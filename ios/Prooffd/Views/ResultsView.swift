@@ -513,11 +513,11 @@ struct ResultCard: View {
 
     var body: some View {
         Button(action: onTap) {
-            HStack(spacing: 14) {
+            HStack(spacing: 12) {
                 Text("\(rank)")
                     .font(.caption.weight(.bold))
                     .foregroundStyle(Theme.textTertiary)
-                    .frame(width: 24)
+                    .frame(width: 20)
 
                 ZStack {
                     RoundedRectangle(cornerRadius: 10)
@@ -534,7 +534,7 @@ struct ResultCard: View {
                         .foregroundStyle(Theme.textPrimary)
                         .lineLimit(1)
 
-                    HStack(spacing: 8) {
+                    HStack(spacing: 6) {
                         Text(result.businessPath.startupCostRange)
                             .font(.caption2)
                             .foregroundStyle(Theme.textTertiary)
@@ -547,9 +547,9 @@ struct ResultCard: View {
                     }
                 }
 
-                Spacer()
+                Spacer(minLength: 4)
 
-                HStack(spacing: 10) {
+                HStack(spacing: 6) {
                     Button {
                         withAnimation(.spring(duration: 0.3)) {
                             appState.toggleFavorite(result.businessPath.id)
@@ -558,7 +558,7 @@ struct ResultCard: View {
                         Image(systemName: appState.isFavorite(result.businessPath.id) ? "heart.fill" : "heart")
                             .font(.subheadline)
                             .foregroundStyle(appState.isFavorite(result.businessPath.id) ? .pink : Theme.textTertiary)
-                            .frame(minWidth: 44, minHeight: 44)
+                            .frame(width: 32, height: 44)
                     }
                     .accessibilityLabel(appState.isFavorite(result.businessPath.id) ? "Remove from favorites" : "Add to favorites")
 
@@ -568,14 +568,17 @@ struct ResultCard: View {
                         Image(systemName: "square.and.arrow.up")
                             .font(.caption)
                             .foregroundStyle(Theme.textTertiary)
-                            .frame(minWidth: 44, minHeight: 44)
+                            .frame(width: 32, height: 44)
                     }
                     .accessibilityLabel("Share this match")
 
                     matchBadge
+                        .fixedSize()
                 }
             }
-            .padding(14)
+            .padding(.leading, 12)
+            .padding(.trailing, 10)
+            .padding(.vertical, 10)
             .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 12))
         }
