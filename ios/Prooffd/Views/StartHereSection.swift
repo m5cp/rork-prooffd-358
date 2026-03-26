@@ -37,8 +37,8 @@ struct StartHereSection: View {
                 startCard(
                     icon: "building.2.fill",
                     iconColor: Theme.accentBlue,
-                    title: "Find a Stable Career Path",
-                    subtitle: "Education & certification paths with steady income",
+                    title: "Trade Schools & Certifications",
+                    subtitle: "Skilled trades, healthcare, creative & professional certs",
                     action: onStableCareer
                 )
 

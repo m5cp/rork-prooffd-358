@@ -123,13 +123,13 @@ struct ExploreTabView: View {
                 Image(systemName: "graduationcap.fill")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(Theme.accentBlue)
-                Text("Education & Training")
+                Text("Trade Schools & Certifications")
                     .font(.title3.weight(.bold))
                     .foregroundStyle(Theme.textPrimary)
             }
             .padding(.horizontal, 16)
 
-            Text("Structured paths to stable careers")
+            Text("Skilled trades, healthcare, creative & professional programs")
                 .font(.subheadline)
                 .foregroundStyle(Theme.textSecondary)
                 .padding(.horizontal, 16)
