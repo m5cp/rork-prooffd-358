@@ -14,7 +14,6 @@ struct ExploreTabView: View {
             ScrollView {
                 VStack(spacing: 24) {
                     filterBar
-                    trendingSection
                     educationOverviewSection
                     shareLoopSection
                     Color.clear.frame(height: 40)

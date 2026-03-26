@@ -307,13 +307,13 @@ struct DiscoverTabView: View {
                 mode: .recommended
             )
 
-            if !fastStartResults.isEmpty {
+            if !trendingResults.isEmpty {
                 horizontalSection(
-                    title: "Fast Start Options",
-                    icon: "bolt.fill",
-                    iconColor: Color(hex: "FB923C"),
-                    results: fastStartResults,
-                    mode: .fastStart
+                    title: "Popular Right Now",
+                    icon: "chart.line.uptrend.xyaxis",
+                    iconColor: Theme.accent,
+                    results: trendingResults,
+                    mode: .trending
                 )
             }
 
