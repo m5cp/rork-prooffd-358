@@ -5,29 +5,25 @@ class QuizViewModel {
     var currentStep: Int = 0
     var profile: UserProfile = UserProfile()
     var direction: Edge = .trailing
-    var showTeaser: Bool = false
-    var hasShownTeaser: Bool = false
-    var showEarlyResults: Bool = false
+    var showCheckpoint: Bool = false
+    var hasShownCheckpoint: Bool = false
+    var checkpointMatches: [MatchResult] = []
 
-    let totalSteps: Int = 13
+    let totalSteps: Int = 10
 
     var progress: Double {
         Double(currentStep + 1) / Double(totalSteps)
     }
 
     var progressText: String {
-        let pct = Int(progress * 100)
-        if pct < 50 { return "\(pct)% complete" }
-        if pct < 80 { return "\(pct)% — almost there" }
-        return "\(pct)% — final stretch"
+        "\(currentStep + 1) of \(totalSteps)"
     }
 
     var motivationMessage: String? {
         switch currentStep {
-        case 3: return "You're on the right track"
-        case 6: return "Great answers — matches shaping up"
-        case 9: return "Users like you find strong matches"
-        case 11: return "Almost done — just a couple more"
+        case 2: return "Great start — keep going!"
+        case 5: return "Matches are getting sharper"
+        case 8: return "Almost done — just 2 more"
         default: return nil
         }
     }
@@ -35,31 +31,47 @@ class QuizViewModel {
     var canAdvance: Bool {
         switch currentStep {
         case 0: return !profile.firstName.trimmingCharacters(in: .whitespaces).isEmpty
-        case 1: return profile.selectedCategories.count == 2
+        case 1: return !profile.selectedCategories.isEmpty
         case 2: return profile.budget != nil
-        case 3: return profile.hoursPerDay != nil
-        case 4: return profile.workPreference != nil
+        case 3: return profile.workPreference != nil
+        case 4: return profile.hoursPerDay != nil
         case 5: return profile.workStyle != nil
         case 6: return true
         case 7: return profile.techComfort != nil
-        case 8: return profile.experienceLevel != nil
-        case 9: return profile.customerInteraction != nil
-        case 10: return profile.hasCar != nil
-        case 11: return profile.sellingComfort != nil
-        case 12: return profile.needsFastCash != nil
+        case 8: return profile.experienceLevel != nil && profile.customerInteraction != nil
+        case 9: return profile.hasCar != nil && profile.sellingComfort != nil && profile.needsFastCash != nil
         default: return false
         }
     }
 
     var canShowEarlyResults: Bool {
-        currentStep >= 3 && profile.selectedCategories.count == 2 && profile.budget != nil
+        currentStep >= 4 && !profile.selectedCategories.isEmpty && profile.budget != nil
+    }
+
+    var pointsEarned: Int {
+        var pts = 0
+        if !profile.firstName.isEmpty { pts += 5 }
+        if !profile.selectedCategories.isEmpty { pts += 10 }
+        if profile.budget != nil { pts += 10 }
+        if profile.workPreference != nil { pts += 10 }
+        if profile.hoursPerDay != nil { pts += 5 }
+        if profile.workStyle != nil { pts += 5 }
+        if !profile.workConditions.isEmpty { pts += 5 }
+        if profile.techComfort != nil { pts += 5 }
+        if profile.experienceLevel != nil { pts += 5 }
+        if profile.customerInteraction != nil { pts += 5 }
+        if profile.hasCar != nil { pts += 5 }
+        if profile.sellingComfort != nil { pts += 5 }
+        if profile.needsFastCash != nil { pts += 5 }
+        return pts
     }
 
     func next() {
         guard canAdvance, currentStep < totalSteps - 1 else { return }
-        if currentStep == 3 && !hasShownTeaser {
-            hasShownTeaser = true
-            showTeaser = true
+        if currentStep == 3 && !hasShownCheckpoint {
+            hasShownCheckpoint = true
+            generateCheckpointMatches()
+            showCheckpoint = true
             return
         }
         direction = .trailing
@@ -68,8 +80,8 @@ class QuizViewModel {
         }
     }
 
-    func dismissTeaser() {
-        showTeaser = false
+    func dismissCheckpoint() {
+        showCheckpoint = false
         direction = .trailing
         withAnimation(.spring(duration: 0.4, bounce: 0.1)) {
             currentStep += 1
@@ -87,7 +99,7 @@ class QuizViewModel {
     func toggleCategory(_ category: BusinessCategory) {
         if profile.selectedCategories.contains(category) {
             profile.selectedCategories.removeAll { $0 == category }
-        } else if profile.selectedCategories.count < 2 {
+        } else if profile.selectedCategories.count < 4 {
             profile.selectedCategories.append(category)
         }
     }
@@ -98,5 +110,13 @@ class QuizViewModel {
         } else {
             profile.workConditions.append(condition)
         }
+    }
+
+    private func generateCheckpointMatches() {
+        checkpointMatches = MatchingEngine.quickMatch(
+            profile: profile,
+            paths: BusinessPathDatabase.allPaths,
+            limit: 2
+        )
     }
 }

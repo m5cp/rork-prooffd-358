@@ -91,6 +91,16 @@ struct OnboardingView: View {
                     .padding(.horizontal, 24)
                     .sensoryFeedback(.selection, trigger: currentPage)
 
+                    if currentPage < pages.count - 1 {
+                        Button {
+                            onComplete()
+                        } label: {
+                            Text("Skip to Quiz")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Theme.accent)
+                        }
+                    }
+
                     Button {
                         onSkipQuiz()
                     } label: {

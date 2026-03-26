@@ -226,13 +226,16 @@ struct DiscoverTabView: View {
             headerBadges
                 .padding(.horizontal, 16)
 
-            if !appState.hasCompletedQuiz && !appState.hasSkippedQuiz || appState.builds.isEmpty {
-                StartHereSection(
-                    onStartFast: { seeAllMode = .fastStart },
-                    onStableCareer: { appState.selectedTab = 2 },
-                    onHelpDecide: { appState.retakeQuiz() }
-                )
+            if !appState.hasCompletedQuiz {
+                quizPromptCard
+                    .padding(.horizontal, 16)
             }
+
+            StartHereSection(
+                onStartFast: { seeAllMode = .fastStart },
+                onStableCareer: { appState.selectedTab = 2 },
+                onHelpDecide: { appState.retakeQuiz() }
+            )
 
             if let topResult = recommendedResults.first {
                 topMatchCard(topResult)
@@ -507,7 +510,9 @@ struct DiscoverTabView: View {
 
     private func categoryCard(_ category: BusinessCategory) -> some View {
         let catColor = Theme.categoryColor(for: category)
-        let count = allResults.filter { $0.businessPath.category == category }.count
+        let matchCount = allResults.filter { $0.businessPath.category == category }.count
+        let totalCount = ContentLibrary.jobs(forCategory: category).count
+        let count = matchCount > 0 ? matchCount : totalCount
         return Button {
             seeAllMode = .category(category)
         } label: {
@@ -580,6 +585,58 @@ struct DiscoverTabView: View {
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
                     .stroke(Theme.accentBlue.opacity(0.15), lineWidth: 0.5)
+            )
+            .cardShadow()
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var quizPromptCard: some View {
+        Button {
+            appState.retakeQuiz()
+        } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle()
+                        .fill(Theme.accent.opacity(0.15))
+                        .frame(width: 48, height: 48)
+                    Image(systemName: "sparkles")
+                        .font(.title3)
+                        .foregroundStyle(Theme.accent)
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Take the Quiz")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(Theme.textPrimary)
+                    Text("Answer a few questions for personalized matches")
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineLimit(2)
+                }
+
+                Spacer(minLength: 4)
+
+                Text("Start")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 6)
+                    .background(Theme.accent)
+                    .clipShape(.capsule)
+            }
+            .padding(16)
+            .background(
+                LinearGradient(
+                    colors: [Theme.accent.opacity(0.06), Theme.cardBackground],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(.rect(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Theme.accent.opacity(0.2), lineWidth: 1)
             )
             .cardShadow()
         }

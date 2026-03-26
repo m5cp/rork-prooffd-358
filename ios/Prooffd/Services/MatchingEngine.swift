@@ -2,6 +2,12 @@ import Foundation
 
 enum MatchingEngine {
     nonisolated static func match(profile: UserProfile, paths: [BusinessPath]) -> [MatchResult] {
+        let hasAnswers = !profile.selectedCategories.isEmpty || profile.budget != nil || profile.workPreference != nil
+
+        if !hasAnswers {
+            return browseAll(paths: paths)
+        }
+
         var results: [MatchResult] = []
 
         for path in paths {
@@ -112,7 +118,7 @@ enum MatchingEngine {
 
             let percentage = maxScore > 0 ? Int((score / maxScore) * 100) : 0
 
-            if percentage >= 30 {
+            if percentage >= 20 {
                 results.append(MatchResult(
                     id: path.id,
                     businessPath: path,
@@ -123,5 +129,22 @@ enum MatchingEngine {
         }
 
         return results.sorted { $0.scorePercentage > $1.scorePercentage }
+    }
+
+    nonisolated static func quickMatch(profile: UserProfile, paths: [BusinessPath], limit: Int = 2) -> [MatchResult] {
+        let results = match(profile: profile, paths: paths)
+        return Array(results.prefix(limit))
+    }
+
+    private nonisolated static func browseAll(paths: [BusinessPath]) -> [MatchResult] {
+        paths.enumerated().map { index, path in
+            let baseScore = max(50 - index / 5, 30)
+            return MatchResult(
+                id: path.id,
+                businessPath: path,
+                score: Double(baseScore),
+                scorePercentage: baseScore
+            )
+        }
     }
 }

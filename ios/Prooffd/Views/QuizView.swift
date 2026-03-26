@@ -37,12 +37,29 @@ struct QuizView: View {
                     .frame(height: 6)
 
                     Text(viewModel.progressText)
-                        .font(.caption2)
+                        .font(.caption2.weight(.semibold))
                         .foregroundStyle(Theme.textTertiary)
                         .fixedSize()
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
+
+                if viewModel.pointsEarned > 0 {
+                    HStack(spacing: 4) {
+                        Image(systemName: "star.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.yellow)
+                        Text("+\(viewModel.pointsEarned) pts")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.yellow)
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(Color.yellow.opacity(0.12))
+                    .clipShape(.capsule)
+                    .padding(.top, 8)
+                    .animation(.spring(duration: 0.3), value: viewModel.pointsEarned)
+                }
 
                 TabView(selection: $viewModel.currentStep) {
                     ForEach(0..<viewModel.totalSteps, id: \.self) { step in
@@ -76,7 +93,7 @@ struct QuizView: View {
                         Button {
                             onEarlyComplete(viewModel.profile)
                         } label: {
-                            Text("See Early Results")
+                            Text("Go to Dashboard Now")
                                 .font(.subheadline.weight(.medium))
                                 .foregroundStyle(Theme.accent)
                         }
@@ -94,68 +111,83 @@ struct QuizView: View {
                 .padding(.bottom, 32)
             }
 
-            if viewModel.showTeaser {
-                quizTeaserOverlay
+            if viewModel.showCheckpoint {
+                checkpointOverlay
                     .transition(.opacity.combined(with: .scale(scale: 0.95)))
             }
         }
-        .animation(.spring(duration: 0.4), value: viewModel.showTeaser)
+        .animation(.spring(duration: 0.4), value: viewModel.showCheckpoint)
         .onAppear {
             viewModel.profile = initialProfile
         }
     }
 
-    private var quizTeaserOverlay: some View {
+    private var checkpointOverlay: some View {
         ZStack {
             Color.black.opacity(0.7).ignoresSafeArea()
 
             VStack(spacing: 24) {
                 Spacer()
 
-                Image(systemName: "sparkles")
-                    .font(.system(size: 48))
-                    .foregroundStyle(Theme.accent)
-                    .symbolEffect(.bounce, options: .repeating.speed(0.5))
+                VStack(spacing: 8) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 48))
+                        .foregroundStyle(Theme.accent)
+                        .symbolEffect(.bounce, options: .repeating.speed(0.5))
 
-                VStack(spacing: 12) {
-                    Text("You already have strong matches")
+                    Text("2 Matches Found!")
                         .font(.title2.bold())
                         .foregroundStyle(.white)
-                        .multilineTextAlignment(.center)
 
-                    Text("Finish the quiz to unlock all your personalized results")
+                    Text("Based on your first 4 answers")
                         .font(.subheadline)
                         .foregroundStyle(.white.opacity(0.7))
-                        .multilineTextAlignment(.center)
                 }
 
-                HStack(spacing: 16) {
-                    blurredPreviewCard("Mobile Detailing", icon: "car.fill")
-                    blurredPreviewCard("Pressure Washing", icon: "drop.fill")
+                VStack(spacing: 10) {
+                    ForEach(viewModel.checkpointMatches) { result in
+                        checkpointMatchCard(result)
+                    }
                 }
                 .padding(.horizontal, 8)
+
+                HStack(spacing: 6) {
+                    Image(systemName: "star.fill")
+                        .font(.caption)
+                        .foregroundStyle(.yellow)
+                    Text("+35 pts earned so far")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.yellow)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Color.yellow.opacity(0.15))
+                .clipShape(.capsule)
 
                 Spacer()
 
                 VStack(spacing: 12) {
                     Button {
-                        viewModel.dismissTeaser()
+                        viewModel.dismissCheckpoint()
                     } label: {
-                        Text("Keep Going")
-                            .font(.headline)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(Theme.accent)
-                            .clipShape(.capsule)
+                        HStack(spacing: 8) {
+                            Image(systemName: "arrow.right.circle.fill")
+                            Text("Keep Going for Better Matches")
+                        }
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Theme.accent)
+                        .clipShape(.capsule)
                     }
-                    .sensoryFeedback(.impact(weight: .medium), trigger: viewModel.showTeaser)
+                    .sensoryFeedback(.impact(weight: .medium), trigger: viewModel.showCheckpoint)
 
                     Button {
-                        viewModel.showTeaser = false
+                        viewModel.showCheckpoint = false
                         onEarlyComplete(viewModel.profile)
                     } label: {
-                        Text("See Early Results Now")
+                        Text("Go to Dashboard Now")
                             .font(.subheadline.weight(.medium))
                             .foregroundStyle(.white.opacity(0.6))
                     }
@@ -167,17 +199,39 @@ struct QuizView: View {
         }
     }
 
-    private func blurredPreviewCard(_ name: String, icon: String) -> some View {
-        VStack(spacing: 10) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundStyle(Theme.accent.opacity(0.6))
-            Text(name)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.white.opacity(0.5))
+    private func checkpointMatchCard(_ result: MatchResult) -> some View {
+        let catColor = Theme.categoryColor(for: result.businessPath.category)
+        return HStack(spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(catColor.opacity(0.2))
+                    .frame(width: 48, height: 48)
+                Image(systemName: result.businessPath.icon)
+                    .font(.title3)
+                    .foregroundStyle(catColor)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(result.businessPath.name)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
+                HStack(spacing: 8) {
+                    Text("\(result.scorePercentage)% match")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(catColor)
+                    Text(result.businessPath.startupCostRange)
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.5))
+                }
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.white.opacity(0.3))
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 20)
+        .padding(16)
         .background(.ultraThinMaterial)
         .clipShape(.rect(cornerRadius: 14))
     }
@@ -206,16 +260,13 @@ struct QuizView: View {
                 case 0: nameStep
                 case 1: categoryStep
                 case 2: budgetStep
-                case 3: hoursStep
-                case 4: workPreferenceStep
+                case 3: workPreferenceStep
+                case 4: hoursStep
                 case 5: workStyleStep
                 case 6: workConditionsStep
                 case 7: techComfortStep
-                case 8: experienceStep
-                case 9: customerInteractionStep
-                case 10: carStep
-                case 11: sellingComfortStep
-                case 12: fastCashStep
+                case 8: experienceAndCustomerStep
+                case 9: quickPicksStep
                 default: EmptyView()
                 }
             }
@@ -242,7 +293,7 @@ struct QuizView: View {
 
     private var categoryStep: some View {
         VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "Pick your top 2 work categories", subtitle: "Choose the areas that interest you most.")
+            quizHeader(title: "What interests you?", subtitle: "Select all that apply (up to 4).")
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 12)], spacing: 12) {
                 ForEach(BusinessCategory.allCases) { category in
                     let isSelected = viewModel.profile.selectedCategories.contains(category)
@@ -273,6 +324,13 @@ struct QuizView: View {
                     .sensoryFeedback(.selection, trigger: isSelected)
                 }
             }
+
+            if !viewModel.profile.selectedCategories.isEmpty {
+                Text("\(viewModel.profile.selectedCategories.count) selected")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Theme.accent)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
         }
     }
 
@@ -285,20 +343,20 @@ struct QuizView: View {
         }
     }
 
-    private var hoursStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "Hours per day?", subtitle: "How much time can you dedicate daily?")
-            optionList(HoursPerDay.allCases, selected: viewModel.profile.hoursPerDay) {
-                viewModel.profile.hoursPerDay = $0
-            }
-        }
-    }
-
     private var workPreferenceStep: some View {
         VStack(alignment: .leading, spacing: 16) {
             quizHeader(title: "Work preference?", subtitle: "Do you prefer physical or digital work?")
             optionList(WorkPreference.allCases, selected: viewModel.profile.workPreference) {
                 viewModel.profile.workPreference = $0
+            }
+        }
+    }
+
+    private var hoursStep: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            quizHeader(title: "Hours per day?", subtitle: "How much time can you dedicate daily?")
+            optionList(HoursPerDay.allCases, selected: viewModel.profile.hoursPerDay) {
+                viewModel.profile.hoursPerDay = $0
             }
         }
     }
@@ -314,7 +372,7 @@ struct QuizView: View {
 
     private var workConditionsStep: some View {
         VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "What are you okay with?", subtitle: "Select all work conditions you can tolerate.")
+            quizHeader(title: "What are you okay with?", subtitle: "Select all that apply.")
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 12)], spacing: 12) {
                 ForEach(WorkCondition.allCases) { condition in
                     let isSelected = viewModel.profile.workConditions.contains(condition)
@@ -350,56 +408,66 @@ struct QuizView: View {
         }
     }
 
-    private var experienceStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "Experience level?", subtitle: "What's your overall work experience?")
-            optionList(ExperienceLevel.allCases, selected: viewModel.profile.experienceLevel) {
-                viewModel.profile.experienceLevel = $0
-            }
-        }
-    }
-
-    private var customerInteractionStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "Customer interaction?", subtitle: "How much do you want to interact with customers?")
-            optionList(CustomerInteraction.allCases, selected: viewModel.profile.customerInteraction) {
-                viewModel.profile.customerInteraction = $0
-            }
-        }
-    }
-
-    private var carStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "Do you have a car?", subtitle: "Some businesses require reliable transportation.")
-            HStack(spacing: 12) {
-                boolButton("Yes", icon: "car.fill", isSelected: viewModel.profile.hasCar == true) {
-                    viewModel.profile.hasCar = true
+    private var experienceAndCustomerStep: some View {
+        VStack(alignment: .leading, spacing: 28) {
+            VStack(alignment: .leading, spacing: 16) {
+                quizHeader(title: "Experience level?", subtitle: "What's your overall work experience?")
+                optionList(ExperienceLevel.allCases, selected: viewModel.profile.experienceLevel) {
+                    viewModel.profile.experienceLevel = $0
                 }
-                boolButton("No", icon: "figure.walk", isSelected: viewModel.profile.hasCar == false) {
-                    viewModel.profile.hasCar = false
+            }
+
+            Rectangle()
+                .fill(Theme.border)
+                .frame(height: 0.5)
+
+            VStack(alignment: .leading, spacing: 16) {
+                quizHeader(title: "Customer interaction?", subtitle: "How much do you want to interact with customers?")
+                optionList(CustomerInteraction.allCases, selected: viewModel.profile.customerInteraction) {
+                    viewModel.profile.customerInteraction = $0
                 }
             }
         }
     }
 
-    private var sellingComfortStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "Comfort with selling?", subtitle: "How comfortable are you pitching your services?")
-            optionList(SellingComfort.allCases, selected: viewModel.profile.sellingComfort) {
-                viewModel.profile.sellingComfort = $0
-            }
-        }
-    }
+    private var quickPicksStep: some View {
+        VStack(alignment: .leading, spacing: 28) {
+            quizHeader(title: "Quick picks", subtitle: "Last few questions to finalize your matches.")
 
-    private var fastCashStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "Need fast cash?", subtitle: "Are you looking to earn money quickly?")
-            HStack(spacing: 12) {
-                boolButton("Yes, ASAP", icon: "bolt.fill", isSelected: viewModel.profile.needsFastCash == true) {
-                    viewModel.profile.needsFastCash = true
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Do you have a car?")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                HStack(spacing: 12) {
+                    boolButton("Yes", icon: "car.fill", isSelected: viewModel.profile.hasCar == true) {
+                        viewModel.profile.hasCar = true
+                    }
+                    boolButton("No", icon: "figure.walk", isSelected: viewModel.profile.hasCar == false) {
+                        viewModel.profile.hasCar = false
+                    }
                 }
-                boolButton("No rush", icon: "clock.fill", isSelected: viewModel.profile.needsFastCash == false) {
-                    viewModel.profile.needsFastCash = false
+            }
+
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Comfort with selling?")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                optionList(SellingComfort.allCases, selected: viewModel.profile.sellingComfort) {
+                    viewModel.profile.sellingComfort = $0
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Need fast cash?")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                HStack(spacing: 12) {
+                    boolButton("Yes, ASAP", icon: "bolt.fill", isSelected: viewModel.profile.needsFastCash == true) {
+                        viewModel.profile.needsFastCash = true
+                    }
+                    boolButton("No rush", icon: "clock.fill", isSelected: viewModel.profile.needsFastCash == false) {
+                        viewModel.profile.needsFastCash = false
+                    }
                 }
             }
         }

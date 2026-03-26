@@ -151,7 +151,7 @@ nonisolated struct UserProfile: Codable, Sendable {
 
     var isComplete: Bool {
         !firstName.isEmpty &&
-        selectedCategories.count == 2 &&
+        !selectedCategories.isEmpty &&
         budget != nil &&
         hoursPerDay != nil &&
         workPreference != nil &&
