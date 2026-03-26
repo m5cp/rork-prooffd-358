@@ -1,14 +1,42 @@
 import SwiftUI
 
 enum Theme {
-    static let background = Color(hex: "0A0E1A")
-    static let cardBackground = Color(hex: "141929")
-    static let cardBackgroundLight = Color(hex: "1C2237")
     static let accent = Color(hex: "34D399")
     static let accentBlue = Color(hex: "3B82F6")
-    static let textPrimary = Color.white
-    static let textSecondary = Color.white.opacity(0.6)
-    static let textTertiary = Color.white.opacity(0.4)
+
+    static let background = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 10/255, green: 14/255, blue: 26/255, alpha: 1)
+            : .systemBackground
+    })
+
+    static let cardBackground = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 20/255, green: 25/255, blue: 41/255, alpha: 1)
+            : .secondarySystemGroupedBackground
+    })
+
+    static let cardBackgroundLight = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 28/255, green: 34/255, blue: 55/255, alpha: 1)
+            : .tertiarySystemGroupedBackground
+    })
+
+    static let textPrimary = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark ? .white : .label
+    })
+
+    static let textSecondary = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor.white.withAlphaComponent(0.6)
+            : .secondaryLabel
+    })
+
+    static let textTertiary = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor.white.withAlphaComponent(0.4)
+            : .tertiaryLabel
+    })
 
     static func categoryColor(for category: BusinessCategory) -> Color {
         switch category {

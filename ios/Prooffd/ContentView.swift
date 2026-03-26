@@ -29,6 +29,10 @@ struct RootView: View {
                 AnalyzingView()
                     .transition(.opacity)
 
+            case .resultsReveal:
+                ResultsRevealView()
+                    .transition(.opacity)
+
             case .results:
                 ResultsView()
                     .transition(.move(edge: .trailing))

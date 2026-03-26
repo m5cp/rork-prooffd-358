@@ -5,6 +5,7 @@ import RevenueCat
 struct ProoffdApp: App {
     @State private var appState = AppState()
     @State private var storeViewModel = StoreViewModel()
+    @State private var themeManager = ThemeManager()
 
     init() {
         let apiKey = Config.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY.isEmpty
@@ -20,7 +21,8 @@ struct ProoffdApp: App {
             RootView()
                 .environment(appState)
                 .environment(storeViewModel)
-                .preferredColorScheme(.dark)
+                .environment(themeManager)
+                .preferredColorScheme(themeManager.colorScheme)
         }
     }
 }

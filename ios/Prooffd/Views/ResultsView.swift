@@ -2,47 +2,57 @@ import SwiftUI
 
 struct ResultsView: View {
     @Environment(AppState.self) private var appState
-    @State private var selectedTab: Int = 0
+    @Environment(StoreViewModel.self) private var store
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            MatchesTabView()
-                .tabItem {
-                    Image(systemName: "list.bullet.rectangle.fill")
-                    Text("Matches")
-                }
-                .tag(0)
+        @Bindable var state = appState
+        ZStack {
+            TabView(selection: $state.selectedTab) {
+                DiscoverTabView()
+                    .tabItem {
+                        Image(systemName: "magnifyingglass")
+                        Text("Discover")
+                    }
+                    .tag(0)
 
-            DiscoverView()
-                .tabItem {
-                    Image(systemName: "sparkles")
-                    Text("Discover")
-                }
-                .tag(1)
+                MyBuildsView()
+                    .tabItem {
+                        Image(systemName: "hammer.fill")
+                        Text("My Builds")
+                    }
+                    .tag(1)
 
-            ProgressTabView()
-                .tabItem {
-                    Image(systemName: "chart.bar.fill")
-                    Text("Progress")
-                }
-                .tag(2)
+                ExploreTabView()
+                    .tabItem {
+                        Image(systemName: "compass.drawing")
+                        Text("Explore")
+                    }
+                    .tag(2)
+
+                ProfileTabView()
+                    .tabItem {
+                        Image(systemName: "person.fill")
+                        Text("Profile")
+                    }
+                    .tag(3)
+            }
+            .tint(Theme.accent)
+
+            if appState.showWelcomeBack {
+                WelcomeBackView()
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+            }
         }
-        .tint(Theme.accent)
+        .animation(.spring(duration: 0.5), value: appState.showWelcomeBack)
         .onAppear {
-            let tabBarAppearance = UITabBarAppearance()
-            tabBarAppearance.configureWithOpaqueBackground()
-            tabBarAppearance.backgroundColor = UIColor(Theme.cardBackground)
-            UITabBar.appearance().standardAppearance = tabBarAppearance
-            UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
             appState.recordAppOpen()
         }
     }
 }
 
-struct MatchesTabView: View {
+struct DiscoverTabView: View {
     @Environment(AppState.self) private var appState
     @Environment(StoreViewModel.self) private var store
-    @State private var showSettings: Bool = false
     @State private var showPaywall: Bool = false
     @State private var showWhatIf: Bool = false
     @State private var selectedResult: MatchResult?
@@ -110,26 +120,16 @@ struct MatchesTabView: View {
             }
             .scrollIndicators(.hidden)
             .background(Theme.background)
-            .navigationTitle("Matches")
+            .navigationTitle("Discover")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         shareAllResults()
                     } label: {
                         Image(systemName: "square.and.arrow.up")
                             .foregroundStyle(Theme.textSecondary)
                     }
-                    .accessibilityLabel("Share results")
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showSettings = true
-                    } label: {
-                        Image(systemName: "gearshape.fill")
-                            .foregroundStyle(Theme.textSecondary)
-                    }
-                    .accessibilityLabel("Settings")
                 }
             }
             .toolbarBackground(Theme.background, for: .navigationBar)
@@ -138,9 +138,6 @@ struct MatchesTabView: View {
             }
             .sheet(item: $shareResult) { result in
                 ShareCardView(result: result, userName: appState.userProfile.firstName, totalMatches: appState.matchResults.count)
-            }
-            .sheet(isPresented: $showSettings) {
-                SettingsView()
             }
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
@@ -190,8 +187,6 @@ struct MatchesTabView: View {
         }
     }
 
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-
     private func topMatchCard(_ result: MatchResult) -> some View {
         let catColor = Theme.categoryColor(for: result.businessPath.category)
         return Button {
@@ -219,9 +214,7 @@ struct MatchesTabView: View {
 
                     Spacer()
 
-                    VStack(spacing: 8) {
-                        scoreRing(result.scorePercentage, size: 52)
-                    }
+                    scoreRing(result.scorePercentage, size: 52)
                 }
 
                 HStack(spacing: 16) {
@@ -236,15 +229,13 @@ struct MatchesTabView: View {
                                 .font(.body)
                                 .foregroundStyle(appState.isFavorite(result.businessPath.id) ? .pink : Theme.textTertiary)
                         }
-                        .accessibilityLabel(appState.isFavorite(result.businessPath.id) ? "Remove from favorites" : "Add to favorites")
                         Button {
-                            shareResultCard(result)
+                            shareResult = result
                         } label: {
                             Image(systemName: "square.and.arrow.up")
                                 .font(.body)
                                 .foregroundStyle(Theme.textTertiary)
                         }
-                        .accessibilityLabel("Share")
                     }
                 }
             }
@@ -269,20 +260,12 @@ struct MatchesTabView: View {
     private var filterBar: some View {
         let favoriteCount = visibleResultsForFavoriteCount
         HStack(spacing: 10) {
-            filterChip(
-                title: "All",
-                isActive: !appState.showFavoritesOnly
-            ) {
+            filterChip(title: "All", isActive: !appState.showFavoritesOnly) {
                 withAnimation(.spring(duration: 0.3)) {
                     appState.showFavoritesOnly = false
                 }
             }
-            filterChip(
-                title: "Favorites",
-                icon: "heart.fill",
-                count: favoriteCount,
-                isActive: appState.showFavoritesOnly
-            ) {
+            filterChip(title: "Favorites", icon: "heart.fill", count: favoriteCount, isActive: appState.showFavoritesOnly) {
                 withAnimation(.spring(duration: 0.3)) {
                     appState.showFavoritesOnly = true
                 }
@@ -355,7 +338,6 @@ struct MatchesTabView: View {
                 Image(systemName: "crown.fill")
                     .font(.title3)
                     .foregroundStyle(.yellow)
-
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Unlock All \(matchesAbove40.count) Matches")
                         .font(.subheadline.weight(.semibold))
@@ -364,9 +346,7 @@ struct MatchesTabView: View {
                         .font(.caption)
                         .foregroundStyle(Theme.textSecondary)
                 }
-
                 Spacer()
-
                 Text("PRO")
                     .font(.caption.weight(.bold))
                     .foregroundStyle(.white)
@@ -418,8 +398,6 @@ struct MatchesTabView: View {
                 .foregroundStyle(scoreColor(percentage))
         }
         .frame(width: size, height: size)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(percentage) percent match")
     }
 
     private func scoreColor(_ percentage: Int) -> Color {
@@ -439,10 +417,6 @@ struct MatchesTabView: View {
         }
     }
 
-    private func shareResultCard(_ result: MatchResult) {
-        shareResult = result
-    }
-
     private var whatIfButton: some View {
         Button {
             showWhatIf = true
@@ -456,7 +430,6 @@ struct MatchesTabView: View {
                         .font(.body.weight(.semibold))
                         .foregroundStyle(Theme.accentBlue)
                 }
-
                 VStack(alignment: .leading, spacing: 3) {
                     Text("What If Mode")
                         .font(.subheadline.weight(.semibold))
@@ -465,9 +438,7 @@ struct MatchesTabView: View {
                         .font(.caption)
                         .foregroundStyle(Theme.textTertiary)
                 }
-
                 Spacer()
-
                 Image(systemName: "chevron.right")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(Theme.textTertiary)
@@ -488,7 +459,7 @@ struct MatchesTabView: View {
             Image(systemName: "lightbulb.fill")
                 .font(.caption)
                 .foregroundStyle(.yellow)
-            Text("Adjust your profile in **What If Mode** or **Settings** to see how your match scores change.")
+            Text("Adjust your profile in **What If Mode** to see how your match scores change.")
                 .font(.caption2)
                 .foregroundStyle(Theme.textTertiary)
         }
@@ -547,7 +518,6 @@ struct ResultCard: View {
                                 .foregroundStyle(appState.isFavorite(result.businessPath.id) ? .pink : Theme.textTertiary)
                                 .frame(width: 32, height: 44)
                         }
-                        .accessibilityLabel(appState.isFavorite(result.businessPath.id) ? "Remove from favorites" : "Add to favorites")
 
                         Button {
                             onShare()
@@ -557,7 +527,6 @@ struct ResultCard: View {
                                 .foregroundStyle(Theme.textTertiary)
                                 .frame(width: 32, height: 44)
                         }
-                        .accessibilityLabel("Share this match")
                     }
                 }
 
@@ -615,5 +584,4 @@ struct ResultCard: View {
     private var categoryColor: Color {
         Theme.categoryColor(for: result.businessPath.category)
     }
-
 }

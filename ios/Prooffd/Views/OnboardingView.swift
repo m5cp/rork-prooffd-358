@@ -3,6 +3,7 @@ import SwiftUI
 struct OnboardingView: View {
     var onComplete: () -> Void
     @State private var currentPage: Int = 0
+    @Environment(\.colorScheme) private var colorScheme
 
     private let pages: [OnboardingPage] = [
         OnboardingPage(
@@ -21,8 +22,8 @@ struct OnboardingView: View {
             icon: "arrow.triangle.turn.up.right.diamond.fill"
         ),
         OnboardingPage(
-            headline: "We'll show you\nexactly what to do",
-            subtitle: "Answer a few quick questions and we'll match you with real businesses you can start this week.",
+            headline: "We'll guide you\nstep by step",
+            subtitle: "Answer a few questions, get matched, then follow a clear plan to start earning.",
             icon: "checkmark.seal.fill"
         )
     ]
@@ -39,7 +40,6 @@ struct OnboardingView: View {
                                 .font(.system(.largeTitle, design: .default, weight: .bold))
                                 .foregroundStyle(Theme.accent)
                                 .symbolEffect(.pulse, options: .repeating)
-                                .accessibilityHidden(true)
 
                             Text(page.headline)
                                 .font(.largeTitle.bold())
@@ -88,7 +88,7 @@ struct OnboardingView: View {
                             .clipShape(.capsule)
                     }
                     .padding(.horizontal, 24)
-                    .accessibilityHint(currentPage == pages.count - 1 ? "Begin the quiz" : "Go to next page")
+                    .sensoryFeedback(.selection, trigger: currentPage)
 
                     if currentPage < pages.count - 1 {
                         Button("Skip") {
@@ -96,7 +96,6 @@ struct OnboardingView: View {
                         }
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(Theme.textTertiary)
-                        .accessibilityHint("Skip onboarding and start the quiz")
                     }
                 }
                 .padding(.bottom, 48)
@@ -105,20 +104,31 @@ struct OnboardingView: View {
     }
 
     private var meshBackground: some View {
-        MeshGradient(
-            width: 3, height: 3,
-            points: [
-                [0, 0], [0.5, 0], [1, 0],
-                [0, 0.5], [0.5, 0.5], [1, 0.5],
-                [0, 1], [0.5, 1], [1, 1]
-            ],
-            colors: [
-                Color(hex: "0A0E1A"), Color(hex: "0F1B2D"), Color(hex: "0A0E1A"),
-                Color(hex: "0D1825"), Color(hex: "132A1E"), Color(hex: "0D1825"),
-                Color(hex: "0A0E1A"), Color(hex: "0F1B2D"), Color(hex: "0A0E1A")
-            ]
-        )
-        .ignoresSafeArea()
+        Group {
+            if colorScheme == .dark {
+                MeshGradient(
+                    width: 3, height: 3,
+                    points: [
+                        [0, 0], [0.5, 0], [1, 0],
+                        [0, 0.5], [0.5, 0.5], [1, 0.5],
+                        [0, 1], [0.5, 1], [1, 1]
+                    ],
+                    colors: [
+                        Color(hex: "0A0E1A"), Color(hex: "0F1B2D"), Color(hex: "0A0E1A"),
+                        Color(hex: "0D1825"), Color(hex: "132A1E"), Color(hex: "0D1825"),
+                        Color(hex: "0A0E1A"), Color(hex: "0F1B2D"), Color(hex: "0A0E1A")
+                    ]
+                )
+                .ignoresSafeArea()
+            } else {
+                LinearGradient(
+                    colors: [Color(.systemBackground), Color(.secondarySystemBackground), Color(.systemBackground)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+            }
+        }
     }
 }
 

@@ -7,8 +7,10 @@ struct PathDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showPaywall: Bool = false
     @State private var showShareSheet: Bool = false
+    @State private var showBuildAdded: Bool = false
 
     private var path: BusinessPath { result.businessPath }
+    private var alreadyBuilding: Bool { appState.hasBuild(for: path.id) }
 
     var body: some View {
         NavigationStack {
@@ -16,6 +18,7 @@ struct PathDetailView: View {
                 VStack(spacing: 24) {
                     heroSection
                     quickStats
+                    startBuildSection
                     overviewSection
                     actionPlanSection
                     pricingSection
@@ -63,6 +66,27 @@ struct PathDetailView: View {
             .sheet(isPresented: $showShareSheet) {
                 ShareCardView(result: result, userName: appState.userProfile.firstName, totalMatches: appState.matchResults.count)
             }
+            .overlay {
+                if showBuildAdded {
+                    VStack {
+                        HStack(spacing: 10) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(Theme.accent)
+                            Text("Added to My Builds!")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Theme.textPrimary)
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 12)
+                        .background(.ultraThinMaterial)
+                        .clipShape(.capsule)
+                        .padding(.top, 60)
+                        Spacer()
+                    }
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                }
+            }
+            .animation(.spring(duration: 0.4), value: showBuildAdded)
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
@@ -642,6 +666,51 @@ struct PathDetailView: View {
             .fill(Theme.cardBackgroundLight)
             .frame(height: 0.5)
             .padding(.leading, 52)
+    }
+
+    private var startBuildSection: some View {
+        VStack(spacing: 12) {
+            if alreadyBuilding {
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(Theme.accent)
+                    Text("Already in My Builds")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Theme.accent)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(Theme.accent.opacity(0.12))
+                .clipShape(.capsule)
+            } else {
+                Button {
+                    appState.addBuild(from: path)
+                    showBuildAdded = true
+                    Task {
+                        try? await Task.sleep(for: .seconds(2))
+                        showBuildAdded = false
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "hammer.fill")
+                        Text("Start This Build")
+                    }
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        LinearGradient(
+                            colors: [Theme.accent, Theme.accentBlue],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .clipShape(.capsule)
+                }
+                .sensoryFeedback(.impact(weight: .medium), trigger: showBuildAdded)
+            }
+        }
     }
 
     private var actionButtons: some View {

@@ -10,6 +10,10 @@ class AppState {
     var streakTracker: StreakTracker = StreakTracker()
     var unlockedAchievementIDs: Set<String> = []
     var exploredPathIDs: Set<String> = []
+    var builds: [BuildProject] = []
+    var selectedTab: Int = 0
+    var showWelcomeBack: Bool = false
+
     var hasUsedWhatIf: Bool {
         get { UserDefaults.standard.bool(forKey: "hasUsedWhatIf") }
         set { UserDefaults.standard.set(newValue, forKey: "hasUsedWhatIf") }
@@ -35,15 +39,29 @@ class AppState {
         get { UserDefaults.standard.bool(forKey: "hasCompletedQuiz") }
         set { UserDefaults.standard.set(newValue, forKey: "hasCompletedQuiz") }
     }
+    var hasSeenResultsReveal: Bool {
+        get { UserDefaults.standard.bool(forKey: "hasSeenResultsReveal") }
+        set { UserDefaults.standard.set(newValue, forKey: "hasSeenResultsReveal") }
+    }
+    var completedFirstStep: Bool {
+        get { UserDefaults.standard.bool(forKey: "completedFirstStep") }
+        set { UserDefaults.standard.set(newValue, forKey: "completedFirstStep") }
+    }
+    var hasBeenPromptedForRating: Bool {
+        get { UserDefaults.standard.bool(forKey: "hasBeenPromptedForRating") }
+        set { UserDefaults.standard.set(newValue, forKey: "hasBeenPromptedForRating") }
+    }
 
     init() {
         loadProfile()
         loadFavorites()
         loadExploredPaths()
         loadUnlockedAchievements()
+        loadBuilds()
         if hasCompletedQuiz {
             currentScreen = .results
             runMatching()
+            checkWelcomeBack()
         } else if hasCompletedOnboarding {
             currentScreen = .quiz
         }
@@ -66,10 +84,23 @@ class AppState {
             try? await Task.sleep(for: .seconds(3))
             await MainActor.run {
                 runMatching()
-                withAnimation(.spring(duration: 0.5)) {
-                    currentScreen = .results
+                if !hasSeenResultsReveal {
+                    withAnimation(.spring(duration: 0.5)) {
+                        currentScreen = .resultsReveal
+                    }
+                } else {
+                    withAnimation(.spring(duration: 0.5)) {
+                        currentScreen = .results
+                    }
                 }
             }
+        }
+    }
+
+    func completeResultsReveal() {
+        hasSeenResultsReveal = true
+        withAnimation(.spring(duration: 0.5)) {
+            currentScreen = .results
         }
     }
 
@@ -77,6 +108,7 @@ class AppState {
         userProfile = UserProfile()
         matchResults = []
         hasCompletedQuiz = false
+        hasSeenResultsReveal = false
         saveProfile()
         withAnimation(.spring(duration: 0.5)) {
             currentScreen = .quiz
@@ -87,7 +119,95 @@ class AppState {
         matchResults = MatchingEngine.match(profile: userProfile, paths: BusinessPathDatabase.allPaths)
     }
 
-    private func saveProfile() {
+    private func checkWelcomeBack() {
+        let lastSession = UserDefaults.standard.object(forKey: "lastSessionDate") as? Date
+        let now = Date()
+        if let last = lastSession {
+            let calendar = Calendar.current
+            if !calendar.isDate(last, inSameDayAs: now) {
+                showWelcomeBack = !builds.isEmpty
+            }
+        }
+        UserDefaults.standard.set(now, forKey: "lastSessionDate")
+    }
+
+    func dismissWelcomeBack() {
+        withAnimation(.spring(duration: 0.4)) {
+            showWelcomeBack = false
+        }
+    }
+
+    // MARK: - Builds
+
+    func addBuild(from path: BusinessPath) {
+        guard !builds.contains(where: { $0.pathId == path.id }) else { return }
+        let build = BuildProject.create(from: path)
+        builds.append(build)
+        saveBuilds()
+    }
+
+    func removeBuild(_ buildId: String) {
+        builds.removeAll { $0.id == buildId }
+        saveBuilds()
+    }
+
+    func hasBuild(for pathId: String) -> Bool {
+        builds.contains { $0.pathId == pathId }
+    }
+
+    func toggleBuildStep(buildId: String, stepId: String) {
+        guard let buildIndex = builds.firstIndex(where: { $0.id == buildId }),
+              let stepIndex = builds[buildIndex].steps.firstIndex(where: { $0.id == stepId }) else { return }
+        builds[buildIndex].steps[stepIndex].isCompleted.toggle()
+
+        if builds[buildIndex].steps[stepIndex].isCompleted && !completedFirstStep {
+            completedFirstStep = true
+        }
+
+        saveBuilds()
+        checkAchievements()
+    }
+
+    func updateBuildField(buildId: String, field: BuildField, value: String) {
+        guard let index = builds.firstIndex(where: { $0.id == buildId }) else { return }
+        switch field {
+        case .businessName: builds[index].businessName = value
+        case .pricing: builds[index].pricingNotes = value
+        case .strategy: builds[index].strategyNotes = value
+        case .services: builds[index].serviceNotes = value
+        }
+        saveBuilds()
+    }
+
+    var activeBuild: BuildProject? {
+        builds.first { $0.progressPercentage < 100 }
+    }
+
+    var todayStep: (build: BuildProject, step: BuildStep)? {
+        for build in builds {
+            if let step = build.nextStep {
+                return (build, step)
+            }
+        }
+        return nil
+    }
+
+    private func saveBuilds() {
+        if let data = try? JSONEncoder().encode(builds) {
+            UserDefaults.standard.set(data, forKey: "builds")
+        }
+    }
+
+    private func loadBuilds() {
+        if let data = UserDefaults.standard.data(forKey: "builds"),
+           let saved = try? JSONDecoder().decode([BuildProject].self, from: data) {
+            builds = saved
+        }
+    }
+
+    // MARK: - Profile
+
+    func saveProfile() {
         if let data = try? JSONEncoder().encode(userProfile) {
             UserDefaults.standard.set(data, forKey: "userProfile")
         }
@@ -99,6 +219,8 @@ class AppState {
             userProfile = profile
         }
     }
+
+    // MARK: - Favorites
 
     func toggleFavorite(_ pathID: String) {
         if favoritePathIDs.contains(pathID) {
@@ -143,10 +265,10 @@ class AppState {
         checkAchievements()
     }
 
+    // MARK: - Readiness
+
     var readinessScore: Int {
         var score = 0
-        let maxScore = 100
-
         if userProfile.budget != nil {
             switch userProfile.budget! {
             case .zero: score += 5
@@ -156,7 +278,6 @@ class AppState {
             case .over1000: score += 20
             }
         }
-
         if let hours = userProfile.hoursPerDay {
             switch hours {
             case .lessThan1: score += 5
@@ -165,7 +286,6 @@ class AppState {
             case .fivePlus: score += 20
             }
         }
-
         if let tech = userProfile.techComfort {
             switch tech {
             case .notComfortable: score += 3
@@ -174,7 +294,6 @@ class AppState {
             case .verySavvy: score += 15
             }
         }
-
         if let exp = userProfile.experienceLevel {
             switch exp {
             case .beginner: score += 5
@@ -182,7 +301,6 @@ class AppState {
             case .skilled: score += 15
             }
         }
-
         if let selling = userProfile.sellingComfort {
             switch selling {
             case .notComfortable: score += 3
@@ -190,14 +308,12 @@ class AppState {
             case .veryComfortable: score += 10
             }
         }
-
         if userProfile.hasCar == true { score += 5 }
         if !userProfile.selectedCategories.isEmpty { score += 5 }
         if !userProfile.workConditions.isEmpty { score += 5 }
         if userProfile.workPreference != nil { score += 3 }
         if userProfile.workStyle != nil { score += 2 }
-
-        return min(score, maxScore)
+        return min(score, 100)
     }
 
     var readinessLevel: String {
@@ -231,6 +347,8 @@ class AppState {
         }
         return tips
     }
+
+    // MARK: - Achievements
 
     func checkAchievements() {
         for achievement in AchievementDatabase.all {
@@ -302,5 +420,13 @@ nonisolated enum AppScreen: Sendable, Equatable {
     case onboarding
     case quiz
     case analyzing
+    case resultsReveal
     case results
+}
+
+nonisolated enum BuildField: Sendable {
+    case businessName
+    case pricing
+    case strategy
+    case services
 }

@@ -19,7 +19,6 @@ struct QuizView: View {
                                 .font(.title3.weight(.semibold))
                                 .foregroundStyle(Theme.textSecondary)
                         }
-                        .accessibilityLabel("Go back")
                     }
 
                     GeometryReader { geo in
@@ -35,10 +34,10 @@ struct QuizView: View {
                     }
                     .frame(height: 6)
 
-                    Text("\(viewModel.currentStep + 1)/\(viewModel.totalSteps)")
-                        .font(.caption)
+                    Text(viewModel.progressText)
+                        .font(.caption2)
                         .foregroundStyle(Theme.textTertiary)
-                        .monospacedDigit()
+                        .fixedSize()
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
@@ -68,19 +67,108 @@ struct QuizView: View {
                         .clipShape(.capsule)
                 }
                 .disabled(!viewModel.canAdvance)
+                .sensoryFeedback(.selection, trigger: viewModel.currentStep)
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
             }
+
+            if viewModel.showTeaser {
+                quizTeaserOverlay
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
+            }
         }
+        .animation(.spring(duration: 0.4), value: viewModel.showTeaser)
         .onAppear {
             viewModel.profile = initialProfile
         }
+    }
+
+    private var quizTeaserOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.7).ignoresSafeArea()
+
+            VStack(spacing: 24) {
+                Spacer()
+
+                Image(systemName: "sparkles")
+                    .font(.system(size: 48))
+                    .foregroundStyle(Theme.accent)
+                    .symbolEffect(.bounce, options: .repeating.speed(0.5))
+
+                VStack(spacing: 12) {
+                    Text("You already have strong matches")
+                        .font(.title2.bold())
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+
+                    Text("Finish the quiz to unlock all your personalized results")
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.7))
+                        .multilineTextAlignment(.center)
+                }
+
+                HStack(spacing: 16) {
+                    blurredPreviewCard("Mobile Detailing", icon: "car.fill")
+                    blurredPreviewCard("Pressure Washing", icon: "drop.fill")
+                }
+                .padding(.horizontal, 8)
+
+                Spacer()
+
+                Button {
+                    viewModel.dismissTeaser()
+                } label: {
+                    Text("Keep Going")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Theme.accent)
+                        .clipShape(.capsule)
+                }
+                .sensoryFeedback(.impact(weight: .medium), trigger: viewModel.showTeaser)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 48)
+            }
+            .padding(.horizontal, 20)
+        }
+    }
+
+    private func blurredPreviewCard(_ name: String, icon: String) -> some View {
+        VStack(spacing: 10) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundStyle(Theme.accent.opacity(0.6))
+            Text(name)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.5))
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 20)
+        .background(.ultraThinMaterial)
+        .clipShape(.rect(cornerRadius: 14))
     }
 
     @ViewBuilder
     private func quizStep(_ step: Int) -> some View {
         ScrollView {
             VStack(spacing: 24) {
+                if let motivation = viewModel.motivationMessage, step == viewModel.currentStep {
+                    HStack(spacing: 8) {
+                        Image(systemName: "sparkle")
+                            .font(.caption)
+                            .foregroundStyle(Theme.accent)
+                        Text(motivation)
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(Theme.accent)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Theme.accent.opacity(0.1))
+                    .clipShape(.capsule)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+
                 switch step {
                 case 0: nameStep
                 case 1: categoryStep
@@ -122,7 +210,6 @@ struct QuizView: View {
     private var categoryStep: some View {
         VStack(alignment: .leading, spacing: 16) {
             quizHeader(title: "Pick your top 2 work categories", subtitle: "Choose the areas that interest you most.")
-
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 12)], spacing: 12) {
                 ForEach(BusinessCategory.allCases) { category in
                     let isSelected = viewModel.profile.selectedCategories.contains(category)
@@ -295,7 +382,6 @@ struct QuizView: View {
                 .font(.subheadline)
                 .foregroundStyle(Theme.textSecondary)
         }
-        .accessibilityElement(children: .combine)
     }
 
     private func optionList<T: Identifiable & RawRepresentable>(
@@ -319,6 +405,7 @@ struct QuizView: View {
                         .background(isSelected ? Theme.accentBlue : Theme.cardBackground)
                         .clipShape(.rect(cornerRadius: 12))
                 }
+                .sensoryFeedback(.selection, trigger: isSelected)
             }
         }
     }
@@ -341,5 +428,6 @@ struct QuizView: View {
             .background(isSelected ? Theme.accentBlue : Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 12))
         }
+        .sensoryFeedback(.selection, trigger: isSelected)
     }
 }
