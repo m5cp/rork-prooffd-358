@@ -57,65 +57,53 @@ struct DiscoverTabView: View {
     @State private var showWhatIf: Bool = false
     @State private var selectedResult: MatchResult?
     @State private var shareResult: MatchResult?
-    @State private var appeared: Bool = false
+    @State private var seeAllMode: SeeAllMode?
+    @State private var showSearch: Bool = false
+    @State private var searchText: String = ""
+    @Environment(\.horizontalSizeClass) private var sizeClass
 
-    private var matchesAbove40: [MatchResult] {
-        appState.matchResults.filter { $0.scorePercentage >= 40 }
+    private var allResults: [MatchResult] {
+        appState.matchResults
     }
 
-    private var visibleResults: [MatchResult] {
-        let pool: [MatchResult] = store.isPremium ? matchesAbove40 : Array(appState.matchResults.prefix(20))
-        if appState.showFavoritesOnly {
-            return pool.filter { appState.isFavorite($0.businessPath.id) }
+    private var recommendedResults: [MatchResult] {
+        Array(allResults.sorted { $0.scorePercentage > $1.scorePercentage }.prefix(8))
+    }
+
+    private var fastStartResults: [MatchResult] {
+        Array(allResults.filter {
+            $0.businessPath.minBudget < 200 && $0.businessPath.fastCashPotential
+        }.prefix(8))
+    }
+
+    private var aiSafeResults: [MatchResult] {
+        Array(allResults.filter { $0.businessPath.aiProofRating >= 85 }
+            .sorted { $0.businessPath.aiProofRating > $1.businessPath.aiProofRating }
+            .prefix(8))
+    }
+
+    private var trendingResults: [MatchResult] {
+        Array(allResults.sorted { $0.scorePercentage > $1.scorePercentage }
+            .dropFirst(3).prefix(6))
+    }
+
+    private var searchResults: [MatchResult] {
+        guard !searchText.isEmpty else { return [] }
+        let q = searchText.lowercased()
+        return allResults.filter {
+            $0.businessPath.name.localizedStandardContains(q) ||
+            $0.businessPath.overview.localizedStandardContains(q) ||
+            $0.businessPath.category.rawValue.localizedStandardContains(q)
         }
-        return pool
     }
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 20) {
-                    headerSection
-
-                    whatIfButton
-                        .padding(.horizontal, 16)
-
-                    if !store.isPremium && matchesAbove40.count > 20 {
-                        upgradePrompt
-                    }
-
-                    filterBar
-                        .padding(.horizontal, 16)
-
-                    LazyVStack(spacing: 12) {
-                        ForEach(Array(visibleResults.enumerated()), id: \.element.id) { index, result in
-                            ResultCard(result: result, rank: index + 1, onTap: {
-                                selectedResult = result
-                                appState.markPathExplored(result.businessPath.id)
-                            }, onShare: {
-                                shareResult = result
-                                appState.markResultShared()
-                            })
-                            .opacity(appeared ? 1 : 0)
-                            .offset(y: appeared ? 0 : 20)
-                            .animation(.spring(duration: 0.5, bounce: 0.2).delay(Double(min(index, 10)) * 0.05), value: appeared)
-                        }
-                    }
-                    .padding(.horizontal, 16)
-
-                    if visibleResults.isEmpty && appState.showFavoritesOnly {
-                        emptyFavoritesView
-                            .padding(.horizontal, 16)
-                    }
-
-                    if !store.isPremium && matchesAbove40.count > 20 && !appState.showFavoritesOnly {
-                        lockedResultsBanner
-                    }
-
-                    whatIfHint
-                        .padding(.horizontal, 16)
-
-                    Color.clear.frame(height: 40)
+                if showSearch {
+                    searchContent
+                } else {
+                    mainContent
                 }
             }
             .scrollIndicators(.hidden)
@@ -124,11 +112,16 @@ struct DiscoverTabView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        shareAllResults()
-                    } label: {
-                        Image(systemName: "square.and.arrow.up")
-                            .foregroundStyle(Theme.textSecondary)
+                    HStack(spacing: 12) {
+                        Button {
+                            withAnimation(.spring(duration: 0.3)) {
+                                showSearch.toggle()
+                                if !showSearch { searchText = "" }
+                            }
+                        } label: {
+                            Image(systemName: showSearch ? "xmark.circle.fill" : "magnifyingglass")
+                                .foregroundStyle(Theme.textSecondary)
+                        }
                     }
                 }
             }
@@ -145,44 +138,183 @@ struct DiscoverTabView: View {
             .sheet(isPresented: $showWhatIf) {
                 WhatIfView(profile: appState.userProfile)
             }
-        }
-        .onAppear {
-            withAnimation {
-                appeared = true
+            .sheet(item: $seeAllMode) { mode in
+                SeeAllView(mode: mode, results: resultsForMode(mode))
             }
         }
     }
 
-    private var headerSection: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 8) {
-                if appState.streakTracker.currentStreak > 0 {
-                    HStack(spacing: 4) {
-                        Image(systemName: "flame.fill")
-                            .font(.caption)
-                            .foregroundStyle(.orange)
-                        Text("\(appState.streakTracker.currentStreak) day streak")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.orange)
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(Color.orange.opacity(0.12))
-                    .clipShape(.capsule)
-                }
+    private func resultsForMode(_ mode: SeeAllMode) -> [MatchResult] {
+        switch mode {
+        case .recommended: return allResults.sorted { $0.scorePercentage > $1.scorePercentage }
+        case .fastStart: return allResults.filter { $0.businessPath.minBudget < 200 && $0.businessPath.fastCashPotential }
+        case .aiSafe: return allResults.filter { $0.businessPath.aiProofRating >= 80 }.sorted { $0.businessPath.aiProofRating > $1.businessPath.aiProofRating }
+        case .trending: return allResults.sorted { $0.scorePercentage > $1.scorePercentage }
+        case .category(let cat): return allResults.filter { $0.businessPath.category == cat }
+        case .search: return searchResults
+        }
+    }
 
-                Text("\(appState.matchResults.count) paths matched")
-                    .font(.caption)
+    @ViewBuilder
+    private var searchContent: some View {
+        VStack(spacing: 16) {
+            HStack(spacing: 10) {
+                Image(systemName: "magnifyingglass")
                     .foregroundStyle(Theme.textTertiary)
-
-                Spacer()
+                TextField("Search businesses, categories...", text: $searchText)
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.textPrimary)
+                if !searchText.isEmpty {
+                    Button {
+                        searchText = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+                }
             }
+            .padding(12)
+            .background(Theme.cardBackground)
+            .clipShape(.rect(cornerRadius: 12))
             .padding(.horizontal, 16)
+            .padding(.top, 8)
 
-            if let topResult = visibleResults.first, !appState.showFavoritesOnly {
+            if searchText.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 36))
+                        .foregroundStyle(Theme.textTertiary)
+                    Text("Search \(ContentLibrary.jobCount) business paths")
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 60)
+            } else if searchResults.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 36))
+                        .foregroundStyle(Theme.textTertiary)
+                    Text("No results for \"\(searchText)\"")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Theme.textSecondary)
+                    Text("Try a different search term")
+                        .font(.caption)
+                        .foregroundStyle(Theme.textTertiary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 60)
+            } else {
+                LazyVStack(spacing: 10) {
+                    ForEach(searchResults) { result in
+                        SeeAllResultCard(result: result) {
+                            selectedResult = result
+                            appState.markPathExplored(result.businessPath.id)
+                        }
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
+
+            Color.clear.frame(height: 40)
+        }
+    }
+
+    @ViewBuilder
+    private var mainContent: some View {
+        VStack(spacing: 24) {
+            headerBadges
+                .padding(.horizontal, 16)
+
+            if !appState.hasCompletedQuiz && !appState.hasSkippedQuiz || appState.builds.isEmpty {
+                StartHereSection(
+                    onStartFast: { seeAllMode = .fastStart },
+                    onStableCareer: { appState.selectedTab = 2 },
+                    onHelpDecide: { appState.retakeQuiz() }
+                )
+            }
+
+            if let topResult = recommendedResults.first {
                 topMatchCard(topResult)
                     .padding(.horizontal, 16)
-                    .padding(.top, 4)
+            }
+
+            whatIfButton
+                .padding(.horizontal, 16)
+
+            horizontalSection(
+                title: "Recommended For You",
+                icon: "star.fill",
+                iconColor: Theme.accent,
+                results: recommendedResults,
+                mode: .recommended
+            )
+
+            if !fastStartResults.isEmpty {
+                horizontalSection(
+                    title: "Fast Start Options",
+                    icon: "bolt.fill",
+                    iconColor: Color(hex: "FB923C"),
+                    results: fastStartResults,
+                    mode: .fastStart
+                )
+            }
+
+            horizontalSection(
+                title: "High AI-Safe Careers",
+                icon: "shield.checkered",
+                iconColor: Theme.accent,
+                results: aiSafeResults,
+                mode: .aiSafe
+            )
+
+            browseByCategorySection
+
+            if !store.isPremium {
+                upgradePrompt
+                    .padding(.horizontal, 16)
+            }
+
+            Color.clear.frame(height: 40)
+        }
+        .padding(.top, 8)
+    }
+
+    private var headerBadges: some View {
+        HStack(spacing: 8) {
+            if appState.streakTracker.currentStreak > 0 {
+                HStack(spacing: 4) {
+                    Image(systemName: "flame.fill")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                    Text("\(appState.streakTracker.currentStreak) day streak")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.orange)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(Color.orange.opacity(0.12))
+                .clipShape(.capsule)
+            }
+
+            Text("\(allResults.count) paths matched")
+                .font(.caption)
+                .foregroundStyle(Theme.textTertiary)
+
+            Spacer()
+
+            if !appState.builds.isEmpty {
+                HStack(spacing: 4) {
+                    Image(systemName: "hammer.fill")
+                        .font(.caption2)
+                    Text("\(appState.builds.count)")
+                        .font(.caption.weight(.bold))
+                }
+                .foregroundStyle(Theme.accentBlue)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(Theme.accentBlue.opacity(0.12))
+                .clipShape(.capsule)
             }
         }
     }
@@ -191,6 +323,7 @@ struct DiscoverTabView: View {
         let catColor = Theme.categoryColor(for: result.businessPath.category)
         return Button {
             selectedResult = result
+            appState.markPathExplored(result.businessPath.id)
         } label: {
             VStack(spacing: 16) {
                 HStack(spacing: 12) {
@@ -221,21 +354,12 @@ struct DiscoverTabView: View {
                     infoChip(icon: "dollarsign.circle.fill", text: result.businessPath.startupCostRange)
                     infoChip(icon: "clock.fill", text: result.businessPath.timeToFirstDollar)
                     Spacer()
-                    HStack(spacing: 12) {
-                        Button {
-                            appState.toggleFavorite(result.businessPath.id)
-                        } label: {
-                            Image(systemName: appState.isFavorite(result.businessPath.id) ? "heart.fill" : "heart")
-                                .font(.body)
-                                .foregroundStyle(appState.isFavorite(result.businessPath.id) ? .pink : Theme.textTertiary)
-                        }
-                        Button {
-                            shareResult = result
-                        } label: {
-                            Image(systemName: "square.and.arrow.up")
-                                .font(.body)
-                                .foregroundStyle(Theme.textTertiary)
-                        }
+                    Button {
+                        appState.toggleFavorite(result.businessPath.id)
+                    } label: {
+                        Image(systemName: appState.isFavorite(result.businessPath.id) ? "heart.fill" : "heart")
+                            .font(.body)
+                            .foregroundStyle(appState.isFavorite(result.businessPath.id) ? .pink : Theme.textTertiary)
                     }
                 }
             }
@@ -252,169 +376,176 @@ struct DiscoverTabView: View {
                 RoundedRectangle(cornerRadius: 16)
                     .stroke(catColor.opacity(0.2), lineWidth: 1)
             )
+            .cardShadow()
+        }
+        .buttonStyle(.plain)
+        .sensoryFeedback(.selection, trigger: appState.isFavorite(result.businessPath.id))
+    }
+
+    private func horizontalSection(title: String, icon: String, iconColor: Color, results: [MatchResult], mode: SeeAllMode) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(iconColor)
+                Text(title)
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(Theme.textPrimary)
+                Spacer()
+                Button {
+                    seeAllMode = mode
+                } label: {
+                    Text("See All")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Theme.accent)
+                }
+            }
+            .padding(.horizontal, 16)
+
+            ScrollView(.horizontal) {
+                HStack(spacing: 12) {
+                    ForEach(results) { result in
+                        compactCard(result)
+                    }
+                }
+            }
+            .contentMargins(.horizontal, 16)
+            .scrollIndicators(.hidden)
+        }
+    }
+
+    private func compactCard(_ result: MatchResult) -> some View {
+        let catColor = Theme.categoryColor(for: result.businessPath.category)
+        return Button {
+            selectedResult = result
+            appState.markPathExplored(result.businessPath.id)
+        } label: {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 10) {
+                    ZStack {
+                        Circle()
+                            .fill(catColor.opacity(0.15))
+                            .frame(width: 40, height: 40)
+                        Image(systemName: result.businessPath.icon)
+                            .font(.body)
+                            .foregroundStyle(catColor)
+                    }
+                    Spacer()
+                    Text("\(result.scorePercentage)%")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(scoreColor(result.scorePercentage))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(scoreColor(result.scorePercentage).opacity(0.12))
+                        .clipShape(.capsule)
+                }
+
+                Text(result.businessPath.name)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Spacer(minLength: 0)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "dollarsign.circle.fill")
+                            .font(.system(size: 9))
+                        Text(result.businessPath.startupCostRange)
+                            .font(.caption2)
+                    }
+                    .foregroundStyle(Theme.textTertiary)
+
+                    HStack(spacing: 4) {
+                        Image(systemName: "shield.checkered")
+                            .font(.system(size: 9))
+                        Text("AI Safe: \(result.businessPath.aiProofRating)")
+                            .font(.caption2)
+                    }
+                    .foregroundStyle(aiScoreColor(result.businessPath.aiProofRating))
+                }
+            }
+            .frame(width: 160, height: 170, alignment: .leading)
+            .padding(14)
+            .background(Theme.cardBackground)
+            .clipShape(.rect(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(catColor.opacity(0.1), lineWidth: 0.5)
+            )
+            .cardShadow()
         }
         .buttonStyle(.plain)
     }
 
-    @ViewBuilder
-    private var filterBar: some View {
-        let favoriteCount = visibleResultsForFavoriteCount
-        HStack(spacing: 10) {
-            filterChip(title: "All", isActive: !appState.showFavoritesOnly) {
-                withAnimation(.spring(duration: 0.3)) {
-                    appState.showFavoritesOnly = false
+    private var browseByCategorySection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 8) {
+                Image(systemName: "square.grid.2x2.fill")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.accentBlue)
+                Text("Browse by Category")
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(Theme.textPrimary)
+            }
+            .padding(.horizontal, 16)
+
+            let columns = sizeClass == .regular
+                ? [GridItem(.adaptive(minimum: 160), spacing: 10)]
+                : [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)]
+
+            LazyVGrid(columns: columns, spacing: 10) {
+                ForEach(BusinessCategory.allCases) { category in
+                    categoryCard(category)
                 }
             }
-            filterChip(title: "Favorites", icon: "heart.fill", count: favoriteCount, isActive: appState.showFavoritesOnly) {
-                withAnimation(.spring(duration: 0.3)) {
-                    appState.showFavoritesOnly = true
-                }
-            }
-            Spacer()
+            .padding(.horizontal, 16)
         }
     }
 
-    private var visibleResultsForFavoriteCount: Int {
-        let pool: [MatchResult] = store.isPremium ? matchesAbove40 : Array(appState.matchResults.prefix(20))
-        return pool.filter { appState.isFavorite($0.businessPath.id) }.count
-    }
-
-    private func filterChip(title: String, icon: String? = nil, count: Int? = nil, isActive: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 5) {
-                if let icon {
-                    Image(systemName: icon)
-                        .font(.caption2)
-                        .foregroundStyle(isActive ? .pink : Theme.textTertiary)
-                }
-                Text(title)
-                    .font(.subheadline.weight(.medium))
-                if let count, count > 0 {
-                    Text("\(count)")
-                        .font(.caption2.weight(.bold))
-                        .foregroundStyle(isActive ? Theme.background : Theme.textTertiary)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(isActive ? Theme.accent : Theme.cardBackgroundLight)
-                        .clipShape(.capsule)
-                }
-            }
-            .foregroundStyle(isActive ? Theme.textPrimary : Theme.textTertiary)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 8)
-            .background(isActive ? Theme.cardBackgroundLight : Theme.cardBackground)
-            .clipShape(.capsule)
-            .overlay(
-                Capsule()
-                    .stroke(isActive ? Theme.accent.opacity(0.3) : Color.clear, lineWidth: 1)
-            )
-        }
-    }
-
-    private var emptyFavoritesView: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "heart.slash")
-                .font(.system(size: 36))
-                .foregroundStyle(Theme.textTertiary)
-            Text("No favorites yet")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(Theme.textSecondary)
-            Text("Tap the heart icon on any business path to save it here")
-                .font(.caption)
-                .foregroundStyle(Theme.textTertiary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 40)
-        .background(Theme.cardBackground)
-        .clipShape(.rect(cornerRadius: 14))
-    }
-
-    private var upgradePrompt: some View {
-        Button {
-            showPaywall = true
+    private func categoryCard(_ category: BusinessCategory) -> some View {
+        let catColor = Theme.categoryColor(for: category)
+        let count = allResults.filter { $0.businessPath.category == category }.count
+        return Button {
+            seeAllMode = .category(category)
         } label: {
             HStack(spacing: 12) {
-                Image(systemName: "crown.fill")
-                    .font(.title3)
-                    .foregroundStyle(.yellow)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Unlock All \(matchesAbove40.count) Matches")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Theme.textPrimary)
-                    Text("Plus templates, scripts & business plans")
-                        .font(.caption)
-                        .foregroundStyle(Theme.textSecondary)
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(catColor.opacity(0.12))
+                        .frame(width: 40, height: 40)
+                    Image(systemName: category.icon)
+                        .font(.body)
+                        .foregroundStyle(catColor)
                 }
-                Spacer()
-                Text("PRO")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(Theme.accent)
-                    .clipShape(.capsule)
-            }
-            .padding(16)
-            .background(Theme.cardBackground)
-            .clipShape(.rect(cornerRadius: 12))
-        }
-        .padding(.horizontal, 16)
-    }
 
-    private var lockedResultsBanner: some View {
-        Button {
-            showPaywall = true
-        } label: {
-            VStack(spacing: 12) {
-                Image(systemName: "lock.fill")
-                    .font(.title2)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(category.rawValue)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Theme.textPrimary)
+                        .lineLimit(1)
+                    Text("\(count) paths")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.textTertiary)
+                }
+
+                Spacer(minLength: 4)
+
+                Image(systemName: "chevron.right")
+                    .font(.caption2.weight(.bold))
                     .foregroundStyle(Theme.textTertiary)
-                Text("\(matchesAbove40.count - 20) more matches above 40% available with Pro")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(Theme.textSecondary)
-                Text("Upgrade to Pro")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Theme.accent)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 24)
+            .padding(12)
             .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(catColor.opacity(0.08), lineWidth: 0.5)
+            )
         }
-        .padding(.horizontal, 16)
-    }
-
-    private func scoreRing(_ percentage: Int, size: CGFloat) -> some View {
-        ZStack {
-            Circle()
-                .stroke(Theme.cardBackgroundLight, lineWidth: 4)
-            Circle()
-                .trim(from: 0, to: Double(percentage) / 100.0)
-                .stroke(scoreColor(percentage), style: StrokeStyle(lineWidth: 4, lineCap: .round))
-                .rotationEffect(.degrees(-90))
-            Text("\(percentage)%")
-                .font(.system(size: size * 0.24, weight: .bold))
-                .foregroundStyle(scoreColor(percentage))
-        }
-        .frame(width: size, height: size)
-    }
-
-    private func scoreColor(_ percentage: Int) -> Color {
-        if percentage >= 80 { return Theme.accent }
-        if percentage >= 60 { return Theme.accentBlue }
-        return .orange
-    }
-
-    private func infoChip(icon: String, text: String) -> some View {
-        HStack(spacing: 4) {
-            Image(systemName: icon)
-                .font(.caption2)
-                .foregroundStyle(Theme.textTertiary)
-            Text(text)
-                .font(.caption)
-                .foregroundStyle(Theme.textSecondary)
-        }
+        .buttonStyle(.plain)
     }
 
     private var whatIfButton: some View {
@@ -448,31 +579,86 @@ struct DiscoverTabView: View {
             .clipShape(.rect(cornerRadius: 14))
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
-                    .stroke(Theme.accentBlue.opacity(0.15), lineWidth: 1)
+                    .stroke(Theme.accentBlue.opacity(0.15), lineWidth: 0.5)
             )
+            .cardShadow()
         }
         .buttonStyle(.plain)
     }
 
-    private var whatIfHint: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "lightbulb.fill")
-                .font(.caption)
-                .foregroundStyle(.yellow)
-            Text("Adjust your profile in **What If Mode** to see how your match scores change.")
-                .font(.caption2)
-                .foregroundStyle(Theme.textTertiary)
+    private var upgradePrompt: some View {
+        Button {
+            showPaywall = true
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "crown.fill")
+                    .font(.title3)
+                    .foregroundStyle(.yellow)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Unlock All Matches & Pro Tools")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Theme.textPrimary)
+                    Text("Templates, scripts, business plans & more")
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+                Spacer()
+                Text("PRO")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(Theme.accent)
+                    .clipShape(.capsule)
+            }
+            .padding(16)
+            .background(Theme.cardBackground)
+            .clipShape(.rect(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Theme.accent.opacity(0.15), lineWidth: 0.5)
+            )
+            .cardShadow()
         }
-        .padding(12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.cardBackground)
-        .clipShape(.rect(cornerRadius: 10))
-        .cardShadow()
+        .buttonStyle(.plain)
     }
 
-    private func shareAllResults() {
-        guard let topResult = visibleResults.first else { return }
-        shareResult = topResult
+    private func scoreRing(_ percentage: Int, size: CGFloat) -> some View {
+        ZStack {
+            Circle()
+                .stroke(Theme.cardBackgroundLight, lineWidth: 4)
+            Circle()
+                .trim(from: 0, to: Double(percentage) / 100.0)
+                .stroke(scoreColor(percentage), style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+            Text("\(percentage)%")
+                .font(.system(size: size * 0.24, weight: .bold))
+                .foregroundStyle(scoreColor(percentage))
+        }
+        .frame(width: size, height: size)
+    }
+
+    private func scoreColor(_ percentage: Int) -> Color {
+        if percentage >= 80 { return Theme.accent }
+        if percentage >= 60 { return Theme.accentBlue }
+        return .orange
+    }
+
+    private func aiScoreColor(_ score: Int) -> Color {
+        if score >= 80 { return Theme.accent }
+        if score >= 50 { return Color(hex: "FBBF24") }
+        return .orange
+    }
+
+    private func infoChip(icon: String, text: String) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.caption2)
+                .foregroundStyle(Theme.textTertiary)
+            Text(text)
+                .font(.caption)
+                .foregroundStyle(Theme.textSecondary)
+        }
     }
 }
 
