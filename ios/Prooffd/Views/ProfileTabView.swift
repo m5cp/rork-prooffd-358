@@ -11,6 +11,7 @@ struct ProfileTabView: View {
     @State private var showMyPathShare: Bool = false
     @State private var showAvatarPicker: Bool = false
     @State private var showPointsGuide: Bool = false
+    @State private var showReadinessDetail: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -58,7 +59,25 @@ struct ProfileTabView: View {
                 Section("Stats") {
                     statsRow(icon: "flame.fill", color: .orange, label: "Streak", value: "\(appState.streakTracker.currentStreak) days")
                     statsRow(icon: "bolt.fill", color: Color(hex: "FBBF24"), label: "Points", value: "\(appState.momentum.totalPoints)")
-                    statsRow(icon: "gauge.open.with.lines.needle.33percent.and.arrowtriangle", color: Theme.accent, label: "Readiness", value: "\(appState.readinessScore)/100")
+                    Button {
+                        showReadinessDetail = true
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "gauge.open.with.lines.needle.33percent.and.arrowtriangle")
+                                .foregroundStyle(Theme.accent)
+                                .frame(width: 22)
+                            Text("Readiness")
+                                .foregroundStyle(Theme.textPrimary)
+                            Spacer()
+                            Text("\(appState.readinessScore)/100")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Theme.textSecondary)
+                            Image(systemName: "chevron.right")
+                                .font(.caption2)
+                                .foregroundStyle(Theme.textTertiary)
+                        }
+                    }
+                    .listRowBackground(Theme.cardBackground)
                     statsRow(icon: "hammer.fill", color: Theme.accentBlue, label: "Active Builds", value: "\(appState.builds.count)")
                     statsRow(icon: "eye.fill", color: Color(hex: "818CF8"), label: "Explored", value: "\(appState.exploredPathIDs.count) paths")
 
@@ -399,6 +418,9 @@ struct ProfileTabView: View {
             }
             .sheet(isPresented: $showPointsGuide) {
                 PointsGuideView()
+            }
+            .sheet(isPresented: $showReadinessDetail) {
+                ReadinessDetailView()
             }
             .sheet(isPresented: $showAvatarPicker) {
                 AvatarPickerView(selectedAvatar: Binding(
