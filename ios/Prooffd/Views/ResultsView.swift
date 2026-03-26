@@ -167,7 +167,7 @@ struct DiscoverTabView: View {
                                 totalPoints: appState.momentum.totalPoints
                             )
                         ),
-                        shareText: "I'm building \(build.businessName) step-by-step with Prooffd — \(build.progressPercentage)% complete!"
+                        shareText: "I'm building \(build.businessName) step-by-step with Prooffd — \(build.progressPercentage)% complete! Download Prooffd: https://apps.apple.com/app/prooffd/id6743071053"
                     )
                 }
             }
@@ -183,7 +183,7 @@ struct DiscoverTabView: View {
                             icon: result.businessPath.icon
                         )
                     ),
-                    shareText: "I found my business match on Prooffd — \(result.businessPath.name) with a \(result.scorePercentage)% match!"
+                    shareText: "I found my business match on Prooffd — \(result.businessPath.name) with a \(result.scorePercentage)% match! Download Prooffd: https://apps.apple.com/app/prooffd/id6743071053"
                 )
             }
             .sheet(item: $seeAllMode) { mode in

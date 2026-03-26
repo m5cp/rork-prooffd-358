@@ -333,7 +333,7 @@ struct ProfileTabView: View {
                             totalPoints: appState.momentum.totalPoints
                         )
                     ),
-                    shareText: "I'm building a business step-by-step with Prooffd!"
+                    shareText: "I'm building a business step-by-step with Prooffd! Download Prooffd: https://apps.apple.com/app/prooffd/id6743071053"
                 )
             }
             .sheet(isPresented: $showAvatarPicker) {

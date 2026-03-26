@@ -12,6 +12,7 @@ struct BuildDetailView: View {
     @State private var expandedProSection: String?
     @State private var shareImage: UIImage?
     @State private var showShareSheet: Bool = false
+    @State private var showProgressShareCard: Bool = false
 
     private var build: BuildProject? {
         appState.builds.first { $0.id == buildId }
@@ -64,6 +65,21 @@ struct BuildDetailView: View {
                 .toolbarBackground(Theme.background, for: .navigationBar)
                 .sheet(isPresented: $showPaywall) {
                     PaywallView()
+                }
+                .sheet(isPresented: $showProgressShareCard) {
+                    let nextStep = build.steps.first(where: { !$0.isCompleted })?.title ?? ""
+                    ShareableCardSheet(
+                        cardContent: AnyView(
+                            ProgressShareCard(
+                                buildName: build.businessName,
+                                progressPercent: build.progressPercentage,
+                                streakDays: appState.streakTracker.currentStreak,
+                                nextStep: nextStep,
+                                totalPoints: appState.momentum.totalPoints
+                            )
+                        ),
+                        shareText: "I'm building \(build.businessName) step-by-step with Prooffd — \(build.progressPercentage)% complete! Download Prooffd: https://apps.apple.com/app/prooffd/id6743071053"
+                    )
                 }
                 .alert("Remove Build?", isPresented: $showDeleteConfirm) {
                     Button("Cancel", role: .cancel) {}
@@ -921,7 +937,7 @@ struct BuildDetailView: View {
 
     private func shareProgressButton(_ build: BuildProject) -> some View {
         Button {
-            shareBuildProgress(build)
+            showProgressShareCard = true
         } label: {
             HStack(spacing: 8) {
                 Image(systemName: "square.and.arrow.up")
@@ -970,20 +986,7 @@ struct BuildDetailView: View {
             .clipShape(.capsule)
     }
 
-    private func shareBuildProgress(_ build: BuildProject) {
-        let text = "I'm building \(build.businessName) step-by-step with Prooffd — \(build.progressPercentage)% complete!"
-        let activityVC = UIActivityViewController(activityItems: [text], applicationActivities: nil)
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let root = windowScene.windows.first?.rootViewController {
-            var topController = root
-            while let presented = topController.presentedViewController { topController = presented }
-            activityVC.popoverPresentationController?.sourceView = topController.view
-            activityVC.popoverPresentationController?.sourceRect = CGRect(x: topController.view.bounds.midX, y: topController.view.bounds.midY, width: 0, height: 0)
-            activityVC.popoverPresentationController?.permittedArrowDirections = []
-            topController.present(activityVC, animated: true)
-        }
-        appState.markResultShared()
-    }
+
 
     private func exportBuildPDF(_ build: BuildProject) {
         if let url = PDFExportService.exportBuildPDF(build) {

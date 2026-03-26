@@ -109,7 +109,8 @@ struct ShareCardView: View {
         if renderedImage == nil { renderImage() }
         guard let image = renderedImage else { return }
 
-        let activityVC = UIActivityViewController(activityItems: [image], applicationActivities: nil)
+        let shareText = "Check out my top match on Prooffd! Download: https://apps.apple.com/app/prooffd/id6743071053"
+        let activityVC = UIActivityViewController(activityItems: [image, shareText], applicationActivities: nil)
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let root = windowScene.windows.first?.rootViewController {
             var topController = root
