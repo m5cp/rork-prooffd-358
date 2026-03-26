@@ -12,6 +12,8 @@ struct ProfileTabView: View {
     @State private var showAvatarPicker: Bool = false
     @State private var showPointsGuide: Bool = false
     @State private var showReadinessDetail: Bool = false
+    @State private var showNameEdit: Bool = false
+    @State private var editingName: String = ""
 
     var body: some View {
         NavigationStack {
@@ -41,9 +43,19 @@ struct ProfileTabView: View {
                         }
 
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(appState.userProfile.firstName.isEmpty ? "User" : appState.userProfile.firstName)
-                                .font(.headline)
-                                .foregroundStyle(Theme.textPrimary)
+                            Button {
+                                editingName = appState.userProfile.firstName
+                                showNameEdit = true
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Text(appState.userProfile.firstName.isEmpty ? "User" : appState.userProfile.firstName)
+                                        .font(.headline)
+                                        .foregroundStyle(Theme.textPrimary)
+                                    Image(systemName: "pencil")
+                                        .font(.caption)
+                                        .foregroundStyle(Theme.textTertiary)
+                                }
+                            }
                             Text(store.isPremium ? "Pro Member" : "Free Plan")
                                 .font(.caption)
                                 .foregroundStyle(store.isPremium ? Theme.accent : Theme.textTertiary)
@@ -427,6 +439,19 @@ struct ProfileTabView: View {
                     get: { appState.userProfile.avatar },
                     set: { appState.updateAvatar($0) }
                 ))
+            }
+            .alert("Edit Name", isPresented: $showNameEdit) {
+                TextField("Your name", text: $editingName)
+                    .textInputAutocapitalization(.words)
+                Button("Save") {
+                    let trimmed = editingName.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if !trimmed.isEmpty {
+                        appState.updateName(trimmed)
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Enter your display name")
             }
             .alert("Retake Quiz?", isPresented: $showRetakeConfirm) {
                 Button("Cancel", role: .cancel) {}

@@ -310,6 +310,11 @@ class AppState {
         saveProfile()
     }
 
+    func updateName(_ name: String) {
+        userProfile.firstName = name
+        saveProfile()
+    }
+
     // MARK: - Favorites
 
     func toggleFavorite(_ pathID: String) {
