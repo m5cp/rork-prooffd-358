@@ -123,6 +123,7 @@ struct MyBuildsView: View {
             RoundedRectangle(cornerRadius: 16)
                 .stroke(Theme.accent.opacity(0.2), lineWidth: 1)
         )
+        .cardShadow()
     }
 
     private var buildsListSection: some View {
@@ -206,6 +207,7 @@ struct MyBuildsView: View {
                 RoundedRectangle(cornerRadius: 14)
                     .stroke(Theme.categoryColor(for: build.category).opacity(0.1), lineWidth: 1)
             )
+            .cardShadow()
         }
         .buttonStyle(.plain)
     }
@@ -246,6 +248,7 @@ struct MyBuildsView: View {
         .padding(.horizontal, 20)
         .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 16))
+        .cardShadow()
     }
 
     private var upgradePrompt: some View {

@@ -467,6 +467,7 @@ struct DiscoverTabView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 10))
+        .cardShadow()
     }
 
     private func shareAllResults() {
@@ -545,6 +546,7 @@ struct ResultCard: View {
             .padding(.vertical, 10)
             .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 12))
+            .cardShadow()
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: appState.isFavorite(result.businessPath.id))

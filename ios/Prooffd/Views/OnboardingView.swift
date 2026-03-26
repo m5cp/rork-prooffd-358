@@ -121,10 +121,18 @@ struct OnboardingView: View {
                 )
                 .ignoresSafeArea()
             } else {
-                LinearGradient(
-                    colors: [Color(.systemBackground), Color(.secondarySystemBackground), Color(.systemBackground)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
+                MeshGradient(
+                    width: 3, height: 3,
+                    points: [
+                        [0, 0], [0.5, 0], [1, 0],
+                        [0, 0.5], [0.5, 0.5], [1, 0.5],
+                        [0, 1], [0.5, 1], [1, 1]
+                    ],
+                    colors: [
+                        Color(hex: "F7F7F4"), Color(hex: "EEF4F0"), Color(hex: "F7F7F4"),
+                        Color(hex: "F0F4EE"), Color(hex: "E8F0E8"), Color(hex: "EEF2F6"),
+                        Color(hex: "F7F7F4"), Color(hex: "F0F0ED"), Color(hex: "F7F7F4")
+                    ]
                 )
                 .ignoresSafeArea()
             }

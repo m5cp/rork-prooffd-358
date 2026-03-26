@@ -202,6 +202,7 @@ struct ProfileTabView: View {
                     .listRowBackground(Color.clear)
                 }
             }
+            .listSectionSpacing(12)
             .scrollContentBackground(.hidden)
             .background(Theme.background)
             .navigationTitle("Profile")

@@ -434,6 +434,7 @@ struct ExploreTabView: View {
             .padding(14)
             .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 14))
+            .cardShadow()
         }
         .padding(.horizontal, 16)
     }
@@ -471,6 +472,7 @@ struct ExploreTabView: View {
         .padding(.horizontal, 16)
         .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 14))
+        .cardShadow()
         .padding(.horizontal, 16)
     }
 
