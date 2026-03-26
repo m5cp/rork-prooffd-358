@@ -81,11 +81,7 @@ struct DiscoverTabView: View {
         }.prefix(8))
     }
 
-    private var aiSafeResults: [MatchResult] {
-        Array(allResults.filter { $0.businessPath.aiProofRating >= 85 }
-            .sorted { $0.businessPath.aiProofRating > $1.businessPath.aiProofRating }
-            .prefix(8))
-    }
+
 
     private var trendingResults: [MatchResult] {
         Array(allResults.sorted { $0.scorePercentage > $1.scorePercentage }
@@ -320,14 +316,6 @@ struct DiscoverTabView: View {
                     mode: .fastStart
                 )
             }
-
-            horizontalSection(
-                title: "High AI-Safe Careers",
-                icon: "shield.checkered",
-                iconColor: Theme.accent,
-                results: aiSafeResults,
-                mode: .aiSafe
-            )
 
             browseByCategorySection
 

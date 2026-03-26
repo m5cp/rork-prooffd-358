@@ -2,16 +2,32 @@ import SwiftUI
 
 struct EngagementBannerView: View {
     @Environment(AppState.self) private var appState
+    @State private var showPointsInfo: Bool = false
+
+    private var totalEarned: Int {
+        appState.momentum.earnedBadges.count + appState.unlockedCount
+    }
+
+    private var totalAvailable: Int {
+        MomentumBadge.all.count + AchievementDatabase.all.count
+    }
 
     var body: some View {
-        HStack(spacing: 0) {
-            streakPill
-            Spacer(minLength: 8)
-            pointsPill
-            Spacer(minLength: 8)
-            badgesPill
+        VStack(spacing: 0) {
+            HStack(spacing: 0) {
+                streakPill
+                Spacer(minLength: 8)
+                pointsPill
+                Spacer(minLength: 8)
+                badgesPill
+            }
+            .padding(12)
+
+            if showPointsInfo {
+                pointsDescriptionSection
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
         }
-        .padding(12)
         .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 14))
         .cardShadow()
@@ -34,36 +50,83 @@ struct EngagementBannerView: View {
     }
 
     private var pointsPill: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "bolt.fill")
-                .font(.caption)
-                .foregroundStyle(Color(hex: "FBBF24"))
-            VStack(alignment: .leading, spacing: 1) {
-                Text("\(appState.momentum.totalPoints)")
-                    .font(.subheadline.weight(.bold))
-                    .foregroundStyle(Theme.textPrimary)
-                Text("points")
-                    .font(.system(size: 10))
+        Button {
+            withAnimation(.spring(duration: 0.3)) {
+                showPointsInfo.toggle()
+            }
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "bolt.fill")
+                    .font(.caption)
+                    .foregroundStyle(Color(hex: "FBBF24"))
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("\(appState.momentum.totalPoints)")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(Theme.textPrimary)
+                    Text("points")
+                        .font(.system(size: 10))
+                        .foregroundStyle(Theme.textTertiary)
+                }
+                Image(systemName: "info.circle")
+                    .font(.system(size: 9))
                     .foregroundStyle(Theme.textTertiary)
             }
         }
+        .buttonStyle(.plain)
     }
 
     private var badgesPill: some View {
-        let earned = appState.momentum.earnedBadges.count
-        let total = MomentumBadge.all.count
-        return HStack(spacing: 6) {
+        HStack(spacing: 6) {
             Image(systemName: "trophy.fill")
                 .font(.caption)
-                .foregroundStyle(earned > 0 ? Color(hex: "818CF8") : Theme.textTertiary)
+                .foregroundStyle(totalEarned > 0 ? Color(hex: "818CF8") : Theme.textTertiary)
             VStack(alignment: .leading, spacing: 1) {
-                Text("\(earned)/\(total)")
+                Text("\(totalEarned)/\(totalAvailable)")
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(Theme.textPrimary)
                 Text("badges")
                     .font(.system(size: 10))
                     .foregroundStyle(Theme.textTertiary)
             }
+        }
+    }
+
+    private var pointsDescriptionSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Rectangle()
+                .fill(Theme.border.opacity(0.3))
+                .frame(height: 0.5)
+                .padding(.horizontal, 12)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("How to Earn Points")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+
+                pointRow(icon: "checkmark.circle.fill", text: "Complete Today's Step", points: "+10")
+                pointRow(icon: "checklist", text: "Complete a checklist item", points: "+5")
+                pointRow(icon: "pencil.line", text: "Edit your plan", points: "+3")
+                pointRow(icon: "app.badge.fill", text: "Open app daily", points: "+2")
+                pointRow(icon: "square.and.arrow.up", text: "Share your progress", points: "+10")
+            }
+            .padding(.horizontal, 14)
+            .padding(.bottom, 12)
+        }
+    }
+
+    private func pointRow(icon: String, text: String, points: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 10))
+                .foregroundStyle(Color(hex: "FBBF24"))
+                .frame(width: 16)
+            Text(text)
+                .font(.caption)
+                .foregroundStyle(Theme.textSecondary)
+            Spacer()
+            Text(points)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(Color(hex: "FBBF24"))
         }
     }
 }

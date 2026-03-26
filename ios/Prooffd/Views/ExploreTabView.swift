@@ -4,9 +4,8 @@ struct ExploreTabView: View {
     @Environment(AppState.self) private var appState
     @Environment(StoreViewModel.self) private var store
     @State private var selectedResult: MatchResult?
-    @State private var selectedCareer: CareerPath?
     @State private var showPaywall: Bool = false
-    @State private var selectedEducationCategory: EducationCategory?
+    @State private var showEducationCategorySheet: EducationCategory?
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     private var trendingPaths: [MatchResult] {
@@ -19,7 +18,6 @@ struct ExploreTabView: View {
                 VStack(spacing: 24) {
                     trendingSection
                     educationOverviewSection
-                    careerPathsSection
                     shareLoopSection
                     Color.clear.frame(height: 40)
                 }
@@ -33,11 +31,11 @@ struct ExploreTabView: View {
             .sheet(item: $selectedResult) { result in
                 PathDetailView(result: result)
             }
-            .sheet(item: $selectedCareer) { career in
-                CareerPathDetailSheet(career: career)
-            }
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
+            }
+            .sheet(item: $showEducationCategorySheet) { category in
+                EducationCategoryListSheet(category: category)
             }
         }
     }
@@ -161,7 +159,7 @@ struct ExploreTabView: View {
         }()
 
         return Button {
-            selectedEducationCategory = selectedEducationCategory == category ? nil : category
+            showEducationCategorySheet = category
         } label: {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 10) {
@@ -193,124 +191,11 @@ struct ExploreTabView: View {
             .clipShape(.rect(cornerRadius: 12))
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(selectedEducationCategory == category ? catColor.opacity(0.3) : catColor.opacity(0.08), lineWidth: selectedEducationCategory == category ? 1.5 : 0.5)
+                    .stroke(catColor.opacity(0.08), lineWidth: 0.5)
             )
         }
         .buttonStyle(.plain)
-        .sensoryFeedback(.selection, trigger: selectedEducationCategory)
-    }
-
-    private var careerPathsSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            let filteredCareers = selectedEducationCategory != nil
-                ? EducationPathDatabase.all.filter { $0.category == selectedEducationCategory! }
-                : EducationPathDatabase.all
-
-            if let cat = selectedEducationCategory {
-                HStack(spacing: 8) {
-                    Text(cat.rawValue)
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(Theme.textPrimary)
-                    Spacer()
-                    Button {
-                        withAnimation(.spring(duration: 0.3)) {
-                            selectedEducationCategory = nil
-                        }
-                    } label: {
-                        Text("Show All")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(Theme.accent)
-                    }
-                }
-                .padding(.horizontal, 16)
-            } else {
-                HStack(spacing: 8) {
-                    Image(systemName: "road.lanes")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(Theme.accentBlue)
-                    Text("All Career Paths")
-                        .font(.title3.weight(.bold))
-                        .foregroundStyle(Theme.textPrimary)
-                    Spacer()
-                    Text("\(filteredCareers.count) paths")
-                        .font(.caption)
-                        .foregroundStyle(Theme.textTertiary)
-                }
-                .padding(.horizontal, 16)
-            }
-
-            LazyVStack(spacing: 10) {
-                ForEach(filteredCareers) { career in
-                    careerListCard(career)
-                }
-            }
-            .padding(.horizontal, 16)
-        }
-    }
-
-    private func careerListCard(_ career: CareerPath) -> some View {
-        let aiColor: Color = career.aiSafeScore >= 80 ? Theme.accent : career.aiSafeScore >= 50 ? Color(hex: "FBBF24") : .orange
-
-        return Button {
-            selectedCareer = career
-        } label: {
-            HStack(spacing: 14) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Theme.accentBlue.opacity(0.1))
-                        .frame(width: 48, height: 48)
-                    Image(systemName: career.icon)
-                        .font(.body)
-                        .foregroundStyle(Theme.accentBlue)
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(career.name)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Theme.textPrimary)
-                        .lineLimit(1)
-
-                    HStack(spacing: 10) {
-                        HStack(spacing: 3) {
-                            Image(systemName: "dollarsign.circle")
-                                .font(.system(size: 9))
-                            Text(career.salaryRange)
-                                .font(.caption2)
-                        }
-                        .foregroundStyle(Theme.accent)
-
-                        HStack(spacing: 3) {
-                            Image(systemName: "clock")
-                                .font(.system(size: 9))
-                            Text(career.timeToIncome)
-                                .font(.caption2)
-                        }
-                        .foregroundStyle(Theme.textTertiary)
-                    }
-                }
-
-                Spacer(minLength: 4)
-
-                VStack(alignment: .trailing, spacing: 2) {
-                    HStack(spacing: 3) {
-                        Image(systemName: "shield.checkered")
-                            .font(.system(size: 9))
-                        Text("\(career.aiSafeScore)")
-                            .font(.caption2.weight(.bold))
-                    }
-                    .foregroundStyle(aiColor)
-
-                    Image(systemName: "chevron.right")
-                        .font(.caption2.weight(.bold))
-                        .foregroundStyle(Theme.textTertiary)
-                }
-            }
-            .padding(14)
-            .background(Theme.cardBackground)
-            .clipShape(.rect(cornerRadius: 14))
-            .cardShadow()
-        }
-        .buttonStyle(.plain)
+        .sensoryFeedback(.selection, trigger: showEducationCategorySheet)
     }
 
     private var shareLoopSection: some View {
