@@ -404,53 +404,80 @@ class AppState {
 
     // MARK: - Readiness
 
-    var readinessScore: Int {
+    var profileReadinessScore: Int {
         var score = 0
         if userProfile.budget != nil {
             switch userProfile.budget! {
-            case .zero: score += 5
-            case .under100: score += 8
-            case .under500: score += 12
-            case .under1000: score += 16
-            case .over1000: score += 20
+            case .zero: score += 2
+            case .under100: score += 4
+            case .under500: score += 6
+            case .under1000: score += 8
+            case .over1000: score += 10
             }
         }
         if let hours = userProfile.hoursPerDay {
             switch hours {
-            case .lessThan1: score += 5
-            case .oneToTwo: score += 10
-            case .threeToFour: score += 15
-            case .fivePlus: score += 20
+            case .lessThan1: score += 2
+            case .oneToTwo: score += 5
+            case .threeToFour: score += 8
+            case .fivePlus: score += 10
             }
         }
         if let tech = userProfile.techComfort {
             switch tech {
-            case .notComfortable: score += 3
-            case .basic: score += 7
-            case .moderate: score += 12
-            case .verySavvy: score += 15
+            case .notComfortable: score += 2
+            case .basic: score += 4
+            case .moderate: score += 6
+            case .verySavvy: score += 8
             }
         }
         if let exp = userProfile.experienceLevel {
             switch exp {
-            case .beginner: score += 5
-            case .some: score += 10
-            case .skilled: score += 15
+            case .beginner: score += 2
+            case .some: score += 4
+            case .skilled: score += 6
             }
         }
         if let selling = userProfile.sellingComfort {
             switch selling {
-            case .notComfortable: score += 3
-            case .somewhat: score += 7
-            case .veryComfortable: score += 10
+            case .notComfortable: score += 1
+            case .somewhat: score += 3
+            case .veryComfortable: score += 4
             }
         }
-        if userProfile.hasCar == true { score += 5 }
-        if !userProfile.selectedCategories.isEmpty { score += 5 }
-        if !userProfile.workConditions.isEmpty { score += 5 }
-        if userProfile.workPreference != nil { score += 3 }
-        if userProfile.workStyle != nil { score += 2 }
-        return min(score, 100)
+        if userProfile.hasCar == true { score += 2 }
+        if !userProfile.selectedCategories.isEmpty { score += 3 }
+        if !userProfile.workConditions.isEmpty { score += 2 }
+        if userProfile.workPreference != nil { score += 1 }
+        if userProfile.workStyle != nil { score += 1 }
+        if !userProfile.workEnvironments.isEmpty { score += 2 }
+        if userProfile.incomeTimeline != nil { score += 1 }
+        if userProfile.educationWillingness != nil { score += 1 }
+        return min(score, 50)
+    }
+
+    var actionReadinessScore: Int {
+        var score = 0
+        if hasCompletedQuiz { score += 5 }
+        if exploredPathIDs.count >= 5 { score += 5 }
+        if exploredPathIDs.count >= 10 { score += 5 }
+        if favoritePathIDs.count >= 3 { score += 3 }
+        if !builds.isEmpty { score += 5 }
+        let totalCompleted = builds.flatMap(\.steps).filter(\.isCompleted).count
+        if totalCompleted >= 5 { score += 5 }
+        if totalCompleted >= 10 { score += 5 }
+        if hasUsedWhatIf { score += 3 }
+        if hasSharedResult { score += 3 }
+        if streakTracker.currentStreak >= 3 { score += 3 }
+        if streakTracker.currentStreak >= 7 { score += 3 }
+        let hasEditedPlan = builds.contains { !$0.businessName.isEmpty || !$0.pricingNotes.isEmpty || !$0.strategyNotes.isEmpty || !$0.serviceNotes.isEmpty }
+        if hasEditedPlan { score += 2 }
+        if !completedChallengeWeeks.isEmpty { score += 3 }
+        return min(score, 50)
+    }
+
+    var readinessScore: Int {
+        min(profileReadinessScore + actionReadinessScore, 100)
     }
 
     var readinessLevel: String {
@@ -464,25 +491,31 @@ class AppState {
 
     var readinessTips: [String] {
         var tips: [String] = []
+        if !hasCompletedQuiz {
+            tips.append("Complete the profile quiz to boost your score")
+        }
+        if exploredPathIDs.count < 5 {
+            tips.append("Explore more paths to increase readiness (+5 at 5 paths)")
+        }
+        if builds.isEmpty {
+            tips.append("Start a build to add to your readiness score")
+        }
         if let tech = userProfile.techComfort, tech.level < 2 {
             tips.append("Improving tech skills unlocks more digital business paths")
         }
-        if let hours = userProfile.hoursPerDay, hours.numericValue < 3 {
-            tips.append("Dedicating more hours increases your earning potential")
+        if streakTracker.currentStreak < 3 {
+            tips.append("Build a 3-day streak for +3 readiness points")
         }
-        if let selling = userProfile.sellingComfort, selling == .notComfortable {
-            tips.append("Building sales confidence opens high-revenue opportunities")
+        if favoritePathIDs.count < 3 {
+            tips.append("Save 3 favorites to earn readiness points")
         }
-        if let budget = userProfile.budget, budget.numericValue < 500 {
-            tips.append("A slightly higher budget unlocks more business types")
-        }
-        if userProfile.hasCar == false {
-            tips.append("Access to a vehicle opens service-based business paths")
+        if !hasUsedWhatIf {
+            tips.append("Try What If mode to explore different scenarios")
         }
         if tips.isEmpty {
-            tips.append("You're well-positioned — explore your top matches!")
+            tips.append("You're well-positioned \u{2014} explore your top matches!")
         }
-        return tips
+        return Array(tips.prefix(4))
     }
 
     // MARK: - Achievements

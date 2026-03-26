@@ -171,6 +171,21 @@ struct ProgressTabView: View {
                     .background(readinessColor.opacity(0.12))
                     .clipShape(.capsule)
 
+                HStack(spacing: 16) {
+                    readinessBreakdown(
+                        label: "Profile",
+                        value: appState.profileReadinessScore,
+                        max: 50,
+                        color: Theme.accent
+                    )
+                    readinessBreakdown(
+                        label: "Actions",
+                        value: appState.actionReadinessScore,
+                        max: 50,
+                        color: Theme.accentBlue
+                    )
+                }
+
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Tips to improve")
                         .font(.caption.weight(.semibold))
@@ -205,6 +220,29 @@ struct ProgressTabView: View {
                     .stroke(Theme.accent.opacity(0.15), lineWidth: 1)
             )
         }
+    }
+
+    private func readinessBreakdown(label: String, value: Int, max: Int, color: Color) -> some View {
+        VStack(spacing: 6) {
+            Text("\(value)/\(max)")
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(Theme.textPrimary)
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Theme.cardBackgroundLight)
+                        .frame(height: 6)
+                    Capsule()
+                        .fill(color)
+                        .frame(width: geo.size.width * (Double(value) / Double(max)), height: 6)
+                }
+            }
+            .frame(height: 6)
+            Text(label)
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(Theme.textTertiary)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private var readinessGradient: AngularGradient {

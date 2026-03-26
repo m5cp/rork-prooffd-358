@@ -262,12 +262,15 @@ struct QuizView: View {
                 case 2: budgetStep
                 case 3: workPreferenceStep
                 case 4: hoursStep
-                case 5: workStyleStep
-                case 6: techComfortStep
-                case 7: experienceStep
-                case 8: customerInteractionStep
-                case 9: sellingComfortStep
-                case 10: hasCarStep
+                case 5: workEnvironmentStep
+                case 6: workStyleStep
+                case 7: techComfortStep
+                case 8: experienceStep
+                case 9: incomeTimelineStep
+                case 10: educationWillingnessStep
+                case 11: customerInteractionStep
+                case 12: sellingComfortStep
+                case 13: hasCarStep
                 default: EmptyView()
                 }
             }
@@ -403,6 +406,66 @@ struct QuizView: View {
             quizHeader(title: "Comfort with selling?", subtitle: "How comfortable are you with sales?")
             optionList(SellingComfort.allCases, selected: viewModel.profile.sellingComfort) {
                 viewModel.profile.sellingComfort = $0
+            }
+        }
+    }
+
+    private var workEnvironmentStep: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            quizHeader(title: "Where do you want to work?", subtitle: "Select all that apply.")
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 12)], spacing: 12) {
+                ForEach(WorkEnvironment.allCases) { env in
+                    let isSelected = viewModel.profile.workEnvironments.contains(env)
+                    Button {
+                        withAnimation(.spring(duration: 0.25)) {
+                            viewModel.toggleEnvironment(env)
+                        }
+                    } label: {
+                        VStack(spacing: 8) {
+                            Image(systemName: env.icon)
+                                .font(.title2)
+                                .foregroundStyle(isSelected ? .white : Theme.accentBlue)
+                            Text(env.rawValue)
+                                .font(.caption.weight(.medium))
+                                .multilineTextAlignment(.center)
+                        }
+                        .foregroundStyle(isSelected ? .white : Theme.textSecondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(isSelected ? Theme.accentBlue.opacity(0.85) : Theme.cardBackground)
+                        .clipShape(.rect(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(isSelected ? Theme.accentBlue : Theme.accentBlue.opacity(0.15), lineWidth: isSelected ? 2 : 1)
+                        )
+                    }
+                    .sensoryFeedback(.selection, trigger: isSelected)
+                }
+            }
+
+            if !viewModel.profile.workEnvironments.isEmpty {
+                Text("\(viewModel.profile.workEnvironments.count) selected")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Theme.accentBlue)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+        }
+    }
+
+    private var incomeTimelineStep: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            quizHeader(title: "How soon do you need income?", subtitle: "This helps us match you with realistic timelines.")
+            optionList(IncomeTimeline.allCases, selected: viewModel.profile.incomeTimeline) {
+                viewModel.profile.incomeTimeline = $0
+            }
+        }
+    }
+
+    private var educationWillingnessStep: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            quizHeader(title: "What level of training are you open to?", subtitle: "Some paths require more education than others.")
+            optionList(EducationWillingness.allCases, selected: viewModel.profile.educationWillingness) {
+                viewModel.profile.educationWillingness = $0
             }
         }
     }

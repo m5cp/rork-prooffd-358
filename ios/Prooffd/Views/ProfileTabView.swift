@@ -210,6 +210,15 @@ struct ProfileTabView: View {
                         if !appState.userProfile.workConditions.isEmpty {
                             profileRow(icon: "wrench.and.screwdriver.fill", label: "Work Conditions", value: appState.userProfile.workConditions.map(\.rawValue).joined(separator: ", "))
                         }
+                        if !appState.userProfile.workEnvironments.isEmpty {
+                            profileRow(icon: "building.2.fill", label: "Work Environment", value: appState.userProfile.workEnvironments.map(\.rawValue).joined(separator: ", "))
+                        }
+                        if let timeline = appState.userProfile.incomeTimeline {
+                            profileRow(icon: "clock.arrow.circlepath", label: "Income Timeline", value: timeline.rawValue)
+                        }
+                        if let education = appState.userProfile.educationWillingness {
+                            profileRow(icon: "graduationcap.fill", label: "Education Willingness", value: education.rawValue)
+                        }
                     }
 
                     Button {

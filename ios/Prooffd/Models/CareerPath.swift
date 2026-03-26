@@ -497,6 +497,258 @@ enum EducationPathDatabase {
             ],
             linkedJobIds: []
         ),
+        EducationPath(
+            id: "comptia_aplus", title: "CompTIA A+", icon: "desktopcomputer",
+            category: .certification, aiSafeScore: 65,
+            overview: "The standard entry-level certification for IT Help Desk and Support roles. Validates foundational IT skills including hardware, software, networking, and troubleshooting.",
+            whyItWorksNow: "Every organization needs IT support. CompTIA A+ is the most recognized entry-level IT certification worldwide.",
+            typicalSalaryRange: "$40K – $65K+",
+            testRequirements: ["CompTIA A+ Core 1 (220-1101)", "CompTIA A+ Core 2 (220-1102)"],
+            deliveryType: "In-person, but online programs are available",
+            timeToComplete: "2–4 months",
+            costRange: "$500 – $2K",
+            fundingOptions: ["Google IT Support Certificate (free prep)", "Employer-paid certifications", "CompTIA voucher discounts", "Veterans benefits"],
+            basicSteps: [
+                "Study hardware, networking, and OS fundamentals",
+                "Complete practice labs and hands-on exercises",
+                "Pass the Core 1 exam (hardware and networking)",
+                "Pass the Core 2 exam (software and security)",
+                "Apply for help desk or IT support positions",
+                "Pursue Network+ or Security+ for advancement"
+            ],
+            linkedJobIds: []
+        ),
+        EducationPath(
+            id: "comptia_security_plus", title: "CompTIA Security+", icon: "lock.shield.fill",
+            category: .certification, aiSafeScore: 75,
+            overview: "Essential certification for entry-level cybersecurity roles. Covers network security, threat management, cryptography, and identity management. Required by many government and DoD positions.",
+            whyItWorksNow: "Cybersecurity job openings far exceed qualified candidates. Security+ is often the minimum requirement for government security roles.",
+            typicalSalaryRange: "$55K – $95K+",
+            testRequirements: ["CompTIA Security+ SY0-701 exam"],
+            deliveryType: "In-person, but online programs are available",
+            timeToComplete: "2–4 months",
+            costRange: "$400 – $2K",
+            fundingOptions: ["Employer-sponsored training", "DoD workforce programs", "CompTIA voucher discounts", "Veterans benefits"],
+            basicSteps: [
+                "Complete CompTIA A+ or have equivalent IT experience",
+                "Study security fundamentals, threats, and cryptography",
+                "Practice with labs and simulations",
+                "Pass the Security+ SY0-701 exam",
+                "Apply for SOC analyst or security roles",
+                "Pursue CySA+ or CISSP for advancement"
+            ],
+            linkedJobIds: []
+        ),
+        EducationPath(
+            id: "aws_cloud_practitioner", title: "AWS Certified Cloud Practitioner", icon: "cloud.fill",
+            category: .certification, aiSafeScore: 62,
+            overview: "Introduction to cloud computing with Amazon Web Services. Validates understanding of AWS Cloud concepts, services, security, architecture, and pricing. Great entry point for cloud careers.",
+            whyItWorksNow: "AWS dominates the cloud market. Cloud Practitioner is the starting certification that opens doors to higher-paying cloud roles.",
+            typicalSalaryRange: "$50K – $80K+",
+            testRequirements: ["AWS Cloud Practitioner CLF-C02 exam"],
+            deliveryType: "In-person, but online programs are available",
+            timeToComplete: "1–3 months",
+            costRange: "$100 – $1K",
+            fundingOptions: ["AWS free tier for practice", "AWS Skill Builder (free courses)", "Employer-sponsored certification"],
+            basicSteps: [
+                "Create a free AWS account for hands-on practice",
+                "Study cloud concepts and AWS core services",
+                "Complete AWS Cloud Practitioner Essentials (free)",
+                "Practice with sample exams and labs",
+                "Pass the CLF-C02 certification exam",
+                "Pursue Solutions Architect Associate for advancement"
+            ],
+            linkedJobIds: []
+        ),
+        EducationPath(
+            id: "google_it_support", title: "Google IT Support Professional Certificate", icon: "laptopcomputer",
+            category: .certification, aiSafeScore: 65,
+            overview: "A beginner-friendly path to IT support hosted on Coursera. Developed by Google, it covers troubleshooting, networking, operating systems, security, and system administration. No prior experience needed.",
+            whyItWorksNow: "Google certificates are increasingly recognized by employers as equivalent to entry-level experience. Affordable and fully online.",
+            typicalSalaryRange: "$38K – $60K+",
+            testRequirements: ["Complete all 5 courses on Coursera"],
+            deliveryType: "Online",
+            timeToComplete: "3–6 months",
+            costRange: "$0 – $300 (Coursera subscription)",
+            fundingOptions: ["Coursera financial aid (free)", "Google Career Certificate scholarships", "Employer tuition reimbursement"],
+            basicSteps: [
+                "Enroll in the Google IT Support Certificate on Coursera",
+                "Complete courses on troubleshooting, networking, and OS",
+                "Finish the security and system administration modules",
+                "Complete hands-on labs and assessments",
+                "Earn the certificate and add to your resume",
+                "Apply for IT help desk and support roles"
+            ],
+            linkedJobIds: []
+        ),
+        EducationPath(
+            id: "ccna", title: "CCNA (Cisco Certified Network Associate)", icon: "network",
+            category: .certification, aiSafeScore: 68,
+            overview: "For those wanting to work in networking and hardware. Validates ability to install, configure, and troubleshoot enterprise networks. Highly respected in the networking industry.",
+            whyItWorksNow: "Network infrastructure is expanding with IoT, 5G, and cloud computing. CCNA-certified professionals are in steady demand.",
+            typicalSalaryRange: "$55K – $90K+",
+            testRequirements: ["Cisco CCNA 200-301 exam"],
+            deliveryType: "In-person, but online programs are available",
+            timeToComplete: "3–6 months",
+            costRange: "$500 – $3K",
+            fundingOptions: ["Cisco Networking Academy (discounted)", "Employer-sponsored certification", "Community college programs"],
+            basicSteps: [
+                "Study networking fundamentals (TCP/IP, subnetting)",
+                "Practice with Cisco Packet Tracer (free simulator)",
+                "Complete hands-on lab exercises",
+                "Pass the CCNA 200-301 exam",
+                "Apply for network administrator or engineer roles",
+                "Pursue CCNP for senior networking positions"
+            ],
+            linkedJobIds: []
+        ),
+        EducationPath(
+            id: "cissp", title: "CISSP (Certified Information Systems Security Professional)", icon: "shield.checkered",
+            category: .certification, aiSafeScore: 78,
+            overview: "An advanced certification for security management. The gold standard for experienced cybersecurity professionals. Covers eight security domains and requires 5 years of experience.",
+            whyItWorksNow: "CISSP holders command top salaries as organizations invest heavily in security leadership. Required for many CISO and senior security roles.",
+            typicalSalaryRange: "$100K – $170K+",
+            testRequirements: ["CISSP CAT exam (3 hours, 100–150 questions)", "5 years professional experience in 2+ security domains"],
+            deliveryType: "In-person, but online programs are available",
+            timeToComplete: "3–6 months study (requires 5 years experience)",
+            costRange: "$700 – $5K",
+            fundingOptions: ["Employer-sponsored training", "ISC2 membership discounts", "DoD workforce development programs"],
+            basicSteps: [
+                "Gain 5 years of cybersecurity experience",
+                "Study all 8 CISSP domains",
+                "Complete an official ISC2 training course",
+                "Pass the CISSP CAT exam",
+                "Get endorsed by an existing CISSP holder",
+                "Maintain certification with continuing education"
+            ],
+            linkedJobIds: []
+        ),
+        EducationPath(
+            id: "pmp", title: "PMP (Project Management Professional)", icon: "list.clipboard.fill",
+            category: .certification, aiSafeScore: 62,
+            overview: "The top-tier gold standard for project managers. Recognized globally across all industries. Validates ability to lead projects, manage teams, and deliver results.",
+            whyItWorksNow: "PMP holders earn 20–25% more than non-certified peers. Every industry needs project managers, making this one of the most versatile certifications.",
+            typicalSalaryRange: "$75K – $130K+",
+            testRequirements: ["PMP exam (180 questions, 230 minutes)", "35 hours of PM education", "36 months leading projects (with degree) or 60 months (without)"],
+            deliveryType: "In-person, but online programs are available",
+            timeToComplete: "3–6 months study",
+            costRange: "$500 – $3K",
+            fundingOptions: ["Employer-sponsored training", "PMI membership discounts", "Udemy and Coursera courses"],
+            basicSteps: [
+                "Complete 35 hours of project management education",
+                "Document your project leadership experience",
+                "Apply to PMI for exam eligibility",
+                "Study using the PMBOK Guide and practice exams",
+                "Pass the PMP certification exam",
+                "Maintain with 60 PDUs every 3 years"
+            ],
+            linkedJobIds: ["event-planning"]
+        ),
+        EducationPath(
+            id: "capm", title: "CAPM (Certified Associate in Project Management)", icon: "list.bullet.clipboard.fill",
+            category: .certification, aiSafeScore: 60,
+            overview: "The entry-level version of the PMP for those without experience. Great stepping stone to PMP certification. Validates understanding of project management fundamentals.",
+            whyItWorksNow: "Shows employers you understand PM methodology even without years of experience. Gets your foot in the door for project coordinator roles.",
+            typicalSalaryRange: "$50K – $75K+",
+            testRequirements: ["CAPM exam (150 questions, 3 hours)", "23 hours of PM education"],
+            deliveryType: "In-person, but online programs are available",
+            timeToComplete: "1–3 months study",
+            costRange: "$300 – $1K",
+            fundingOptions: ["PMI membership discounts", "Google Project Management Certificate counts toward hours", "Self-funded (low cost)"],
+            basicSteps: [
+                "Complete 23 hours of project management education",
+                "Apply to PMI for CAPM exam eligibility",
+                "Study PM fundamentals and the PMBOK Guide",
+                "Pass the CAPM certification exam",
+                "Apply for project coordinator or junior PM roles",
+                "Gain experience and pursue PMP certification"
+            ],
+            linkedJobIds: []
+        ),
+        EducationPath(
+            id: "shrm_cp", title: "SHRM-CP (Human Resource Management)", icon: "person.3.fill",
+            category: .certification, aiSafeScore: 60,
+            overview: "The go-to certification for HR professionals from the Society for Human Resource Management. Covers people management, organization strategy, and workplace compliance.",
+            whyItWorksNow: "HR is evolving with remote work, DEI, and compliance needs. SHRM-CP demonstrates competency in modern human resource practices.",
+            typicalSalaryRange: "$55K – $85K+",
+            testRequirements: ["SHRM-CP exam (160 questions, 4 hours)", "HR-related experience or education"],
+            deliveryType: "In-person, but online programs are available",
+            timeToComplete: "2–4 months study",
+            costRange: "$400 – $2K",
+            fundingOptions: ["Employer-sponsored training", "SHRM membership discounts", "University HR certificate programs"],
+            basicSteps: [
+                "Verify eligibility based on HR experience or education",
+                "Study the SHRM Body of Competency and Knowledge",
+                "Complete an official SHRM preparation course",
+                "Practice with sample questions and scenarios",
+                "Pass the SHRM-CP certification exam",
+                "Maintain with 60 PDCs every 3 years"
+            ],
+            linkedJobIds: []
+        ),
+        EducationPath(
+            id: "six_sigma", title: "Six Sigma Green/Black Belt", icon: "chart.line.downtrend.xyaxis",
+            category: .certification, aiSafeScore: 68,
+            overview: "Focused on process improvement and efficiency. Huge in manufacturing and operations. Six Sigma professionals use data-driven methods to reduce waste, defects, and improve quality.",
+            whyItWorksNow: "Companies are laser-focused on efficiency and cost reduction. Six Sigma skills command premium salaries and consulting rates across industries.",
+            typicalSalaryRange: "$60K – $120K+",
+            testRequirements: ["Green Belt exam (completion of a project)", "Black Belt exam (advanced project leadership)"],
+            deliveryType: "In-person, but online programs are available",
+            timeToComplete: "2–6 months",
+            costRange: "$500 – $5K",
+            fundingOptions: ["Employer-sponsored training", "ASQ membership discounts", "Online platforms (Coursera, edX)"],
+            basicSteps: [
+                "Study DMAIC methodology and statistical tools",
+                "Earn Green Belt through coursework and a project",
+                "Lead a real process improvement project",
+                "Document measurable results and ROI",
+                "Pursue Black Belt for leadership and consulting roles",
+                "Apply to operations, quality, or consulting positions"
+            ],
+            linkedJobIds: []
+        ),
+        EducationPath(
+            id: "google_data_analytics", title: "Google Data Analytics Certificate", icon: "chart.bar.fill",
+            category: .certification, aiSafeScore: 55,
+            overview: "Teaches SQL, Tableau, and R for data-driven roles. A beginner-friendly certificate hosted on Coursera, developed by Google. Covers data cleaning, analysis, visualization, and storytelling.",
+            whyItWorksNow: "Data literacy is becoming essential across all industries. This certificate is recognized by 150+ employers in the Google Career Certificate network.",
+            typicalSalaryRange: "$45K – $75K+",
+            testRequirements: ["Complete all 8 courses on Coursera"],
+            deliveryType: "Online",
+            timeToComplete: "3–6 months",
+            costRange: "$0 – $300 (Coursera subscription)",
+            fundingOptions: ["Coursera financial aid (free)", "Google Career Certificate scholarships", "Employer tuition reimbursement"],
+            basicSteps: [
+                "Enroll in Google Data Analytics on Coursera",
+                "Learn spreadsheets, SQL, and data cleaning",
+                "Study Tableau for data visualization",
+                "Learn R programming for statistical analysis",
+                "Complete a capstone case study project",
+                "Apply for junior data analyst positions"
+            ],
+            linkedJobIds: ["bookkeeping"]
+        ),
+        EducationPath(
+            id: "microsoft_office_specialist", title: "Microsoft Office Specialist (MOS)", icon: "doc.richtext.fill",
+            category: .certification, aiSafeScore: 50,
+            overview: "Validates expert-level skills in Excel, Word, and PowerPoint. Recognized by employers worldwide as proof of Microsoft Office proficiency. Great for administrative and business roles.",
+            whyItWorksNow: "Microsoft Office remains the standard in business. MOS certification proves productivity skills that every employer values.",
+            typicalSalaryRange: "$35K – $55K+",
+            testRequirements: ["MOS exam for each application (Excel, Word, PowerPoint)"],
+            deliveryType: "In-person, but online programs are available",
+            timeToComplete: "1–3 months",
+            costRange: "$100 – $500",
+            fundingOptions: ["Free Microsoft Learn training", "Community college courses", "Self-funded (very low cost)"],
+            basicSteps: [
+                "Choose which MOS exams to pursue (Excel is most valuable)",
+                "Study using Microsoft Learn (free online resources)",
+                "Practice with real-world document and spreadsheet projects",
+                "Pass the MOS certification exam(s)",
+                "Add to resume for administrative or business roles",
+                "Pursue Expert-level MOS for advanced recognition"
+            ],
+            linkedJobIds: ["bookkeeping"]
+        ),
     ]
 
     static let healthcare: [EducationPath] = [
@@ -694,6 +946,111 @@ enum EducationPathDatabase {
                 "Specialize in emergency, dental, or exotic animal care"
             ],
             linkedJobIds: ["pet-sitting"]
+        ),
+        EducationPath(
+            id: "cpc_medical_coder", title: "CPC (Certified Professional Coder)", icon: "doc.text.fill",
+            category: .healthcare, aiSafeScore: 55,
+            overview: "High-demand credential for medical billing and coding. CPCs translate healthcare services into standardized codes for insurance claims and billing. Remote-friendly with consistent demand.",
+            whyItWorksNow: "Healthcare spending continues to grow. Every medical visit generates codes, creating constant demand for certified coders.",
+            typicalSalaryRange: "$38K – $60K+",
+            testRequirements: ["CPC certification exam (100 questions, 4 hours)"],
+            deliveryType: "In-person, but online programs are available",
+            timeToComplete: "4–12 months",
+            costRange: "$2K – $6K",
+            fundingOptions: ["AAPC scholarships", "Community college financial aid", "Employer tuition reimbursement"],
+            basicSteps: [
+                "Learn medical terminology and anatomy basics",
+                "Study ICD-10, CPT, and HCPCS coding systems",
+                "Complete an AAPC-approved coding program",
+                "Practice with real coding scenarios and exercises",
+                "Pass the CPC certification exam",
+                "Apply for coding positions at hospitals, clinics, or remotely"
+            ],
+            linkedJobIds: []
+        ),
+        EducationPath(
+            id: "cma_medical_assistant", title: "CMA (Certified Medical Assistant)", icon: "stethoscope",
+            category: .healthcare, aiSafeScore: 82,
+            overview: "Covers both clinical tasks and office administration. CMAs take vitals, assist with exams, administer medications, manage records, and handle patient scheduling. Versatile healthcare role.",
+            whyItWorksNow: "Physician offices are expanding and need versatile staff who can handle both clinical and administrative duties.",
+            typicalSalaryRange: "$32K – $48K+",
+            testRequirements: ["CMA (AAMA) certification exam"],
+            deliveryType: "In-person, but online and hybrid programs are available",
+            timeToComplete: "9–12 months",
+            costRange: "$3K – $15K",
+            fundingOptions: ["Community college financial aid", "Clinic-sponsored training", "WIOA grants"],
+            basicSteps: [
+                "Enroll in a CAAHEP-accredited medical assistant program",
+                "Learn clinical skills (vitals, injections, EKGs, phlebotomy)",
+                "Study office administration and medical records",
+                "Complete a clinical externship",
+                "Pass the CMA (AAMA) certification exam",
+                "Apply to physician offices, clinics, or urgent care centers"
+            ],
+            linkedJobIds: []
+        ),
+        EducationPath(
+            id: "cpht_pharmacy_tech", title: "CPhT (Certified Pharmacy Technician)", icon: "pills.fill",
+            category: .healthcare, aiSafeScore: 72,
+            overview: "For working in retail or hospital pharmacies. CPhTs assist pharmacists with dispensing medications, managing inventory, compounding, and serving patients. Steady work with clear advancement.",
+            whyItWorksNow: "Pharmacies are expanding services including vaccinations and testing. Certified techs earn more and have better job prospects.",
+            typicalSalaryRange: "$32K – $48K+",
+            testRequirements: ["PTCB (Pharmacy Technician Certification Board) exam"],
+            deliveryType: "In-person, but online programs are available",
+            timeToComplete: "3–6 months",
+            costRange: "$1K – $5K",
+            fundingOptions: ["Pharmacy chain training programs (some free)", "Community college programs", "WIOA grants"],
+            basicSteps: [
+                "Complete a pharmacy technician training program",
+                "Learn medication names, dosages, and interactions",
+                "Study pharmacy law and compounding basics",
+                "Pass the PTCB certification exam",
+                "Register with your state board of pharmacy",
+                "Get hired at a retail pharmacy or hospital"
+            ],
+            linkedJobIds: []
+        ),
+        EducationPath(
+            id: "cpt_phlebotomy", title: "Phlebotomy Technician (CPT)", icon: "drop.fill",
+            category: .healthcare, aiSafeScore: 85,
+            overview: "Specialized in drawing blood for tests, transfusions, and donations. Usually requires a brief in-person clinical component. Quick entry into healthcare with room for advancement.",
+            whyItWorksNow: "Lab testing is expanding and every blood draw requires a trained phlebotomist. Quick certification makes this an accessible healthcare entry point.",
+            typicalSalaryRange: "$30K – $45K+",
+            testRequirements: ["National phlebotomy certification (NHA CPT or ASCP)"],
+            deliveryType: "In-person (clinical hours required), but online didactic portions available",
+            timeToComplete: "4–8 weeks",
+            costRange: "$500 – $2K",
+            fundingOptions: ["Community college programs", "Hospital-sponsored training", "Red Cross training programs"],
+            basicSteps: [
+                "Enroll in a phlebotomy training program",
+                "Complete classroom instruction on anatomy and safety",
+                "Practice venipuncture techniques in clinical setting",
+                "Complete required supervised blood draws",
+                "Pass the national certification exam (CPT)",
+                "Apply to hospitals, labs, clinics, and blood banks"
+            ],
+            linkedJobIds: []
+        ),
+        EducationPath(
+            id: "ekg_technician", title: "EKG Technician (CET)", icon: "waveform.path.ecg",
+            category: .healthcare, aiSafeScore: 82,
+            overview: "Specializes in heart monitor testing. EKG technicians perform electrocardiograms, apply Holter monitors, and assist cardiologists with cardiac diagnostics. Quick certification with growing demand.",
+            whyItWorksNow: "Heart disease remains the leading cause of death. Cardiac testing demand grows as the population ages and preventive care expands.",
+            typicalSalaryRange: "$32K – $50K+",
+            testRequirements: ["Certified EKG Technician (CET) exam from NHA"],
+            deliveryType: "In-person, but online and hybrid programs are available",
+            timeToComplete: "4–12 weeks",
+            costRange: "$500 – $3K",
+            fundingOptions: ["Community college programs", "Hospital-sponsored training", "MedCerts or similar online programs"],
+            basicSteps: [
+                "Enroll in an EKG technician training program",
+                "Study cardiac anatomy and electrical conduction",
+                "Learn to place leads and operate EKG equipment",
+                "Practice reading and recognizing EKG rhythms",
+                "Pass the CET certification exam",
+                "Apply to hospitals, cardiology offices, and clinics"
+            ],
+            linkedJobIds: []
         ),
     ]
 

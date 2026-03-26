@@ -134,6 +134,51 @@ nonisolated enum SellingComfort: String, CaseIterable, Identifiable, Codable, Se
     var id: String { rawValue }
 }
 
+nonisolated enum WorkEnvironment: String, CaseIterable, Identifiable, Codable, Sendable {
+    case outdoors = "Outdoors"
+    case officeDesk = "Office / Desk"
+    case warehouse = "Warehouse / Shop"
+    case retail = "Retail / Storefront"
+    case homeBased = "Home-based"
+    case onTheRoad = "On the road / Mobile"
+    case constructionSite = "Construction site"
+    case clientLocation = "Client locations"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .outdoors: return "sun.max.fill"
+        case .officeDesk: return "desktopcomputer"
+        case .warehouse: return "building.fill"
+        case .retail: return "storefront.fill"
+        case .homeBased: return "house.fill"
+        case .onTheRoad: return "car.fill"
+        case .constructionSite: return "hammer.fill"
+        case .clientLocation: return "mappin.and.ellipse"
+        }
+    }
+}
+
+nonisolated enum IncomeTimeline: String, CaseIterable, Identifiable, Codable, Sendable {
+    case asap = "ASAP — I need money now"
+    case oneToThree = "1–3 months"
+    case threeToSix = "3–6 months"
+    case noRush = "6+ months is fine"
+
+    var id: String { rawValue }
+}
+
+nonisolated enum EducationWillingness: String, CaseIterable, Identifiable, Codable, Sendable {
+    case selfTaught = "Self-taught / online only"
+    case shortCert = "Short certification (under 3 months)"
+    case tradeSchool = "Trade school / bootcamp (3–12 months)"
+    case twoYear = "2-year program"
+    case fourYear = "4-year degree"
+
+    var id: String { rawValue }
+}
+
 nonisolated struct UserProfile: Codable, Sendable {
     var firstName: String = ""
     var selectedCategories: [BusinessCategory] = []
@@ -148,6 +193,9 @@ nonisolated struct UserProfile: Codable, Sendable {
     var hasCar: Bool?
     var sellingComfort: SellingComfort?
     var needsFastCash: Bool?
+    var workEnvironments: [WorkEnvironment] = []
+    var incomeTimeline: IncomeTimeline?
+    var educationWillingness: EducationWillingness?
     var avatarId: String = ""
 
     var avatar: AvatarOption {
