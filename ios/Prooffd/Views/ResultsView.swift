@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 struct ResultsView: View {
     @Environment(AppState.self) private var appState
@@ -65,7 +66,10 @@ struct DiscoverTabView: View {
     @State private var showAchievements: Bool = false
     @State private var showProgressShare: Bool = false
     @State private var showJobShare: MatchResult?
+    @State private var trendingPool: [MatchResult] = []
+    @State private var trendingRefreshTick: Int = 0
     @Environment(\.horizontalSizeClass) private var sizeClass
+    private let trendingTimer = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
 
     private var allResults: [MatchResult] {
         appState.matchResults
@@ -81,11 +85,27 @@ struct DiscoverTabView: View {
         }.prefix(8))
     }
 
-
-
     private var trendingResults: [MatchResult] {
-        Array(allResults.sorted { $0.scorePercentage > $1.scorePercentage }
-            .dropFirst(3).prefix(6))
+        trendingPool
+    }
+
+    private func refreshTrending() {
+        let sorted = allResults.sorted { $0.scorePercentage > $1.scorePercentage }
+        let pool = Array(sorted.dropFirst(2))
+        trendingPool = Array(pool.shuffled().prefix(6))
+    }
+
+    static func simulatedExploringCount(for pathId: String) -> Int {
+        let hour = Calendar.current.component(.hour, from: Date())
+        let day = Calendar.current.component(.day, from: Date())
+        var hash: UInt64 = 5381
+        for char in pathId.utf8 {
+            hash = ((hash << 5) &+ hash) &+ UInt64(char)
+        }
+        hash = hash &+ UInt64(hour * 17) &+ UInt64(day * 31)
+        let base = Int(hash % 180) + 40
+        let peakMultiplier: Double = (hour >= 9 && hour <= 21) ? 1.0 : 0.6
+        return Int(Double(base) * peakMultiplier)
     }
 
     private var searchResults: [MatchResult] {
@@ -188,6 +208,17 @@ struct DiscoverTabView: View {
             }
             .sheet(item: $seeAllMode) { mode in
                 SeeAllView(mode: mode, results: resultsForMode(mode))
+            }
+            .onAppear {
+                if trendingPool.isEmpty {
+                    refreshTrending()
+                }
+            }
+            .onReceive(trendingTimer) { _ in
+                withAnimation(.spring(duration: 0.4)) {
+                    refreshTrending()
+                    trendingRefreshTick += 1
+                }
             }
         }
     }
@@ -313,7 +344,8 @@ struct DiscoverTabView: View {
                     icon: "chart.line.uptrend.xyaxis",
                     iconColor: Theme.accent,
                     results: trendingResults,
-                    mode: .trending
+                    mode: .trending,
+                    socialProof: true
                 )
             }
 
@@ -447,7 +479,7 @@ struct DiscoverTabView: View {
         .sensoryFeedback(.selection, trigger: appState.isFavorite(result.businessPath.id))
     }
 
-    private func horizontalSection(title: String, icon: String, iconColor: Color, results: [MatchResult], mode: SeeAllMode) -> some View {
+    private func horizontalSection(title: String, icon: String, iconColor: Color, results: [MatchResult], mode: SeeAllMode, socialProof: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 8) {
                 Image(systemName: icon)
@@ -470,7 +502,7 @@ struct DiscoverTabView: View {
             ScrollView(.horizontal) {
                 HStack(spacing: 12) {
                     ForEach(results) { result in
-                        compactCard(result)
+                        compactCard(result, showSocialProof: socialProof)
                     }
                 }
             }
@@ -479,8 +511,9 @@ struct DiscoverTabView: View {
         }
     }
 
-    private func compactCard(_ result: MatchResult) -> some View {
+    private func compactCard(_ result: MatchResult, showSocialProof: Bool = false) -> some View {
         let catColor = Theme.categoryColor(for: result.businessPath.category)
+        let exploringCount = DiscoverTabView.simulatedExploringCount(for: result.businessPath.id)
         return Button {
             selectedResult = result
             appState.markPathExplored(result.businessPath.id)
@@ -514,22 +547,32 @@ struct DiscoverTabView: View {
 
                 Spacer(minLength: 0)
 
-                VStack(alignment: .leading, spacing: 4) {
+                if showSocialProof {
                     HStack(spacing: 4) {
-                        Image(systemName: "dollarsign.circle.fill")
-                            .font(.system(size: 9))
-                        Text(result.businessPath.startupCostRange)
-                            .font(.caption2)
+                        Image(systemName: "eye.fill")
+                            .font(.system(size: 8))
+                        Text("\(exploringCount) exploring")
+                            .font(.caption2.weight(.medium))
                     }
-                    .foregroundStyle(Theme.textTertiary)
+                    .foregroundStyle(Theme.accent.opacity(0.8))
+                } else {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "dollarsign.circle.fill")
+                                .font(.system(size: 9))
+                            Text(result.businessPath.startupCostRange)
+                                .font(.caption2)
+                        }
+                        .foregroundStyle(Theme.textTertiary)
 
-                    HStack(spacing: 4) {
-                        Image(systemName: "shield.checkered")
-                            .font(.system(size: 9))
-                        Text("AI Safe: \(result.businessPath.aiProofRating)")
-                            .font(.caption2)
+                        HStack(spacing: 4) {
+                            Image(systemName: "shield.checkered")
+                                .font(.system(size: 9))
+                            Text("AI Safe: \(result.businessPath.aiProofRating)")
+                                .font(.caption2)
+                        }
+                        .foregroundStyle(aiScoreColor(result.businessPath.aiProofRating))
                     }
-                    .foregroundStyle(aiScoreColor(result.businessPath.aiProofRating))
                 }
             }
             .frame(width: 160, height: 170, alignment: .leading)
