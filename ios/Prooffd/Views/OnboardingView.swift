@@ -2,6 +2,7 @@ import SwiftUI
 
 struct OnboardingView: View {
     var onComplete: () -> Void
+    var onSkipQuiz: () -> Void
     @State private var currentPage: Int = 0
     @Environment(\.colorScheme) private var colorScheme
 
@@ -60,7 +61,7 @@ struct OnboardingView: View {
 
                 Spacer()
 
-                VStack(spacing: 20) {
+                VStack(spacing: 16) {
                     HStack(spacing: 8) {
                         ForEach(0..<pages.count, id: \.self) { index in
                             Capsule()
@@ -79,7 +80,7 @@ struct OnboardingView: View {
                             onComplete()
                         }
                     } label: {
-                        Text(currentPage == pages.count - 1 ? "Get Started" : "Continue")
+                        Text(currentPage == pages.count - 1 ? "Take the Quiz" : "Continue")
                             .font(.headline)
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
@@ -90,12 +91,12 @@ struct OnboardingView: View {
                     .padding(.horizontal, 24)
                     .sensoryFeedback(.selection, trigger: currentPage)
 
-                    if currentPage < pages.count - 1 {
-                        Button("Skip") {
-                            onComplete()
-                        }
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(Theme.textTertiary)
+                    Button {
+                        onSkipQuiz()
+                    } label: {
+                        Text("Explore App Now")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(Theme.textTertiary)
                     }
                 }
                 .padding(.bottom, 48)

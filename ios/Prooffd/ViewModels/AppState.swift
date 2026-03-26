@@ -13,6 +13,8 @@ class AppState {
     var builds: [BuildProject] = []
     var selectedTab: Int = 0
     var showWelcomeBack: Bool = false
+    var momentum: MomentumSystem = MomentumSystem()
+    var quickActionBuildId: String?
 
     var hasUsedWhatIf: Bool {
         get { UserDefaults.standard.bool(forKey: "hasUsedWhatIf") }
@@ -51,6 +53,10 @@ class AppState {
         get { UserDefaults.standard.bool(forKey: "hasBeenPromptedForRating") }
         set { UserDefaults.standard.set(newValue, forKey: "hasBeenPromptedForRating") }
     }
+    var hasSkippedQuiz: Bool {
+        get { UserDefaults.standard.bool(forKey: "hasSkippedQuiz") }
+        set { UserDefaults.standard.set(newValue, forKey: "hasSkippedQuiz") }
+    }
 
     init() {
         loadProfile()
@@ -58,7 +64,7 @@ class AppState {
         loadExploredPaths()
         loadUnlockedAchievements()
         loadBuilds()
-        if hasCompletedQuiz {
+        if hasCompletedQuiz || hasSkippedQuiz {
             currentScreen = .results
             runMatching()
             checkWelcomeBack()
@@ -71,6 +77,15 @@ class AppState {
         hasCompletedOnboarding = true
         withAnimation(.spring(duration: 0.5)) {
             currentScreen = .quiz
+        }
+    }
+
+    func skipQuiz() {
+        hasSkippedQuiz = true
+        hasCompletedOnboarding = true
+        runMatching()
+        withAnimation(.spring(duration: 0.5)) {
+            currentScreen = .results
         }
     }
 
@@ -97,6 +112,16 @@ class AppState {
         }
     }
 
+    func completeEarlyQuiz(partialProfile: UserProfile) {
+        userProfile = partialProfile
+        saveProfile()
+        hasCompletedQuiz = true
+        runMatching()
+        withAnimation(.spring(duration: 0.5)) {
+            currentScreen = .resultsReveal
+        }
+    }
+
     func completeResultsReveal() {
         hasSeenResultsReveal = true
         withAnimation(.spring(duration: 0.5)) {
@@ -109,6 +134,7 @@ class AppState {
         matchResults = []
         hasCompletedQuiz = false
         hasSeenResultsReveal = false
+        hasSkippedQuiz = false
         saveProfile()
         withAnimation(.spring(duration: 0.5)) {
             currentScreen = .quiz
@@ -160,12 +186,28 @@ class AppState {
               let stepIndex = builds[buildIndex].steps.firstIndex(where: { $0.id == stepId }) else { return }
         builds[buildIndex].steps[stepIndex].isCompleted.toggle()
 
-        if builds[buildIndex].steps[stepIndex].isCompleted && !completedFirstStep {
-            completedFirstStep = true
+        if builds[buildIndex].steps[stepIndex].isCompleted {
+            builds[buildIndex].steps[stepIndex].completedDate = Date()
+            momentum.awardPoints(5, reason: .checklistItem)
+
+            if !completedFirstStep {
+                completedFirstStep = true
+                momentum.awardPoints(10, reason: .todayStep)
+            }
+        } else {
+            builds[buildIndex].steps[stepIndex].completedDate = nil
         }
 
         saveBuilds()
         checkAchievements()
+        checkMomentumBadges()
+    }
+
+    func updateStepNotes(buildId: String, stepId: String, notes: String) {
+        guard let buildIndex = builds.firstIndex(where: { $0.id == buildId }),
+              let stepIndex = builds[buildIndex].steps.firstIndex(where: { $0.id == stepId }) else { return }
+        builds[buildIndex].steps[stepIndex].notes = notes
+        saveBuilds()
     }
 
     func updateBuildField(buildId: String, field: BuildField, value: String) {
@@ -176,6 +218,7 @@ class AppState {
         case .strategy: builds[index].strategyNotes = value
         case .services: builds[index].serviceNotes = value
         }
+        momentum.awardPoints(3, reason: .editedPlan)
         saveBuilds()
     }
 
@@ -190,6 +233,17 @@ class AppState {
             }
         }
         return nil
+    }
+
+    private func checkMomentumBadges() {
+        let totalCompleted = builds.flatMap(\.steps).filter(\.isCompleted).count
+        let maxProgress = builds.map(\.progressPercentage).max() ?? 0
+        momentum.checkBadges(
+            completedSteps: totalCompleted,
+            streakDays: streakTracker.currentStreak,
+            buildProgress: maxProgress,
+            buildsCount: builds.count
+        )
     }
 
     private func saveBuilds() {
@@ -249,6 +303,9 @@ class AppState {
 
     func markResultShared() {
         hasSharedResult = true
+        if momentum.canShare() {
+            momentum.recordShare()
+        }
         checkAchievements()
     }
 
@@ -262,7 +319,9 @@ class AppState {
 
     func recordAppOpen() {
         streakTracker.recordAppOpen()
+        momentum.awardPoints(2, reason: .dailyUse)
         checkAchievements()
+        checkMomentumBadges()
     }
 
     // MARK: - Readiness

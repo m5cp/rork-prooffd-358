@@ -3,6 +3,8 @@ import SwiftUI
 struct QuizView: View {
     @State private var viewModel = QuizViewModel()
     var onComplete: (UserProfile) -> Void
+    var onSkip: () -> Void
+    var onEarlyComplete: (UserProfile) -> Void
     var initialProfile: UserProfile
 
     var body: some View {
@@ -51,23 +53,43 @@ struct QuizView: View {
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.spring(duration: 0.4, bounce: 0.1), value: viewModel.currentStep)
 
-                Button {
-                    if viewModel.currentStep == viewModel.totalSteps - 1 {
-                        onComplete(viewModel.profile)
-                    } else {
-                        viewModel.next()
+                VStack(spacing: 12) {
+                    Button {
+                        if viewModel.currentStep == viewModel.totalSteps - 1 {
+                            onComplete(viewModel.profile)
+                        } else {
+                            viewModel.next()
+                        }
+                    } label: {
+                        Text(viewModel.currentStep == viewModel.totalSteps - 1 ? "See My Matches" : "Continue")
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(viewModel.canAdvance ? Theme.accent : Theme.cardBackgroundLight)
+                            .clipShape(.capsule)
                     }
-                } label: {
-                    Text(viewModel.currentStep == viewModel.totalSteps - 1 ? "See My Matches" : "Continue")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(viewModel.canAdvance ? Theme.accent : Theme.cardBackgroundLight)
-                        .clipShape(.capsule)
+                    .disabled(!viewModel.canAdvance)
+                    .sensoryFeedback(.selection, trigger: viewModel.currentStep)
+
+                    if viewModel.canShowEarlyResults {
+                        Button {
+                            onEarlyComplete(viewModel.profile)
+                        } label: {
+                            Text("See Early Results")
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(Theme.accent)
+                        }
+                    } else {
+                        Button {
+                            onSkip()
+                        } label: {
+                            Text("Skip for Now")
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(Theme.textTertiary)
+                        }
+                    }
                 }
-                .disabled(!viewModel.canAdvance)
-                .sensoryFeedback(.selection, trigger: viewModel.currentStep)
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
             }
@@ -115,18 +137,29 @@ struct QuizView: View {
 
                 Spacer()
 
-                Button {
-                    viewModel.dismissTeaser()
-                } label: {
-                    Text("Keep Going")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Theme.accent)
-                        .clipShape(.capsule)
+                VStack(spacing: 12) {
+                    Button {
+                        viewModel.dismissTeaser()
+                    } label: {
+                        Text("Keep Going")
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(Theme.accent)
+                            .clipShape(.capsule)
+                    }
+                    .sensoryFeedback(.impact(weight: .medium), trigger: viewModel.showTeaser)
+
+                    Button {
+                        viewModel.showTeaser = false
+                        onEarlyComplete(viewModel.profile)
+                    } label: {
+                        Text("See Early Results Now")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.white.opacity(0.6))
+                    }
                 }
-                .sensoryFeedback(.impact(weight: .medium), trigger: viewModel.showTeaser)
                 .padding(.horizontal, 24)
                 .padding(.bottom, 48)
             }

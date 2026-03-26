@@ -17,6 +17,11 @@ struct MyBuildsView: View {
                             .padding(.horizontal, 16)
                     }
 
+                    if !appState.builds.isEmpty {
+                        momentumSection
+                            .padding(.horizontal, 16)
+                    }
+
                     if appState.builds.isEmpty {
                         emptyState
                             .padding(.horizontal, 16)
@@ -123,6 +128,57 @@ struct MyBuildsView: View {
             RoundedRectangle(cornerRadius: 16)
                 .stroke(Theme.accent.opacity(0.2), lineWidth: 1)
         )
+        .cardShadow()
+    }
+
+    private var momentumSection: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "bolt.fill")
+                    .font(.caption)
+                    .foregroundStyle(Color(hex: "FBBF24"))
+                Text("Momentum")
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(Theme.textPrimary)
+                Spacer()
+                Text("\(appState.momentum.totalPoints) pts")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Color(hex: "FBBF24"))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(Color(hex: "FBBF24").opacity(0.12))
+                    .clipShape(.capsule)
+            }
+
+            ScrollView(.horizontal) {
+                HStack(spacing: 10) {
+                    ForEach(MomentumBadge.all) { badge in
+                        let earned = appState.momentum.hasBadge(badge.id)
+                        VStack(spacing: 6) {
+                            ZStack {
+                                Circle()
+                                    .fill(earned ? Color(hex: badge.color).opacity(0.15) : Theme.cardBackgroundLight)
+                                    .frame(width: 36, height: 36)
+                                Image(systemName: badge.icon)
+                                    .font(.caption)
+                                    .foregroundStyle(earned ? Color(hex: badge.color) : Theme.textTertiary.opacity(0.4))
+                            }
+                            Text(badge.title)
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundStyle(earned ? Theme.textSecondary : Theme.textTertiary.opacity(0.5))
+                                .lineLimit(1)
+                        }
+                        .frame(width: 64)
+                        .opacity(earned ? 1 : 0.5)
+                    }
+                }
+            }
+            .contentMargins(.horizontal, 0)
+            .scrollIndicators(.hidden)
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
         .cardShadow()
     }
 
@@ -276,7 +332,7 @@ struct MyBuildsView: View {
                         Text("Unlock Pro Features")
                             .font(.subheadline.weight(.bold))
                             .foregroundStyle(Theme.textPrimary)
-                        Text("Get business plans, email templates, sales scripts, PDF exports & more")
+                        Text("Business plans, email templates, sales scripts, PDF exports & more")
                             .font(.caption)
                             .foregroundStyle(Theme.textSecondary)
                             .lineLimit(2)
@@ -326,4 +382,3 @@ struct MyBuildsView: View {
         }
     }
 }
-

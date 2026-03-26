@@ -531,8 +531,9 @@ struct ResultCard: View {
                     }
                 }
 
-                HStack(spacing: 8) {
+                HStack(spacing: 6) {
                     matchBadge
+                    aiSafeBadge
 
                     infoTag(icon: "dollarsign.circle.fill", text: result.businessPath.startupCostRange)
                     infoTag(icon: "clock.fill", text: result.businessPath.timeToFirstDollar)
@@ -574,6 +575,22 @@ struct ResultCard: View {
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
         .background(Theme.cardBackgroundLight.opacity(0.6))
+        .clipShape(.capsule)
+    }
+
+    private var aiSafeBadge: some View {
+        let rating = result.businessPath.aiProofRating
+        let color: Color = rating >= 80 ? Theme.accent : rating >= 50 ? Color(hex: "FBBF24") : .orange
+        return HStack(spacing: 2) {
+            Image(systemName: "shield.checkered")
+                .font(.system(size: 8))
+            Text("\(rating)")
+                .font(.caption2.weight(.bold))
+        }
+        .foregroundStyle(color)
+        .padding(.horizontal, 7)
+        .padding(.vertical, 4)
+        .background(color.opacity(0.12))
         .clipShape(.capsule)
     }
 

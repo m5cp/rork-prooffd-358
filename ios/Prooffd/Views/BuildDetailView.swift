@@ -7,8 +7,10 @@ struct BuildDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showPaywall: Bool = false
     @State private var showDeleteConfirm: Bool = false
-    @State private var editingName: Bool = false
     @State private var celebrationStep: String?
+    @State private var expandedUnlockTier: Int?
+    @State private var shareImage: UIImage?
+    @State private var showShareSheet: Bool = false
 
     private var build: BuildProject? {
         appState.builds.first { $0.id == buildId }
@@ -23,11 +25,13 @@ struct BuildDetailView: View {
                         todayStepSection(build)
                         stepsSection(build)
                         businessPlanSection(build)
+                        unlockTiersSection(build)
                         proFeaturesSection(build)
                         suggestionsSection(build)
                         if store.isPremium {
                             exportButton(build)
                         }
+                        shareProgressButton(build)
                         dangerZone
                         Color.clear.frame(height: 40)
                     }
@@ -107,9 +111,18 @@ struct BuildDetailView: View {
                     .background(Theme.accent.opacity(0.12))
                     .clipShape(.capsule)
 
-                Text("Started \(build.startDate.formatted(.dateTime.month().day()))")
-                    .font(.caption2)
-                    .foregroundStyle(Theme.textTertiary)
+                HStack(spacing: 16) {
+                    Text("Started \(build.startDate.formatted(.dateTime.month().day()))")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.textTertiary)
+                    HStack(spacing: 4) {
+                        Image(systemName: "bolt.fill")
+                            .font(.system(size: 9))
+                        Text("\(appState.momentum.totalPoints) pts")
+                            .font(.caption2.weight(.semibold))
+                    }
+                    .foregroundStyle(Color(hex: "FBBF24"))
+                }
             }
         }
     }
@@ -139,7 +152,7 @@ struct BuildDetailView: View {
                     } label: {
                         HStack(spacing: 8) {
                             Image(systemName: "checkmark.circle.fill")
-                            Text("Mark Complete")
+                            Text("Mark Complete  +10 pts")
                         }
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.white)
@@ -179,27 +192,44 @@ struct BuildDetailView: View {
             }
 
             ForEach(build.steps) { step in
-                Button {
-                    withAnimation(.spring(duration: 0.3)) {
-                        appState.toggleBuildStep(buildId: build.id, stepId: step.id)
-                    }
-                } label: {
-                    HStack(alignment: .top, spacing: 12) {
-                        Image(systemName: step.isCompleted ? "checkmark.circle.fill" : "circle")
-                            .font(.body)
-                            .foregroundStyle(step.isCompleted ? Theme.accent : Theme.textTertiary)
+                VStack(alignment: .leading, spacing: 6) {
+                    Button {
+                        withAnimation(.spring(duration: 0.3)) {
+                            appState.toggleBuildStep(buildId: build.id, stepId: step.id)
+                        }
+                    } label: {
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: step.isCompleted ? "checkmark.circle.fill" : "circle")
+                                .font(.body)
+                                .foregroundStyle(step.isCompleted ? Theme.accent : Theme.textTertiary)
 
-                        Text(step.title)
-                            .font(.subheadline)
-                            .foregroundStyle(step.isCompleted ? Theme.textTertiary : Theme.textSecondary)
-                            .strikethrough(step.isCompleted, color: Theme.textTertiary)
-                            .multilineTextAlignment(.leading)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(step.title)
+                                    .font(.subheadline)
+                                    .foregroundStyle(step.isCompleted ? Theme.textTertiary : Theme.textSecondary)
+                                    .strikethrough(step.isCompleted, color: Theme.textTertiary)
+                                    .multilineTextAlignment(.leading)
 
-                        Spacer()
+                                if let date = step.completedDate {
+                                    Text("Completed \(date.formatted(.dateTime.month(.abbreviated).day()))")
+                                        .font(.caption2)
+                                        .foregroundStyle(Theme.accent.opacity(0.7))
+                                }
+
+                                if let notes = step.notes, !notes.isEmpty {
+                                    Text(notes)
+                                        .font(.caption)
+                                        .foregroundStyle(Theme.textTertiary)
+                                        .lineLimit(2)
+                                }
+                            }
+
+                            Spacer()
+                        }
+                        .padding(.vertical, 6)
                     }
-                    .padding(.vertical, 6)
+                    .sensoryFeedback(.selection, trigger: step.isCompleted)
                 }
-                .sensoryFeedback(.selection, trigger: step.isCompleted)
             }
         }
         .padding(16)
@@ -255,32 +285,132 @@ struct BuildDetailView: View {
         }
     }
 
-    private func suggestionsSection(_ build: BuildProject) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+    private func unlockTiersSection(_ build: BuildProject) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 8) {
-                Image(systemName: "lightbulb.fill")
+                Image(systemName: "gift.fill")
                     .font(.caption)
-                    .foregroundStyle(.yellow)
-                Text("Optimization Tips")
+                    .foregroundStyle(Color(hex: "FBBF24"))
+                Text("Unlocked Content")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Theme.textPrimary)
             }
 
-            ForEach(build.optimizationSuggestions, id: \.self) { suggestion in
-                HStack(alignment: .top, spacing: 10) {
-                    Image(systemName: "arrow.right.circle.fill")
-                        .font(.caption2)
-                        .foregroundStyle(Theme.accent)
-                        .padding(.top, 2)
-                    Text(suggestion)
-                        .font(.caption)
-                        .foregroundStyle(Theme.textSecondary)
-                }
+            let tier1 = UnlockContentDatabase.tier1Content(for: build.pathName)
+            let tier2 = UnlockContentDatabase.tier2Content(for: build.pathName)
+
+            if build.unlockTier >= 1 {
+                unlockTierCard(tier1, isUnlocked: true)
             }
+
+            if build.unlockTier >= 2 {
+                unlockTierCard(tier2, isUnlocked: true)
+            } else {
+                lockedTierCard(title: "Growth Kit", requirement: "Reach 40% progress to unlock", progress: Double(build.progressPercentage) / 40.0)
+            }
+
+            lockedTierCard(title: "Pro Growth System", requirement: store.isPremium ? "Reach 70% to unlock" : "Pro feature — upgrade to access", progress: store.isPremium ? Double(build.progressPercentage) / 70.0 : 0, isPro: !store.isPremium)
         }
         .padding(16)
         .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 14))
+    }
+
+    private func unlockTierCard(_ content: UnlockContent, isUnlocked: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Button {
+                withAnimation(.spring(duration: 0.3)) {
+                    expandedUnlockTier = expandedUnlockTier == content.tier ? nil : content.tier
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.caption)
+                        .foregroundStyle(Theme.accent)
+                    Text(content.title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Theme.textPrimary)
+                    Spacer()
+                    Image(systemName: expandedUnlockTier == content.tier ? "chevron.up" : "chevron.down")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.textTertiary)
+                }
+            }
+
+            if expandedUnlockTier == content.tier {
+                ForEach(content.items) { item in
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(spacing: 8) {
+                            Image(systemName: item.icon)
+                                .font(.caption)
+                                .foregroundStyle(Theme.accent)
+                            Text(item.title)
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Theme.textPrimary)
+                        }
+                        Text(item.content)
+                            .font(.caption)
+                            .foregroundStyle(Theme.textSecondary)
+                            .lineSpacing(2)
+                    }
+                    .padding(10)
+                    .background(Theme.cardBackgroundLight)
+                    .clipShape(.rect(cornerRadius: 8))
+                }
+                .textSelection(.enabled)
+            }
+        }
+        .padding(12)
+        .background(Theme.accent.opacity(0.04))
+        .clipShape(.rect(cornerRadius: 10))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Theme.accent.opacity(0.15), lineWidth: 0.5)
+        )
+    }
+
+    private func lockedTierCard(title: String, requirement: String, progress: Double, isPro: Bool = false) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                Image(systemName: isPro ? "crown.fill" : "lock.fill")
+                    .font(.caption)
+                    .foregroundStyle(isPro ? Color(hex: "FBBF24") : Theme.textTertiary)
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.textTertiary)
+                Spacer()
+            }
+            Text(requirement)
+                .font(.caption)
+                .foregroundStyle(Theme.textTertiary)
+
+            if !isPro && progress > 0 {
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule()
+                            .fill(Theme.cardBackgroundLight)
+                            .frame(height: 3)
+                        Capsule()
+                            .fill(Theme.accent.opacity(0.5))
+                            .frame(width: geo.size.width * min(progress, 1.0), height: 3)
+                    }
+                }
+                .frame(height: 3)
+            }
+
+            if isPro {
+                Button {
+                    showPaywall = true
+                } label: {
+                    Text("Upgrade to Pro")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Theme.accent)
+                }
+            }
+        }
+        .padding(12)
+        .background(Theme.cardBackgroundLight.opacity(0.5))
+        .clipShape(.rect(cornerRadius: 10))
     }
 
     private func proFeaturesSection(_ build: BuildProject) -> some View {
@@ -314,77 +444,23 @@ struct BuildDetailView: View {
             .padding(.bottom, 4)
 
             VStack(spacing: 0) {
-                proFeatureRow(
-                    title: "Draft Email",
-                    icon: "envelope.fill",
-                    description: "Pre-written outreach email",
-                    isLocked: !store.isPremium,
-                    content: path?.draftEmail
-                )
+                proFeatureRow(title: "Draft Email", icon: "envelope.fill", description: "Pre-written outreach email", isLocked: !store.isPremium, content: path?.draftEmail)
                 proFeatureDivider
-                proFeatureRow(
-                    title: "Draft Text Message",
-                    icon: "message.fill",
-                    description: "Ready-to-send text template",
-                    isLocked: !store.isPremium,
-                    content: path?.draftTextMessage
-                )
+                proFeatureRow(title: "Draft Text Message", icon: "message.fill", description: "Ready-to-send text template", isLocked: !store.isPremium, content: path?.draftTextMessage)
                 proFeatureDivider
-                proFeatureRow(
-                    title: "Sales Intro Script",
-                    icon: "person.wave.2.fill",
-                    description: "Word-for-word intro script",
-                    isLocked: !store.isPremium,
-                    content: path?.salesIntroScript
-                )
+                proFeatureRow(title: "Sales Intro Script", icon: "person.wave.2.fill", description: "Word-for-word intro script", isLocked: !store.isPremium, content: path?.salesIntroScript)
                 proFeatureDivider
-                proFeatureRow(
-                    title: "Follow-Up Script",
-                    icon: "arrow.uturn.forward",
-                    description: "Follow-up conversation template",
-                    isLocked: !store.isPremium,
-                    content: path?.followUpScript
-                )
+                proFeatureRow(title: "Follow-Up Script", icon: "arrow.uturn.forward", description: "Follow-up conversation template", isLocked: !store.isPremium, content: path?.followUpScript)
                 proFeatureDivider
-                proFeatureRow(
-                    title: "Social Media Post",
-                    icon: "square.and.arrow.up.fill",
-                    description: "Ready-to-post content",
-                    isLocked: !store.isPremium,
-                    content: path?.socialMediaPost
-                )
+                proFeatureRow(title: "Social Media Post", icon: "square.and.arrow.up.fill", description: "Ready-to-post content", isLocked: !store.isPremium, content: path?.socialMediaPost)
                 proFeatureDivider
-                proFeatureRow(
-                    title: "Flyer Copy",
-                    icon: "doc.richtext.fill",
-                    description: "Print-ready flyer text",
-                    isLocked: !store.isPremium,
-                    content: path?.flyerCopy
-                )
+                proFeatureRow(title: "Flyer Copy", icon: "doc.richtext.fill", description: "Print-ready flyer text", isLocked: !store.isPremium, content: path?.flyerCopy)
                 proFeatureDivider
-                proFeatureRow(
-                    title: "Offer & Pricing Sheet",
-                    icon: "dollarsign.square.fill",
-                    description: "Suggested pricing structure",
-                    isLocked: !store.isPremium,
-                    content: path?.offerPricingSheet
-                )
+                proFeatureRow(title: "Offer & Pricing Sheet", icon: "dollarsign.square.fill", description: "Suggested pricing structure", isLocked: !store.isPremium, content: path?.offerPricingSheet)
                 proFeatureDivider
-                proFeatureRow(
-                    title: "Full Business Plan",
-                    icon: "doc.text.fill",
-                    description: "Comprehensive business plan",
-                    isLocked: !store.isPremium,
-                    content: path?.expandedBusinessPlan
-                )
+                proFeatureRow(title: "Full Business Plan", icon: "doc.text.fill", description: "Comprehensive business plan", isLocked: !store.isPremium, content: path?.expandedBusinessPlan)
                 proFeatureDivider
-                proFeatureRow(
-                    title: "PDF Export",
-                    icon: "arrow.down.doc.fill",
-                    description: "Download your build as PDF",
-                    isLocked: !store.isPremium,
-                    content: nil
-                )
+                proFeatureRow(title: "PDF Export", icon: "arrow.down.doc.fill", description: "Download your build as PDF", isLocked: !store.isPremium, content: nil)
             }
 
             if !store.isPremium {
@@ -455,6 +531,34 @@ struct BuildDetailView: View {
             .padding(.leading, 52)
     }
 
+    private func suggestionsSection(_ build: BuildProject) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "lightbulb.fill")
+                    .font(.caption)
+                    .foregroundStyle(.yellow)
+                Text("Optimization Tips")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+            }
+
+            ForEach(build.optimizationSuggestions, id: \.self) { suggestion in
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: "arrow.right.circle.fill")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.accent)
+                        .padding(.top, 2)
+                    Text(suggestion)
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+            }
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+    }
+
     private func exportButton(_ build: BuildProject) -> some View {
         Button {
             exportBuildPDF(build)
@@ -469,6 +573,23 @@ struct BuildDetailView: View {
         }
     }
 
+    private func shareProgressButton(_ build: BuildProject) -> some View {
+        Button {
+            shareBuildProgress(build)
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "square.and.arrow.up")
+                Text("Share Progress")
+            }
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(Theme.accentBlue)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(Theme.accentBlue.opacity(0.12))
+            .clipShape(.capsule)
+        }
+    }
+
     private var dangerZone: some View {
         Button {
             showDeleteConfirm = true
@@ -478,6 +599,21 @@ struct BuildDetailView: View {
                 .foregroundStyle(.red.opacity(0.7))
         }
         .padding(.top, 8)
+    }
+
+    private func shareBuildProgress(_ build: BuildProject) {
+        let text = "I'm building \(build.businessName) step-by-step with Prooffd — \(build.progressPercentage)% complete!"
+        let activityVC = UIActivityViewController(activityItems: [text], applicationActivities: nil)
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let root = windowScene.windows.first?.rootViewController {
+            var topController = root
+            while let presented = topController.presentedViewController { topController = presented }
+            activityVC.popoverPresentationController?.sourceView = topController.view
+            activityVC.popoverPresentationController?.sourceRect = CGRect(x: topController.view.bounds.midX, y: topController.view.bounds.midY, width: 0, height: 0)
+            activityVC.popoverPresentationController?.permittedArrowDirections = []
+            topController.present(activityVC, animated: true)
+        }
+        appState.markResultShared()
     }
 
     private func exportBuildPDF(_ build: BuildProject) {
@@ -518,8 +654,21 @@ struct BuildPDFContent: View {
             Text("Steps")
                 .font(.headline)
             ForEach(Array(build.steps.enumerated()), id: \.offset) { index, step in
-                Text("\(step.isCompleted ? "✓" : "○") \(index + 1). \(step.title)")
-                    .font(.body)
+                HStack(alignment: .top) {
+                    Text("\(step.isCompleted ? "✓" : "○") \(index + 1). \(step.title)")
+                        .font(.body)
+                    Spacer()
+                    if let date = step.completedDate {
+                        Text(date.formatted(.dateTime.month(.abbreviated).day()))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                if let notes = step.notes, !notes.isEmpty {
+                    Text("  Notes: \(notes)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
             if !build.pricingNotes.isEmpty {
                 Divider()

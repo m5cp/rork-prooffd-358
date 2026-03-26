@@ -23,6 +23,57 @@ struct ProoffdApp: App {
                 .environment(storeViewModel)
                 .environment(themeManager)
                 .preferredColorScheme(themeManager.colorScheme)
+                .onOpenURL { url in
+                    handleQuickAction(url: url)
+                }
+        }
+    }
+
+    private func handleQuickAction(url: URL) {
+        guard url.scheme == "prooffd" else { return }
+        switch url.host {
+        case "builds":
+            appState.selectedTab = 1
+        case "quiz":
+            appState.retakeQuiz()
+        case "today":
+            appState.selectedTab = 1
+        default:
+            break
+        }
+    }
+}
+
+struct RootView: View {
+    @Environment(AppState.self) private var appState
+
+    var body: some View {
+        Group {
+            switch appState.currentScreen {
+            case .onboarding:
+                OnboardingView(
+                    onComplete: { appState.completeOnboarding() },
+                    onSkipQuiz: { appState.skipQuiz() }
+                )
+            case .quiz:
+                QuizView(
+                    onComplete: { profile in
+                        appState.userProfile = profile
+                        appState.completeQuiz()
+                    },
+                    onSkip: { appState.skipQuiz() },
+                    onEarlyComplete: { profile in
+                        appState.completeEarlyQuiz(partialProfile: profile)
+                    },
+                    initialProfile: appState.userProfile
+                )
+            case .analyzing:
+                AnalyzingView()
+            case .resultsReveal:
+                ResultsRevealView()
+            case .results:
+                ResultsView()
+            }
         }
     }
 }

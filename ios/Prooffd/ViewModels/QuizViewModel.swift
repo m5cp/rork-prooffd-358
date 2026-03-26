@@ -7,6 +7,7 @@ class QuizViewModel {
     var direction: Edge = .trailing
     var showTeaser: Bool = false
     var hasShownTeaser: Bool = false
+    var showEarlyResults: Bool = false
 
     let totalSteps: Int = 13
 
@@ -17,16 +18,16 @@ class QuizViewModel {
     var progressText: String {
         let pct = Int(progress * 100)
         if pct < 50 { return "\(pct)% complete" }
-        if pct < 80 { return "\(pct)% complete — almost there" }
-        return "\(pct)% complete — final stretch"
+        if pct < 80 { return "\(pct)% — almost there" }
+        return "\(pct)% — final stretch"
     }
 
     var motivationMessage: String? {
         switch currentStep {
-        case 3: return "You're on the right track — this is getting accurate"
-        case 6: return "Great answers so far — your matches are shaping up"
-        case 9: return "Users similar to you often find strong matches"
-        case 11: return "Almost done — just a couple more questions"
+        case 3: return "You're on the right track"
+        case 6: return "Great answers — matches shaping up"
+        case 9: return "Users like you find strong matches"
+        case 11: return "Almost done — just a couple more"
         default: return nil
         }
     }
@@ -50,9 +51,13 @@ class QuizViewModel {
         }
     }
 
+    var canShowEarlyResults: Bool {
+        currentStep >= 3 && profile.selectedCategories.count == 2 && profile.budget != nil
+    }
+
     func next() {
         guard canAdvance, currentStep < totalSteps - 1 else { return }
-        if currentStep == 5 && !hasShownTeaser {
+        if currentStep == 3 && !hasShownTeaser {
             hasShownTeaser = true
             showTeaser = true
             return
