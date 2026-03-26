@@ -48,32 +48,44 @@ struct RootView: View {
     @Environment(AppState.self) private var appState
 
     var body: some View {
-        Group {
-            switch appState.currentScreen {
-            case .onboarding:
-                OnboardingView(
-                    onComplete: { appState.completeOnboarding() },
-                    onSkipQuiz: { appState.skipQuiz() }
-                )
-            case .quiz:
-                QuizView(
-                    onComplete: { profile in
-                        appState.userProfile = profile
-                        appState.completeQuiz()
-                    },
-                    onSkip: { appState.skipQuiz() },
-                    onEarlyComplete: { profile in
-                        appState.completeEarlyQuiz(partialProfile: profile)
-                    },
-                    initialProfile: appState.userProfile
-                )
-            case .analyzing:
-                AnalyzingView()
-            case .resultsReveal:
-                ResultsRevealView()
-            case .results:
-                ResultsView()
+        ZStack {
+            Group {
+                switch appState.currentScreen {
+                case .onboarding:
+                    OnboardingView(
+                        onComplete: { appState.completeOnboarding() },
+                        onSkipQuiz: { appState.skipQuiz() }
+                    )
+                case .quiz:
+                    QuizView(
+                        onComplete: { profile in
+                            appState.userProfile = profile
+                            appState.completeQuiz()
+                        },
+                        onSkip: { appState.skipQuiz() },
+                        onEarlyComplete: { profile in
+                            appState.completeEarlyQuiz(partialProfile: profile)
+                        },
+                        initialProfile: appState.userProfile
+                    )
+                case .analyzing:
+                    AnalyzingView()
+                case .resultsReveal:
+                    ResultsRevealView()
+                case .results:
+                    ResultsView()
+                }
+            }
+
+            if let badge = appState.celebratingBadge {
+                BadgeCelebrationOverlay(badge: badge) {
+                    appState.celebratingBadge = nil
+                }
+                .transition(.opacity)
+                .zIndex(100)
             }
         }
+        .animation(.spring(duration: 0.4), value: appState.celebratingBadge != nil)
+        .sensoryFeedback(.success, trigger: appState.celebratingBadge != nil)
     }
 }

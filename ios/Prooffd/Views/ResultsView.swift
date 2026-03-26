@@ -62,6 +62,9 @@ struct DiscoverTabView: View {
     @State private var searchText: String = ""
     @State private var randomPicks: [MatchResult] = []
     @State private var showRandomPicks: Bool = false
+    @State private var showAchievements: Bool = false
+    @State private var showProgressShare: Bool = false
+    @State private var showJobShare: MatchResult?
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     private var allResults: [MatchResult] {
@@ -153,6 +156,40 @@ struct DiscoverTabView: View {
                     randomPicks = Array(all.shuffled().prefix(2))
                 }
             }
+            .sheet(isPresented: $showAchievements) {
+                AchievementsView()
+            }
+            .sheet(isPresented: $showProgressShare) {
+                if let build = appState.activeBuild {
+                    ShareableCardSheet(
+                        cardContent: AnyView(
+                            ProgressShareCard(
+                                buildName: build.businessName,
+                                progressPercent: build.progressPercentage,
+                                streakDays: appState.streakTracker.currentStreak,
+                                nextStep: build.nextStep?.title ?? "",
+                                totalPoints: appState.momentum.totalPoints
+                            )
+                        ),
+                        shareText: "I'm building \(build.businessName) step-by-step with Prooffd — \(build.progressPercentage)% complete!"
+                    )
+                }
+            }
+            .sheet(item: $showJobShare) { result in
+                ShareableCardSheet(
+                    cardContent: AnyView(
+                        JobSelectionShareCard(
+                            jobTitle: result.businessPath.name,
+                            matchPercent: result.scorePercentage,
+                            aiSafeScore: result.businessPath.aiProofRating,
+                            startupCost: result.businessPath.startupCostRange,
+                            timeToFirst: result.businessPath.timeToFirstDollar,
+                            icon: result.businessPath.icon
+                        )
+                    ),
+                    shareText: "I found my business match on Prooffd — \(result.businessPath.name) with a \(result.scorePercentage)% match!"
+                )
+            }
             .sheet(item: $seeAllMode) { mode in
                 SeeAllView(mode: mode, results: resultsForMode(mode))
             }
@@ -238,6 +275,9 @@ struct DiscoverTabView: View {
     @ViewBuilder
     private var mainContent: some View {
         VStack(spacing: 24) {
+            EngagementBannerView()
+                .padding(.horizontal, 16)
+
             headerBadges
                 .padding(.horizontal, 16)
 
@@ -323,6 +363,22 @@ struct DiscoverTabView: View {
                 .foregroundStyle(Theme.textTertiary)
 
             Spacer()
+
+            Button {
+                showAchievements = true
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "trophy.fill")
+                        .font(.caption2)
+                    Text("\(appState.momentum.earnedBadges.count)")
+                        .font(.caption.weight(.bold))
+                }
+                .foregroundStyle(Color(hex: "818CF8"))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(Color(hex: "818CF8").opacity(0.12))
+                .clipShape(.capsule)
+            }
 
             if !appState.builds.isEmpty {
                 HStack(spacing: 4) {

@@ -7,6 +7,8 @@ struct ProfileTabView: View {
     @State private var showPaywall: Bool = false
     @State private var showRetakeConfirm: Bool = false
     @State private var showProfileDetails: Bool = false
+    @State private var showAchievements: Bool = false
+    @State private var showMyPathShare: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -43,10 +45,55 @@ struct ProfileTabView: View {
 
                 Section("Stats") {
                     statsRow(icon: "flame.fill", color: .orange, label: "Streak", value: "\(appState.streakTracker.currentStreak) days")
+                    statsRow(icon: "bolt.fill", color: Color(hex: "FBBF24"), label: "Points", value: "\(appState.momentum.totalPoints)")
                     statsRow(icon: "gauge.open.with.lines.needle.33percent.and.arrowtriangle", color: Theme.accent, label: "Readiness", value: "\(appState.readinessScore)/100")
-                    statsRow(icon: "medal.fill", color: Color(hex: "FBBF24"), label: "Achievements", value: "\(appState.unlockedCount)/\(AchievementDatabase.all.count)")
                     statsRow(icon: "hammer.fill", color: Theme.accentBlue, label: "Active Builds", value: "\(appState.builds.count)")
                     statsRow(icon: "eye.fill", color: Color(hex: "818CF8"), label: "Explored", value: "\(appState.exploredPathIDs.count) paths")
+
+                    Button {
+                        showAchievements = true
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "trophy.fill")
+                                .foregroundStyle(Color(hex: "818CF8"))
+                                .frame(width: 22)
+                            Text("Achievements & Badges")
+                                .foregroundStyle(Theme.textPrimary)
+                            Spacer()
+                            Text("\(appState.momentum.earnedBadges.count + appState.unlockedCount)/\(MomentumBadge.all.count + AchievementDatabase.all.count)")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Theme.textSecondary)
+                            Image(systemName: "chevron.right")
+                                .font(.caption2)
+                                .foregroundStyle(Theme.textTertiary)
+                        }
+                    }
+                    .listRowBackground(Theme.cardBackground)
+                }
+
+                Section("Share") {
+                    Button {
+                        showMyPathShare = true
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "square.and.arrow.up.fill")
+                                .foregroundStyle(Theme.accentBlue)
+                                .frame(width: 22)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Share My Path")
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundStyle(Theme.textPrimary)
+                                Text("Show friends your progress")
+                                    .font(.caption)
+                                    .foregroundStyle(Theme.textTertiary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption2)
+                                .foregroundStyle(Theme.textTertiary)
+                        }
+                    }
+                    .listRowBackground(Theme.cardBackground)
                 }
 
                 if !store.isPremium {
@@ -258,6 +305,25 @@ struct ProfileTabView: View {
             .toolbarBackground(Theme.background, for: .navigationBar)
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
+            }
+            .sheet(isPresented: $showAchievements) {
+                AchievementsView()
+            }
+            .sheet(isPresented: $showMyPathShare) {
+                let build = appState.activeBuild
+                ShareableCardSheet(
+                    cardContent: AnyView(
+                        MyPathShareCard(
+                            userName: appState.userProfile.firstName,
+                            selectedJob: build?.pathName ?? "Exploring",
+                            progressPercent: build?.progressPercentage ?? 0,
+                            streakDays: appState.streakTracker.currentStreak,
+                            aiSafeScore: build?.aiSafeScore ?? 0,
+                            totalPoints: appState.momentum.totalPoints
+                        )
+                    ),
+                    shareText: "I'm building a business step-by-step with Prooffd!"
+                )
             }
             .alert("Retake Quiz?", isPresented: $showRetakeConfirm) {
                 Button("Cancel", role: .cancel) {}

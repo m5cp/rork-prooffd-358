@@ -7,11 +7,16 @@ struct MyBuildsView: View {
     @State private var selectedBuild: BuildProject?
     @State private var showPaywall: Bool = false
     @State private var celebrationBuildId: String?
+    @State private var showAchievements: Bool = false
+    @State private var showProgressShare: Bool = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
+                    streakBanner
+                        .padding(.horizontal, 16)
+
                     if let today = appState.todayStep {
                         todayStepSection(today)
                             .padding(.horizontal, 16)
@@ -27,6 +32,11 @@ struct MyBuildsView: View {
                             .padding(.horizontal, 16)
                     } else {
                         buildsListSection
+                            .padding(.horizontal, 16)
+                    }
+
+                    if !appState.builds.isEmpty {
+                        shareProgressSection
                             .padding(.horizontal, 16)
                     }
 
@@ -50,7 +60,67 @@ struct MyBuildsView: View {
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
             }
+            .sheet(isPresented: $showAchievements) {
+                AchievementsView()
+            }
+            .sheet(isPresented: $showProgressShare) {
+                if let build = appState.activeBuild {
+                    ShareableCardSheet(
+                        cardContent: AnyView(
+                            ProgressShareCard(
+                                buildName: build.businessName,
+                                progressPercent: build.progressPercentage,
+                                streakDays: appState.streakTracker.currentStreak,
+                                nextStep: build.nextStep?.title ?? "",
+                                totalPoints: appState.momentum.totalPoints
+                            )
+                        ),
+                        shareText: "I'm building \(build.businessName) step-by-step with Prooffd \u{2014} \(build.progressPercentage)% complete!"
+                    )
+                }
+            }
         }
+    }
+
+    private var streakBanner: some View {
+        HStack(spacing: 14) {
+            HStack(spacing: 8) {
+                Image(systemName: "flame.fill")
+                    .font(.title3)
+                    .foregroundStyle(appState.streakTracker.currentStreak > 0 ? .orange : Theme.textTertiary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(appState.streakTracker.currentStreak > 0
+                        ? "\(appState.streakTracker.currentStreak) Day Streak"
+                        : "Start Your Streak")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(Theme.textPrimary)
+                    Text(appState.streakTracker.streakMessage)
+                        .font(.caption2)
+                        .foregroundStyle(Theme.textTertiary)
+                        .lineLimit(1)
+                }
+            }
+
+            Spacer()
+
+            Button {
+                showAchievements = true
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "trophy.fill")
+                        .font(.caption2)
+                    Text("\(appState.momentum.earnedBadges.count)")
+                        .font(.caption.weight(.bold))
+                }
+                .foregroundStyle(Color(hex: "818CF8"))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(Color(hex: "818CF8").opacity(0.12))
+                .clipShape(.capsule)
+            }
+        }
+        .padding(14)
+        .tintedCard(.orange)
     }
 
     private func todayStepSection(_ today: (build: BuildProject, step: BuildStep)) -> some View {
@@ -104,7 +174,7 @@ struct MyBuildsView: View {
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.circle.fill")
-                    Text("Mark Complete")
+                    Text("Mark Complete  +10 pts")
                 }
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.white)
@@ -365,6 +435,43 @@ struct MyBuildsView: View {
                 RoundedRectangle(cornerRadius: 14)
                     .stroke(Theme.accent.opacity(0.2), lineWidth: 1)
             )
+            .cardShadow()
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var shareProgressSection: some View {
+        Button {
+            showProgressShare = true
+        } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Theme.accentBlue.opacity(0.12))
+                        .frame(width: 44, height: 44)
+                    Image(systemName: "square.and.arrow.up.fill")
+                        .font(.body)
+                        .foregroundStyle(Theme.accentBlue)
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Share Your Progress")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Theme.textPrimary)
+                    Text("Show friends what you're building")
+                        .font(.caption)
+                        .foregroundStyle(Theme.textTertiary)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Theme.textTertiary)
+            }
+            .padding(14)
+            .background(Theme.cardBackground)
+            .clipShape(.rect(cornerRadius: 14))
             .cardShadow()
         }
         .buttonStyle(.plain)

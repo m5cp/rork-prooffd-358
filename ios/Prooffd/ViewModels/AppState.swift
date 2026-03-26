@@ -15,6 +15,8 @@ class AppState {
     var showWelcomeBack: Bool = false
     var momentum: MomentumSystem = MomentumSystem()
     var quickActionBuildId: String?
+    var celebratingBadge: MomentumBadge?
+    var pendingSharePrompt: SharePromptType?
 
     var hasUsedWhatIf: Bool {
         get { UserDefaults.standard.bool(forKey: "hasUsedWhatIf") }
@@ -236,6 +238,7 @@ class AppState {
     }
 
     private func checkMomentumBadges() {
+        let previousBadges = momentum.earnedBadges
         let totalCompleted = builds.flatMap(\.steps).filter(\.isCompleted).count
         let maxProgress = builds.map(\.progressPercentage).max() ?? 0
         momentum.checkBadges(
@@ -244,6 +247,19 @@ class AppState {
             buildProgress: maxProgress,
             buildsCount: builds.count
         )
+        let newBadges = momentum.earnedBadges.subtracting(previousBadges)
+        if let newId = newBadges.first,
+           let badge = MomentumBadge.all.first(where: { $0.id == newId }) {
+            celebratingBadge = badge
+        }
+
+        if maxProgress >= 25 && !UserDefaults.standard.bool(forKey: "prompted_share_25") {
+            UserDefaults.standard.set(true, forKey: "prompted_share_25")
+            pendingSharePrompt = .milestone25
+        } else if maxProgress >= 50 && !UserDefaults.standard.bool(forKey: "prompted_share_50") {
+            UserDefaults.standard.set(true, forKey: "prompted_share_50")
+            pendingSharePrompt = .milestone50
+        }
     }
 
     private func saveBuilds() {
@@ -488,4 +504,12 @@ nonisolated enum BuildField: Sendable {
     case pricing
     case strategy
     case services
+}
+
+nonisolated enum SharePromptType: Sendable {
+    case quizComplete
+    case jobSaved
+    case milestone25
+    case milestone50
+    case streakMilestone
 }
