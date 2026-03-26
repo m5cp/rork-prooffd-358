@@ -4,7 +4,9 @@ struct StartHereSection: View {
     @Environment(AppState.self) private var appState
     let onStartFast: () -> Void
     let onStableCareer: () -> Void
-    let onHelpDecide: () -> Void
+    let onRandomPick: ([MatchResult]) -> Void
+    @State private var isRolling: Bool = false
+    @State private var diceRotation: Double = 0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -40,15 +42,76 @@ struct StartHereSection: View {
                     action: onStableCareer
                 )
 
-                startCard(
-                    icon: "questionmark.circle.fill",
-                    iconColor: Color(hex: "818CF8"),
-                    title: "Help Me Decide",
-                    subtitle: "Take a quick quiz to find your best match",
-                    action: onHelpDecide
-                )
+                diceRollCard
             }
             .padding(.horizontal, 16)
+        }
+    }
+
+    private var diceRollCard: some View {
+        Button {
+            rollDice()
+        } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(hex: "818CF8").opacity(0.12))
+                        .frame(width: 48, height: 48)
+                    Image(systemName: "dice.fill")
+                        .font(.title3)
+                        .foregroundStyle(Color(hex: "818CF8"))
+                        .rotationEffect(.degrees(diceRotation))
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Pick For Me")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Theme.textPrimary)
+                    Text("Roll the dice for 2 random suggestions")
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineLimit(2)
+                }
+
+                Spacer(minLength: 4)
+
+                Image(systemName: "dice.fill")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(Color(hex: "818CF8"))
+                    .rotationEffect(.degrees(diceRotation))
+            }
+            .padding(14)
+            .background(Theme.cardBackground)
+            .clipShape(.rect(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color(hex: "818CF8").opacity(0.1), lineWidth: 0.5)
+            )
+            .cardShadow()
+        }
+        .buttonStyle(.plain)
+        .disabled(isRolling)
+        .sensoryFeedback(.impact(weight: .medium), trigger: isRolling)
+    }
+
+    private func rollDice() {
+        guard !isRolling else { return }
+        isRolling = true
+
+        withAnimation(.spring(duration: 0.6, bounce: 0.4)) {
+            diceRotation += 360
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            let allResults = appState.matchResults
+            guard allResults.count >= 2 else {
+                isRolling = false
+                return
+            }
+            let shuffled = allResults.shuffled()
+            let picks = Array(shuffled.prefix(2))
+            onRandomPick(picks)
+            isRolling = false
         }
     }
 

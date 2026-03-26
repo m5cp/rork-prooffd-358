@@ -60,6 +60,8 @@ struct DiscoverTabView: View {
     @State private var seeAllMode: SeeAllMode?
     @State private var showSearch: Bool = false
     @State private var searchText: String = ""
+    @State private var randomPicks: [MatchResult] = []
+    @State private var showRandomPicks: Bool = false
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     private var allResults: [MatchResult] {
@@ -137,6 +139,19 @@ struct DiscoverTabView: View {
             }
             .sheet(isPresented: $showWhatIf) {
                 WhatIfView(profile: appState.userProfile)
+            }
+            .sheet(isPresented: $showRandomPicks) {
+                RandomPicksView(picks: randomPicks) { result in
+                    showRandomPicks = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        selectedResult = result
+                        appState.markPathExplored(result.businessPath.id)
+                    }
+                } onReroll: {
+                    let all = appState.matchResults
+                    guard all.count >= 2 else { return }
+                    randomPicks = Array(all.shuffled().prefix(2))
+                }
             }
             .sheet(item: $seeAllMode) { mode in
                 SeeAllView(mode: mode, results: resultsForMode(mode))
@@ -234,7 +249,10 @@ struct DiscoverTabView: View {
             StartHereSection(
                 onStartFast: { seeAllMode = .fastStart },
                 onStableCareer: { appState.selectedTab = 2 },
-                onHelpDecide: { appState.retakeQuiz() }
+                onRandomPick: { picks in
+                    randomPicks = picks
+                    showRandomPicks = true
+                }
             )
 
             if let topResult = recommendedResults.first {
