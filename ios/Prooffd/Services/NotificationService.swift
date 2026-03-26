@@ -10,6 +10,21 @@ class NotificationService {
         set { UserDefaults.standard.set(newValue, forKey: "notificationsEnabled") }
     }
 
+    private let usedIndicesKey = "usedNotificationIndices"
+    private let lastScheduleDateKey = "lastNotificationScheduleDate"
+    private let maxDailyNotifications = 3
+    private let scheduleDaysAhead = 14
+
+    private var usedIndices: Set<Int> {
+        get {
+            let array = UserDefaults.standard.array(forKey: usedIndicesKey) as? [Int] ?? []
+            return Set(array)
+        }
+        set {
+            UserDefaults.standard.set(Array(newValue), forKey: usedIndicesKey)
+        }
+    }
+
     private init() {}
 
     func enableNotifications() {
@@ -34,44 +49,112 @@ class NotificationService {
         guard notificationsEnabled else { return }
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
 
-        let reminders: [(String, String, Int, Int)] = [
-            ("Keep your streak alive!", "Open the app to maintain your streak and earn points.", 9, 0),
-            ("Time for your next step", "You're making progress — complete today's step to keep going.", 12, 0),
-            ("Don't forget your build!", "A few minutes a day adds up. Check your progress.", 18, 0),
-        ]
+        var currentUsed = usedIndices
 
-        for (index, reminder) in reminders.enumerated() {
-            let content = UNMutableNotificationContent()
-            content.title = reminder.0
-            content.body = reminder.1
-            content.sound = .default
+        if currentUsed.count > NotificationMessages.all.count - 100 {
+            currentUsed.removeAll()
+        }
 
-            var dateComponents = DateComponents()
-            dateComponents.hour = reminder.2
-            dateComponents.minute = reminder.3
+        let totalNeeded = scheduleDaysAhead * maxDailyNotifications
+        let picked = NotificationMessages.randomMessages(count: totalNeeded, excluding: currentUsed)
 
-            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-            let request = UNNotificationRequest(
-                identifier: "gentle_reminder_\(index)",
-                content: content,
-                trigger: trigger
-            )
+        let deliveryHours = [9, 13, 19]
 
-            UNUserNotificationCenter.current().add(request)
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        for dayOffset in 0..<scheduleDaysAhead {
+            guard let date = calendar.date(byAdding: .day, value: dayOffset, to: today) else { continue }
+
+            for slot in 0..<maxDailyNotifications {
+                let messageIndex = dayOffset * maxDailyNotifications + slot
+                guard messageIndex < picked.count else { continue }
+
+                let (catalogIndex, message) = picked[messageIndex]
+
+                let content = UNMutableNotificationContent()
+                content.title = message.title
+                content.body = message.body
+                content.sound = .default
+
+                var dateComponents = calendar.dateComponents([.year, .month, .day], from: date)
+                dateComponents.hour = deliveryHours[slot]
+                dateComponents.minute = Int.random(in: 0...30)
+
+                let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
+                let request = UNNotificationRequest(
+                    identifier: "gentle_\(dayOffset)_\(slot)",
+                    content: content,
+                    trigger: trigger
+                )
+
+                UNUserNotificationCenter.current().add(request)
+                currentUsed.insert(catalogIndex)
+            }
+        }
+
+        usedIndices = currentUsed
+        UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: lastScheduleDateKey)
+    }
+
+    func refreshRemindersIfNeeded() {
+        guard notificationsEnabled else { return }
+        let lastSchedule = UserDefaults.standard.double(forKey: lastScheduleDateKey)
+        let daysSince = (Date().timeIntervalSince1970 - lastSchedule) / 86400
+        if daysSince >= 7 {
+            scheduleGentleReminders()
         }
     }
 
     func scheduleStreakReminder(currentStreak: Int) {
         guard notificationsEnabled, currentStreak > 0 else { return }
 
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["streak_reminder"])
+
+        let streakMessages: [(String, String)]
+        switch currentStreak {
+        case 1...3:
+            streakMessages = [
+                ("Day \(currentStreak) streak!", "You're building momentum! Don't let it slip away."),
+                ("\(currentStreak) days strong!", "You've shown up \(currentStreak) days in a row. Keep it going!"),
+                ("Streak: \(currentStreak) days", "Consistency is key. Come back tomorrow to make it \(currentStreak + 1)."),
+            ]
+        case 4...7:
+            streakMessages = [
+                ("\(currentStreak)-day streak!", "Almost a full week! You're proving you're serious."),
+                ("Streak power: \(currentStreak) days", "Most people quit by now. You didn't. That's rare."),
+                ("\(currentStreak) days and counting!", "Your dedication is showing. Keep the chain alive."),
+            ]
+        case 8...14:
+            streakMessages = [
+                ("\(currentStreak)-day streak!", "Double digits are calling. Don't stop now!"),
+                ("Incredible: \(currentStreak) days!", "You're in the top tier of consistency. Protect this streak."),
+                ("\(currentStreak) days of dedication!", "This streak is becoming a habit. And habits build empires."),
+            ]
+        case 15...30:
+            streakMessages = [
+                ("\(currentStreak)-day streak!", "You're officially in habit territory. This is who you are now."),
+                ("Legend: \(currentStreak) days!", "Most people dream about this kind of consistency. You live it."),
+                ("\(currentStreak) days strong!", "Your streak is your resume of discipline. Don't stop."),
+            ]
+        default:
+            streakMessages = [
+                ("\(currentStreak)-day streak!", "You're unstoppable. \(currentStreak) days of pure commitment."),
+                ("Streak master: \(currentStreak) days!", "At this point, your streak is legendary. Keep writing history."),
+                ("\(currentStreak) days!", "This level of consistency changes lives. You're proof."),
+            ]
+        }
+
+        let selected = streakMessages.randomElement() ?? streakMessages[0]
+
         let content = UNMutableNotificationContent()
-        content.title = "\(currentStreak) day streak!"
-        content.body = "Don't lose your \(currentStreak)-day streak. Open Prooffd to keep it going."
+        content.title = selected.0
+        content.body = selected.1
         content.sound = .default
 
         var dateComponents = DateComponents()
         dateComponents.hour = 20
-        dateComponents.minute = 0
+        dateComponents.minute = Int.random(in: 0...15)
 
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
         let request = UNNotificationRequest(
@@ -86,9 +169,40 @@ class NotificationService {
     func scheduleMilestoneReminder(buildName: String, progress: Int) {
         guard notificationsEnabled else { return }
 
+        let milestoneMessages: [(String, String)]
+        switch progress {
+        case 0..<25:
+            milestoneMessages = [
+                ("Getting started on \(buildName)!", "You're \(progress)% in. The foundation is being laid."),
+                ("\(buildName): \(progress)% done", "Every journey starts somewhere. You're already ahead of most."),
+            ]
+        case 25..<50:
+            milestoneMessages = [
+                ("\(buildName) is \(progress)% complete!", "Quarter of the way there. The momentum is building."),
+                ("Making moves on \(buildName)!", "At \(progress)%, you're well past the starting line."),
+            ]
+        case 50..<75:
+            milestoneMessages = [
+                ("Halfway on \(buildName)!", "You're \(progress)% done. The finish line is getting closer."),
+                ("\(buildName): \(progress)% and climbing!", "Past halfway! You can see the end from here."),
+            ]
+        case 75..<100:
+            milestoneMessages = [
+                ("Almost there: \(buildName)!", "At \(progress)%, you're in the home stretch. Don't slow down now!"),
+                ("\(buildName) is \(progress)% done!", "So close you can taste it. Push through to the finish."),
+            ]
+        default:
+            milestoneMessages = [
+                ("\(buildName) complete!", "100%. You did it. Time to launch."),
+                ("Build finished: \(buildName)", "From 0 to 100. You built this. Now go use it."),
+            ]
+        }
+
+        let selected = milestoneMessages.randomElement() ?? milestoneMessages[0]
+
         let content = UNMutableNotificationContent()
-        content.title = "You're \(progress)% done!"
-        content.body = "Your \(buildName) build is coming along. Keep going!"
+        content.title = selected.0
+        content.body = selected.1
         content.sound = .default
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 86400, repeats: false)

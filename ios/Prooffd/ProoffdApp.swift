@@ -26,6 +26,9 @@ struct ProoffdApp: App {
                 .onOpenURL { url in
                     handleQuickAction(url: url)
                 }
+                .task {
+                    NotificationService.shared.refreshRemindersIfNeeded()
+                }
         }
     }
 
