@@ -41,13 +41,13 @@ enum Theme {
     static let textSecondary = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
             ? UIColor(hex6: 0xA1A1AA)
-            : UIColor(hex6: 0x5C5C66)
+            : UIColor(hex6: 0x48484F)
     })
 
     static let textTertiary = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
             ? UIColor(hex6: 0x71717A)
-            : UIColor(hex6: 0x9A9AA2)
+            : UIColor(hex6: 0x6E6E78)
     })
 
     static let border = Color(UIColor { traits in
