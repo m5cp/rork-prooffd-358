@@ -148,6 +148,11 @@ nonisolated struct UserProfile: Codable, Sendable {
     var hasCar: Bool?
     var sellingComfort: SellingComfort?
     var needsFastCash: Bool?
+    var avatarId: String = ""
+
+    var avatar: AvatarOption {
+        AvatarOption(rawValue: avatarId) ?? .star
+    }
 
     var isComplete: Bool {
         !firstName.isEmpty &&
@@ -160,7 +165,6 @@ nonisolated struct UserProfile: Codable, Sendable {
         experienceLevel != nil &&
         customerInteraction != nil &&
         hasCar != nil &&
-        sellingComfort != nil &&
-        needsFastCash != nil
+        sellingComfort != nil
     }
 }

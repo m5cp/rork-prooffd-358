@@ -9,22 +9,33 @@ struct ProfileTabView: View {
     @State private var showProfileDetails: Bool = false
     @State private var showAchievements: Bool = false
     @State private var showMyPathShare: Bool = false
+    @State private var showAvatarPicker: Bool = false
 
     var body: some View {
         NavigationStack {
             List {
                 Section {
                     HStack(spacing: 14) {
-                        ZStack {
-                            Circle()
-                                .fill(store.isPremium
-                                    ? LinearGradient(colors: [Theme.accent, Theme.accentBlue], startPoint: .topLeading, endPoint: .bottomTrailing)
-                                    : LinearGradient(colors: [Theme.cardBackgroundLight, Theme.cardBackgroundLight], startPoint: .top, endPoint: .bottom)
-                                )
-                                .frame(width: 50, height: 50)
-                            Text(appState.userProfile.firstName.prefix(1).uppercased())
-                                .font(.title2.weight(.semibold))
-                                .foregroundStyle(.white)
+                        Button {
+                            showAvatarPicker = true
+                        } label: {
+                            ZStack(alignment: .bottomTrailing) {
+                                AvatarView(avatar: appState.userProfile.avatar, size: 50)
+                                    .overlay {
+                                        if store.isPremium {
+                                            Circle()
+                                                .stroke(
+                                                    LinearGradient(colors: [Theme.accent, Theme.accentBlue], startPoint: .topLeading, endPoint: .bottomTrailing),
+                                                    lineWidth: 2
+                                                )
+                                                .frame(width: 54, height: 54)
+                                        }
+                                    }
+                                Image(systemName: "pencil.circle.fill")
+                                    .font(.system(size: 16))
+                                    .foregroundStyle(Theme.accent)
+                                    .background(Circle().fill(Theme.background).frame(width: 14, height: 14))
+                            }
                         }
 
                         VStack(alignment: .leading, spacing: 4) {
@@ -324,6 +335,12 @@ struct ProfileTabView: View {
                     ),
                     shareText: "I'm building a business step-by-step with Prooffd!"
                 )
+            }
+            .sheet(isPresented: $showAvatarPicker) {
+                AvatarPickerView(selectedAvatar: Binding(
+                    get: { appState.userProfile.avatar },
+                    set: { appState.updateAvatar($0) }
+                ))
             }
             .alert("Retake Quiz?", isPresented: $showRetakeConfirm) {
                 Button("Cancel", role: .cancel) {}

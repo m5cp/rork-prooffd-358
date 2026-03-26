@@ -6,16 +6,14 @@ struct ExploreTabView: View {
     @State private var selectedResult: MatchResult?
     @State private var showPaywall: Bool = false
     @State private var showEducationCategorySheet: EducationCategory?
+    @State private var randomizedTrending: [MatchResult] = []
     @Environment(\.horizontalSizeClass) private var sizeClass
-
-    private var trendingPaths: [MatchResult] {
-        Array(appState.matchResults.sorted { $0.scorePercentage > $1.scorePercentage }.prefix(6))
-    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
+                    filterBar
                     trendingSection
                     educationOverviewSection
                     shareLoopSection
@@ -37,6 +35,46 @@ struct ExploreTabView: View {
             .sheet(item: $showEducationCategorySheet) { category in
                 EducationCategoryListSheet(category: category)
             }
+            .onAppear {
+                shuffleTrending()
+            }
+        }
+    }
+
+    private func shuffleTrending() {
+        randomizedTrending = Array(appState.matchResults.shuffled().prefix(6))
+    }
+
+    private var filterBar: some View {
+        HStack(spacing: 8) {
+            ForEach(ExploreFilterMode.allCases) { mode in
+                Button {
+                    withAnimation(.spring(duration: 0.3)) {
+                        appState.exploreFilter = mode
+                    }
+                } label: {
+                    Text(mode.rawValue)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(appState.exploreFilter == mode ? .white : Theme.textSecondary)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 7)
+                        .background(appState.exploreFilter == mode ? Theme.accent : Theme.cardBackground)
+                        .clipShape(.capsule)
+                }
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+    }
+
+    private var filteredTrending: [MatchResult] {
+        switch appState.exploreFilter {
+        case .all:
+            return randomizedTrending.filter { !appState.isPathHidden($0.businessPath.id) }
+        case .favorites:
+            return randomizedTrending.filter { appState.isFavorite($0.businessPath.id) }
+        case .hidden:
+            return appState.matchResults.filter { appState.isPathHidden($0.businessPath.id) }
         }
     }
 
@@ -50,23 +88,38 @@ struct ExploreTabView: View {
                     .font(.title3.weight(.bold))
                     .foregroundStyle(Theme.textPrimary)
                 Spacer()
+                Button {
+                    withAnimation(.spring(duration: 0.3)) {
+                        shuffleTrending()
+                    }
+                } label: {
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Theme.accent)
+                }
             }
             .padding(.horizontal, 16)
 
-            ScrollView(.horizontal) {
-                HStack(spacing: 12) {
-                    ForEach(trendingPaths) { result in
-                        trendingCard(result)
+            if filteredTrending.isEmpty {
+                emptyFilterState(appState.exploreFilter == .favorites ? "No favorited careers yet" : "No hidden careers")
+            } else {
+                ScrollView(.horizontal) {
+                    HStack(spacing: 12) {
+                        ForEach(filteredTrending) { result in
+                            trendingCard(result)
+                        }
                     }
                 }
+                .contentMargins(.horizontal, 16)
+                .scrollIndicators(.hidden)
             }
-            .contentMargins(.horizontal, 16)
-            .scrollIndicators(.hidden)
         }
     }
 
     private func trendingCard(_ result: MatchResult) -> some View {
         let catColor = Theme.categoryColor(for: result.businessPath.category)
+        let isFav = appState.isFavorite(result.businessPath.id)
+        let isHidden = appState.isPathHidden(result.businessPath.id)
         return Button {
             selectedResult = result
             appState.markPathExplored(result.businessPath.id)
@@ -82,6 +135,11 @@ struct ExploreTabView: View {
                             .foregroundStyle(catColor)
                     }
                     Spacer()
+                    if isFav {
+                        Image(systemName: "heart.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.pink)
+                    }
                 }
 
                 Text(result.businessPath.name)
@@ -113,6 +171,44 @@ struct ExploreTabView: View {
             .cardShadow()
         }
         .buttonStyle(.plain)
+        .contextMenu {
+            Button {
+                appState.toggleFavorite(result.businessPath.id)
+            } label: {
+                Label(isFav ? "Unfavorite" : "Favorite", systemImage: isFav ? "heart.slash.fill" : "heart.fill")
+            }
+            Button(role: isHidden ? nil : .destructive) {
+                appState.toggleHiddenPath(result.businessPath.id)
+            } label: {
+                Label(isHidden ? "Unhide" : "Hide", systemImage: isHidden ? "eye.fill" : "eye.slash.fill")
+            }
+        }
+    }
+
+    private var filteredEducationCategories: [EducationCategory] {
+        switch appState.exploreFilter {
+        case .all:
+            return EducationCategory.allCases.filter { category in
+                EducationPathDatabase.all.contains { $0.category == category && !appState.isEducationHidden($0.id) }
+            }
+        case .favorites:
+            return EducationCategory.allCases.filter { category in
+                EducationPathDatabase.all.contains { $0.category == category && appState.isEducationFavorite($0.id) }
+            }
+        case .hidden:
+            return EducationCategory.allCases.filter { category in
+                EducationPathDatabase.all.contains { $0.category == category && appState.isEducationHidden($0.id) }
+            }
+        }
+    }
+
+    private func educationCount(for category: EducationCategory) -> Int {
+        let paths = EducationPathDatabase.all.filter { $0.category == category }
+        switch appState.exploreFilter {
+        case .all: return paths.filter { !appState.isEducationHidden($0.id) }.count
+        case .favorites: return paths.filter { appState.isEducationFavorite($0.id) }.count
+        case .hidden: return paths.filter { appState.isEducationHidden($0.id) }.count
+        }
     }
 
     private var educationOverviewSection: some View {
@@ -132,21 +228,27 @@ struct ExploreTabView: View {
                 .foregroundStyle(Theme.textSecondary)
                 .padding(.horizontal, 16)
 
-            let columns = sizeClass == .regular
-                ? [GridItem(.adaptive(minimum: 160), spacing: 10)]
-                : [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)]
+            let categories = filteredEducationCategories
 
-            LazyVGrid(columns: columns, spacing: 10) {
-                ForEach(EducationCategory.allCases) { category in
-                    educationCategoryCard(category)
+            if categories.isEmpty {
+                emptyFilterState(appState.exploreFilter == .favorites ? "No favorited programs yet" : "No hidden programs")
+            } else {
+                let columns = sizeClass == .regular
+                    ? [GridItem(.adaptive(minimum: 160), spacing: 10)]
+                    : [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)]
+
+                LazyVGrid(columns: columns, spacing: 10) {
+                    ForEach(categories) { category in
+                        educationCategoryCard(category)
+                    }
                 }
+                .padding(.horizontal, 16)
             }
-            .padding(.horizontal, 16)
         }
     }
 
     private func educationCategoryCard(_ category: EducationCategory) -> some View {
-        let paths = EducationPathDatabase.all.filter { $0.category == category }
+        let count = educationCount(for: category)
         let catColor: Color = {
             switch category {
             case .trade: return Theme.accent
@@ -172,7 +274,7 @@ struct ExploreTabView: View {
                             .foregroundStyle(catColor)
                     }
                     Spacer()
-                    Text("\(paths.count)")
+                    Text("\(count)")
                         .font(.caption2.weight(.bold))
                         .foregroundStyle(catColor)
                         .padding(.horizontal, 8)
@@ -196,6 +298,19 @@ struct ExploreTabView: View {
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: showEducationCategorySheet)
+    }
+
+    private func emptyFilterState(_ message: String) -> some View {
+        VStack(spacing: 8) {
+            Image(systemName: appState.exploreFilter == .favorites ? "heart" : "eye.slash")
+                .font(.title2)
+                .foregroundStyle(Theme.textTertiary)
+            Text(message)
+                .font(.subheadline)
+                .foregroundStyle(Theme.textTertiary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 24)
     }
 
     private var shareLoopSection: some View {
@@ -254,14 +369,20 @@ struct CareerPathDetailSheet: View {
     let career: CareerPath
     @Environment(\.dismiss) private var dismiss
     @Environment(StoreViewModel.self) private var store
+    @Environment(AppState.self) private var appState
     @State private var showPaywall: Bool = false
+
+    private var isFav: Bool { appState.isEducationFavorite(career.id) }
+    private var isHidden: Bool { appState.isEducationHidden(career.id) }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
                     heroHeader
+                    deliveryBadge
                     statsBar
+                    favHideBar
                     overviewCard
                     aiSafeCard
                     stepsCard
@@ -317,6 +438,71 @@ struct CareerPathDetailSheet: View {
                 .multilineTextAlignment(.center)
 
             aiSafeBadge
+        }
+    }
+
+    private var deliveryBadge: some View {
+        HStack(spacing: 6) {
+            Image(systemName: deliveryIcon)
+                .font(.caption2)
+            Text(career.deliveryType)
+                .font(.caption.weight(.medium))
+        }
+        .foregroundStyle(Theme.accentBlue)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 6)
+        .background(Theme.accentBlue.opacity(0.1))
+        .clipShape(.capsule)
+    }
+
+    private var deliveryIcon: String {
+        let dt = career.deliveryType.lowercased()
+        if dt.contains("online") && dt.contains("person") { return "laptopcomputer.and.arrow.down" }
+        if dt.contains("online") || dt.contains("remote") || dt.contains("self-taught") { return "laptopcomputer" }
+        if dt.contains("hybrid") { return "building.2" }
+        return "mappin.and.ellipse"
+    }
+
+    private var favHideBar: some View {
+        HStack(spacing: 12) {
+            Button {
+                withAnimation(.spring(duration: 0.3)) {
+                    appState.toggleEducationFavorite(career.id)
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: isFav ? "heart.fill" : "heart")
+                        .font(.caption)
+                    Text(isFav ? "Favorited" : "Favorite")
+                        .font(.caption.weight(.semibold))
+                }
+                .foregroundStyle(isFav ? .pink : Theme.textSecondary)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(isFav ? Color.pink.opacity(0.1) : Theme.cardBackground)
+                .clipShape(.capsule)
+            }
+            .sensoryFeedback(.selection, trigger: isFav)
+
+            Button {
+                withAnimation(.spring(duration: 0.3)) {
+                    appState.toggleHiddenEducation(career.id)
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: isHidden ? "eye.fill" : "eye.slash")
+                        .font(.caption)
+                    Text(isHidden ? "Unhide" : "Hide")
+                        .font(.caption.weight(.semibold))
+                }
+                .foregroundStyle(Theme.textSecondary)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Theme.cardBackground)
+                .clipShape(.capsule)
+            }
+
+            Spacer()
         }
     }
 

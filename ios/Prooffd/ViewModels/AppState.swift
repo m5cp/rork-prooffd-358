@@ -6,6 +6,10 @@ class AppState {
     var userProfile: UserProfile = UserProfile()
     var matchResults: [MatchResult] = []
     var favoritePathIDs: Set<String> = []
+    var favoriteEducationIDs: Set<String> = []
+    var hiddenPathIDs: Set<String> = []
+    var hiddenEducationIDs: Set<String> = []
+    var exploreFilter: ExploreFilterMode = .all
     var showFavoritesOnly: Bool = false
     var streakTracker: StreakTracker = StreakTracker()
     var unlockedAchievementIDs: Set<String> = []
@@ -63,9 +67,11 @@ class AppState {
     init() {
         loadProfile()
         loadFavorites()
+        loadHidden()
         loadExploredPaths()
         loadUnlockedAchievements()
         loadBuilds()
+        assignAvatarIfNeeded()
         if hasCompletedQuiz || hasSkippedQuiz {
             currentScreen = .results
             runMatching()
@@ -290,6 +296,20 @@ class AppState {
         }
     }
 
+    // MARK: - Avatar
+
+    private func assignAvatarIfNeeded() {
+        if userProfile.avatarId.isEmpty {
+            userProfile.avatarId = AvatarOption.random().rawValue
+            saveProfile()
+        }
+    }
+
+    func updateAvatar(_ avatar: AvatarOption) {
+        userProfile.avatarId = avatar.rawValue
+        saveProfile()
+    }
+
     // MARK: - Favorites
 
     func toggleFavorite(_ pathID: String) {
@@ -304,6 +324,47 @@ class AppState {
 
     func isFavorite(_ pathID: String) -> Bool {
         favoritePathIDs.contains(pathID)
+    }
+
+    func toggleEducationFavorite(_ pathID: String) {
+        if favoriteEducationIDs.contains(pathID) {
+            favoriteEducationIDs.remove(pathID)
+        } else {
+            favoriteEducationIDs.insert(pathID)
+        }
+        saveFavorites()
+    }
+
+    func isEducationFavorite(_ pathID: String) -> Bool {
+        favoriteEducationIDs.contains(pathID)
+    }
+
+    // MARK: - Hidden
+
+    func toggleHiddenPath(_ pathID: String) {
+        if hiddenPathIDs.contains(pathID) {
+            hiddenPathIDs.remove(pathID)
+        } else {
+            hiddenPathIDs.insert(pathID)
+        }
+        saveHidden()
+    }
+
+    func isPathHidden(_ pathID: String) -> Bool {
+        hiddenPathIDs.contains(pathID)
+    }
+
+    func toggleHiddenEducation(_ pathID: String) {
+        if hiddenEducationIDs.contains(pathID) {
+            hiddenEducationIDs.remove(pathID)
+        } else {
+            hiddenEducationIDs.insert(pathID)
+        }
+        saveHidden()
+    }
+
+    func isEducationHidden(_ pathID: String) -> Bool {
+        hiddenEducationIDs.contains(pathID)
     }
 
     func markPathExplored(_ pathID: String) {
@@ -462,11 +523,29 @@ class AppState {
 
     private func saveFavorites() {
         UserDefaults.standard.set(Array(favoritePathIDs), forKey: "favoritePathIDs")
+        UserDefaults.standard.set(Array(favoriteEducationIDs), forKey: "favoriteEducationIDs")
     }
 
     private func loadFavorites() {
         if let ids = UserDefaults.standard.stringArray(forKey: "favoritePathIDs") {
             favoritePathIDs = Set(ids)
+        }
+        if let ids = UserDefaults.standard.stringArray(forKey: "favoriteEducationIDs") {
+            favoriteEducationIDs = Set(ids)
+        }
+    }
+
+    private func saveHidden() {
+        UserDefaults.standard.set(Array(hiddenPathIDs), forKey: "hiddenPathIDs")
+        UserDefaults.standard.set(Array(hiddenEducationIDs), forKey: "hiddenEducationIDs")
+    }
+
+    private func loadHidden() {
+        if let ids = UserDefaults.standard.stringArray(forKey: "hiddenPathIDs") {
+            hiddenPathIDs = Set(ids)
+        }
+        if let ids = UserDefaults.standard.stringArray(forKey: "hiddenEducationIDs") {
+            hiddenEducationIDs = Set(ids)
         }
     }
 
@@ -512,4 +591,12 @@ nonisolated enum SharePromptType: Sendable {
     case milestone25
     case milestone50
     case streakMilestone
+}
+
+nonisolated enum ExploreFilterMode: String, CaseIterable, Identifiable, Sendable {
+    case all = "All"
+    case favorites = "Favorites"
+    case hidden = "Hidden"
+
+    var id: String { rawValue }
 }

@@ -18,6 +18,7 @@ struct PathDetailView: View {
                 VStack(spacing: 24) {
                     heroSection
                     quickStats
+                    favHideBar
                     startBuildSection
                     overviewSection
                     actionPlanSection
@@ -95,6 +96,49 @@ struct PathDetailView: View {
 
     private var catColor: Color {
         Theme.categoryColor(for: path.category)
+    }
+
+    private var favHideBar: some View {
+        HStack(spacing: 12) {
+            Button {
+                withAnimation(.spring(duration: 0.3)) {
+                    appState.toggleFavorite(path.id)
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: appState.isFavorite(path.id) ? "heart.fill" : "heart")
+                        .font(.caption)
+                    Text(appState.isFavorite(path.id) ? "Favorited" : "Favorite")
+                        .font(.caption.weight(.semibold))
+                }
+                .foregroundStyle(appState.isFavorite(path.id) ? .pink : Theme.textSecondary)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(appState.isFavorite(path.id) ? Color.pink.opacity(0.1) : Theme.cardBackground)
+                .clipShape(.capsule)
+            }
+            .sensoryFeedback(.selection, trigger: appState.isFavorite(path.id))
+
+            Button {
+                withAnimation(.spring(duration: 0.3)) {
+                    appState.toggleHiddenPath(path.id)
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: appState.isPathHidden(path.id) ? "eye.fill" : "eye.slash")
+                        .font(.caption)
+                    Text(appState.isPathHidden(path.id) ? "Unhide" : "Hide")
+                        .font(.caption.weight(.semibold))
+                }
+                .foregroundStyle(Theme.textSecondary)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Theme.cardBackground)
+                .clipShape(.capsule)
+            }
+
+            Spacer()
+        }
     }
 
     private var heroSection: some View {

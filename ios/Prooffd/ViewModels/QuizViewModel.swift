@@ -9,21 +9,23 @@ class QuizViewModel {
     var hasShownCheckpoint: Bool = false
     var checkpointMatches: [MatchResult] = []
 
-    let totalSteps: Int = 10
+    let totalSteps: Int = 11
 
     var progress: Double {
-        Double(currentStep + 1) / Double(totalSteps)
+        if currentStep == 0 { return 0.05 }
+        return Double(currentStep) / Double(totalSteps - 1)
     }
 
     var progressText: String {
-        "\(currentStep + 1) of \(totalSteps)"
+        if currentStep == 0 { return "Profile" }
+        return "\(currentStep) of 10"
     }
 
     var motivationMessage: String? {
         switch currentStep {
-        case 2: return "Great start — keep going!"
-        case 5: return "Matches are getting sharper"
-        case 8: return "Almost done — just 2 more"
+        case 3: return "Great start — keep going!"
+        case 6: return "Matches are getting sharper"
+        case 9: return "Almost done — just 2 more"
         default: return nil
         }
     }
@@ -36,16 +38,17 @@ class QuizViewModel {
         case 3: return profile.workPreference != nil
         case 4: return profile.hoursPerDay != nil
         case 5: return profile.workStyle != nil
-        case 6: return true
-        case 7: return profile.techComfort != nil
-        case 8: return profile.experienceLevel != nil && profile.customerInteraction != nil
-        case 9: return profile.hasCar != nil && profile.sellingComfort != nil && profile.needsFastCash != nil
+        case 6: return profile.techComfort != nil
+        case 7: return profile.experienceLevel != nil
+        case 8: return profile.customerInteraction != nil
+        case 9: return profile.sellingComfort != nil
+        case 10: return profile.hasCar != nil
         default: return false
         }
     }
 
     var canShowEarlyResults: Bool {
-        currentStep >= 4 && !profile.selectedCategories.isEmpty && profile.budget != nil
+        currentStep >= 5 && !profile.selectedCategories.isEmpty && profile.budget != nil
     }
 
     var pointsEarned: Int {
@@ -56,19 +59,17 @@ class QuizViewModel {
         if profile.workPreference != nil { pts += 10 }
         if profile.hoursPerDay != nil { pts += 5 }
         if profile.workStyle != nil { pts += 5 }
-        if !profile.workConditions.isEmpty { pts += 5 }
         if profile.techComfort != nil { pts += 5 }
         if profile.experienceLevel != nil { pts += 5 }
         if profile.customerInteraction != nil { pts += 5 }
-        if profile.hasCar != nil { pts += 5 }
         if profile.sellingComfort != nil { pts += 5 }
-        if profile.needsFastCash != nil { pts += 5 }
+        if profile.hasCar != nil { pts += 5 }
         return pts
     }
 
     func next() {
         guard canAdvance, currentStep < totalSteps - 1 else { return }
-        if currentStep == 3 && !hasShownCheckpoint {
+        if currentStep == 4 && !hasShownCheckpoint {
             hasShownCheckpoint = true
             generateCheckpointMatches()
             showCheckpoint = true

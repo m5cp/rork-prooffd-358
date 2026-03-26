@@ -263,10 +263,11 @@ struct QuizView: View {
                 case 3: workPreferenceStep
                 case 4: hoursStep
                 case 5: workStyleStep
-                case 6: workConditionsStep
-                case 7: techComfortStep
-                case 8: experienceAndCustomerStep
-                case 9: quickPicksStep
+                case 6: techComfortStep
+                case 7: experienceStep
+                case 8: customerInteractionStep
+                case 9: sellingComfortStep
+                case 10: hasCarStep
                 default: EmptyView()
                 }
             }
@@ -370,35 +371,6 @@ struct QuizView: View {
         }
     }
 
-    private var workConditionsStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "What are you okay with?", subtitle: "Select all that apply.")
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 12)], spacing: 12) {
-                ForEach(WorkCondition.allCases) { condition in
-                    let isSelected = viewModel.profile.workConditions.contains(condition)
-                    Button {
-                        withAnimation(.spring(duration: 0.25)) {
-                            viewModel.toggleCondition(condition)
-                        }
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: condition.icon)
-                                .font(.caption)
-                            Text(condition.rawValue)
-                                .font(.caption)
-                        }
-                        .foregroundStyle(isSelected ? .white : Theme.textSecondary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 8)
-                        .background(isSelected ? Theme.accentBlue : Theme.cardBackground)
-                        .clipShape(.rect(cornerRadius: 10))
-                    }
-                }
-            }
-        }
-    }
-
     private var techComfortStep: some View {
         VStack(alignment: .leading, spacing: 16) {
             quizHeader(title: "Tech comfort level?", subtitle: "How comfortable are you with technology?")
@@ -408,66 +380,42 @@ struct QuizView: View {
         }
     }
 
-    private var experienceAndCustomerStep: some View {
-        VStack(alignment: .leading, spacing: 28) {
-            VStack(alignment: .leading, spacing: 16) {
-                quizHeader(title: "Experience level?", subtitle: "What's your overall work experience?")
-                optionList(ExperienceLevel.allCases, selected: viewModel.profile.experienceLevel) {
-                    viewModel.profile.experienceLevel = $0
-                }
-            }
-
-            Rectangle()
-                .fill(Theme.border)
-                .frame(height: 0.5)
-
-            VStack(alignment: .leading, spacing: 16) {
-                quizHeader(title: "Customer interaction?", subtitle: "How much do you want to interact with customers?")
-                optionList(CustomerInteraction.allCases, selected: viewModel.profile.customerInteraction) {
-                    viewModel.profile.customerInteraction = $0
-                }
+    private var experienceStep: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            quizHeader(title: "Experience level?", subtitle: "What's your overall work experience?")
+            optionList(ExperienceLevel.allCases, selected: viewModel.profile.experienceLevel) {
+                viewModel.profile.experienceLevel = $0
             }
         }
     }
 
-    private var quickPicksStep: some View {
-        VStack(alignment: .leading, spacing: 28) {
-            quizHeader(title: "Quick picks", subtitle: "Last few questions to finalize your matches.")
-
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Do you have a car?")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Theme.textPrimary)
-                HStack(spacing: 12) {
-                    boolButton("Yes", icon: "car.fill", isSelected: viewModel.profile.hasCar == true) {
-                        viewModel.profile.hasCar = true
-                    }
-                    boolButton("No", icon: "figure.walk", isSelected: viewModel.profile.hasCar == false) {
-                        viewModel.profile.hasCar = false
-                    }
-                }
+    private var customerInteractionStep: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            quizHeader(title: "Customer interaction?", subtitle: "How much do you want to interact with customers?")
+            optionList(CustomerInteraction.allCases, selected: viewModel.profile.customerInteraction) {
+                viewModel.profile.customerInteraction = $0
             }
+        }
+    }
 
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Comfort with selling?")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Theme.textPrimary)
-                optionList(SellingComfort.allCases, selected: viewModel.profile.sellingComfort) {
-                    viewModel.profile.sellingComfort = $0
-                }
+    private var sellingComfortStep: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            quizHeader(title: "Comfort with selling?", subtitle: "How comfortable are you with sales?")
+            optionList(SellingComfort.allCases, selected: viewModel.profile.sellingComfort) {
+                viewModel.profile.sellingComfort = $0
             }
+        }
+    }
 
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Need fast cash?")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Theme.textPrimary)
-                HStack(spacing: 12) {
-                    boolButton("Yes, ASAP", icon: "bolt.fill", isSelected: viewModel.profile.needsFastCash == true) {
-                        viewModel.profile.needsFastCash = true
-                    }
-                    boolButton("No rush", icon: "clock.fill", isSelected: viewModel.profile.needsFastCash == false) {
-                        viewModel.profile.needsFastCash = false
-                    }
+    private var hasCarStep: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            quizHeader(title: "Do you have a car?", subtitle: "Some businesses require reliable transportation.")
+            HStack(spacing: 12) {
+                boolButton("Yes", icon: "car.fill", isSelected: viewModel.profile.hasCar == true) {
+                    viewModel.profile.hasCar = true
+                }
+                boolButton("No", icon: "figure.walk", isSelected: viewModel.profile.hasCar == false) {
+                    viewModel.profile.hasCar = false
                 }
             }
         }
