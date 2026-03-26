@@ -413,8 +413,10 @@ struct CareerPathDetailSheet: View {
                     statsBar
                     favHideBar
                     overviewCard
+                    firstStepsCard
                     aiSafeCard
                     stepsCard
+                    findProgramsCard
                     fundingCard
 
                     if store.isPremium {
@@ -471,17 +473,25 @@ struct CareerPathDetailSheet: View {
     }
 
     private var deliveryBadge: some View {
-        HStack(spacing: 6) {
-            Image(systemName: deliveryIcon)
-                .font(.caption2)
-            Text(career.deliveryType)
-                .font(.caption.weight(.medium))
+        VStack(spacing: 6) {
+            HStack(spacing: 6) {
+                Image(systemName: deliveryIcon)
+                    .font(.caption2)
+                Text(career.deliveryType)
+                    .font(.caption.weight(.medium))
+            }
+            .foregroundStyle(Theme.accentBlue)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 6)
+            .background(Theme.accentBlue.opacity(0.1))
+            .clipShape(.capsule)
+
+            if career.deliveryType.lowercased().contains("person") || career.deliveryType.lowercased().contains("apprenticeship") || career.deliveryType.lowercased().contains("school") {
+                Text("Online & hybrid programs may be available")
+                    .font(.caption2)
+                    .foregroundStyle(Theme.textTertiary)
+            }
         }
-        .foregroundStyle(Theme.accentBlue)
-        .padding(.horizontal, 14)
-        .padding(.vertical, 6)
-        .background(Theme.accentBlue.opacity(0.1))
-        .clipShape(.capsule)
     }
 
     private var deliveryIcon: String {
@@ -596,6 +606,20 @@ struct CareerPathDetailSheet: View {
                     .foregroundStyle(Theme.textTertiary)
                     .lineSpacing(3)
             }
+
+            if !career.futureDemand.isEmpty {
+                Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.accent)
+                        .padding(.top, 2)
+                    Text(career.futureDemand)
+                        .font(.caption)
+                        .foregroundStyle(Theme.textTertiary)
+                        .lineSpacing(3)
+                }
+            }
         }
         .padding(16)
         .background(Theme.cardBackground)
@@ -675,6 +699,92 @@ struct CareerPathDetailSheet: View {
                         .clipShape(Circle())
                     Text(step)
                         .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineSpacing(3)
+                }
+            }
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+        .cardShadow()
+    }
+
+    private var firstStepsCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader("Your First Steps", icon: "figure.walk")
+
+            let firstSteps = [
+                "Decide what area of \(career.title.lowercased()) interests you most",
+                "Choose your learning format: \(career.deliveryType.lowercased())",
+                "Research accredited programs in your area or online",
+                "Compare costs, time commitment, and funding options",
+                "Apply and begin your training"
+            ]
+
+            ForEach(Array(firstSteps.enumerated()), id: \.offset) { index, step in
+                HStack(alignment: .top, spacing: 12) {
+                    Text("\(index + 1)")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 24, height: 24)
+                        .background(Theme.accent)
+                        .clipShape(Circle())
+                    Text(step)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineSpacing(3)
+                }
+            }
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+        .cardShadow()
+    }
+
+    private var findProgramsCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionHeader("How to Find Programs", icon: "magnifyingglass")
+            ForEach(career.howToFindPrograms, id: \.self) { item in
+                HStack(alignment: .top, spacing: 10) {
+                    Circle()
+                        .fill(Theme.accentBlue)
+                        .frame(width: 5, height: 5)
+                        .padding(.top, 6)
+                    Text(item)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+            }
+
+            if !career.employerSponsoredOptions.isEmpty {
+                Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                Text("Employer-Sponsored Options")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.accent)
+                ForEach(career.employerSponsoredOptions, id: \.self) { option in
+                    HStack(alignment: .top, spacing: 10) {
+                        Circle()
+                            .fill(Theme.accent)
+                            .frame(width: 5, height: 5)
+                            .padding(.top, 6)
+                        Text(option)
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                }
+            }
+
+            if !career.militaryPath.isEmpty {
+                Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "shield.fill")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.accent)
+                        .padding(.top, 2)
+                    Text(career.militaryPath)
+                        .font(.caption)
                         .foregroundStyle(Theme.textSecondary)
                         .lineSpacing(3)
                 }

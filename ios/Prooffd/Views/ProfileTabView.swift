@@ -10,6 +10,7 @@ struct ProfileTabView: View {
     @State private var showAchievements: Bool = false
     @State private var showMyPathShare: Bool = false
     @State private var showAvatarPicker: Bool = false
+    @State private var showPointsGuide: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -74,6 +75,23 @@ struct ProfileTabView: View {
                             Text("\(appState.momentum.earnedBadges.count + appState.unlockedCount)/\(MomentumBadge.all.count + AchievementDatabase.all.count)")
                                 .font(.subheadline.weight(.semibold))
                                 .foregroundStyle(Theme.textSecondary)
+                            Image(systemName: "chevron.right")
+                                .font(.caption2)
+                                .foregroundStyle(Theme.textTertiary)
+                        }
+                    }
+                    .listRowBackground(Theme.cardBackground)
+
+                    Button {
+                        showPointsGuide = true
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "questionmark.circle.fill")
+                                .foregroundStyle(Color(hex: "FBBF24"))
+                                .frame(width: 22)
+                            Text("How to Earn Points & Badges")
+                                .foregroundStyle(Theme.textPrimary)
+                            Spacer()
                             Image(systemName: "chevron.right")
                                 .font(.caption2)
                                 .foregroundStyle(Theme.textTertiary)
@@ -208,6 +226,40 @@ struct ProfileTabView: View {
                     .listRowBackground(Theme.cardBackground)
                 }
 
+                Section("Notifications") {
+                    HStack(spacing: 12) {
+                        Image(systemName: "bell.fill")
+                            .foregroundStyle(Theme.accent)
+                            .frame(width: 22)
+                        Toggle("Gentle Reminders", isOn: Binding(
+                            get: { NotificationService.shared.notificationsEnabled },
+                            set: { newValue in
+                                if newValue {
+                                    NotificationService.shared.enableNotifications()
+                                } else {
+                                    NotificationService.shared.disableNotifications()
+                                }
+                            }
+                        ))
+                        .foregroundStyle(Theme.textPrimary)
+                        .tint(Theme.accent)
+                    }
+                    .listRowBackground(Theme.cardBackground)
+
+                    if NotificationService.shared.notificationsEnabled {
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: "info.circle")
+                                .foregroundStyle(Theme.textTertiary)
+                                .frame(width: 22)
+                            Text("You'll receive friendly reminders to keep your streak going, complete steps, and stay on track.")
+                                .font(.caption)
+                                .foregroundStyle(Theme.textTertiary)
+                                .lineSpacing(2)
+                        }
+                        .listRowBackground(Theme.cardBackground)
+                    }
+                }
+
                 Section("Subscription") {
                     if store.isPremium {
                         Button {
@@ -335,6 +387,9 @@ struct ProfileTabView: View {
                     ),
                     shareText: "I'm building a business step-by-step with Prooffd! Download Prooffd: https://apps.apple.com/app/prooffd/id6743071053"
                 )
+            }
+            .sheet(isPresented: $showPointsGuide) {
+                PointsGuideView()
             }
             .sheet(isPresented: $showAvatarPicker) {
                 AvatarPickerView(selectedAvatar: Binding(

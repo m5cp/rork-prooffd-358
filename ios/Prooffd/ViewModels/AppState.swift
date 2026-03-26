@@ -399,6 +399,7 @@ class AppState {
         momentum.awardPoints(2, reason: .dailyUse)
         checkAchievements()
         checkMomentumBadges()
+        NotificationService.shared.scheduleStreakReminder(currentStreak: streakTracker.currentStreak)
     }
 
     // MARK: - Readiness

@@ -56,6 +56,8 @@ nonisolated struct BusinessPath: Identifiable, Codable, Sendable {
     let interests: [String]
     let startupCostMin: Int
     let startupCostMax: Int
+    let llcInfo: LLCInfo
+    let degreeRequirement: String
 
     init(
         id: String,
@@ -108,7 +110,9 @@ nonisolated struct BusinessPath: Identifiable, Codable, Sendable {
         linkedEducationPathId: String = "",
         interests: [String] = [],
         startupCostMin: Int = 0,
-        startupCostMax: Int = 0
+        startupCostMax: Int = 0,
+        llcInfo: LLCInfo = .optional,
+        degreeRequirement: String = ""
     ) {
         self.id = id
         self.name = name
@@ -161,6 +165,8 @@ nonisolated struct BusinessPath: Identifiable, Codable, Sendable {
         self.interests = interests.isEmpty ? [category.rawValue] : interests
         self.startupCostMin = startupCostMin > 0 ? startupCostMin : minBudget
         self.startupCostMax = startupCostMax > 0 ? startupCostMax : minBudget * 3
+        self.llcInfo = llcInfo
+        self.degreeRequirement = degreeRequirement.isEmpty ? Self.generateDegreeRequirement(educationRequired: educationRequired, category: category) : degreeRequirement
     }
 
     private static func generateWhyItWorksNow(name: String, category: BusinessCategory) -> String {
@@ -288,6 +294,93 @@ nonisolated struct BusinessPath: Identifiable, Codable, Sendable {
             "Create a social media post showcasing your work",
             "Book your next 3 appointments"
         ]
+    }
+}
+
+nonisolated struct LLCInfo: Codable, Sendable {
+    let requirement: LLCRequirement
+    let explanation: String
+    let costWithoutLLC: String
+    let costWithLLC: String
+
+    static let optional = LLCInfo(
+        requirement: .optional,
+        explanation: "An LLC is optional for gig or freelance work. You can operate as a sole proprietor. However, an LLC provides liability protection and may look more professional to clients.",
+        costWithoutLLC: "$0 (operate as sole proprietor)",
+        costWithLLC: "$50–$500+ (varies by state)"
+    )
+
+    static let recommended = LLCInfo(
+        requirement: .recommended,
+        explanation: "An LLC is recommended if you plan to operate independently. It separates your personal assets from business liabilities. If working for an employer, no LLC is needed.",
+        costWithoutLLC: "$0 (work as employee or sole proprietor)",
+        costWithLLC: "$50–$500+ (varies by state)"
+    )
+
+    static let requiredForIndependent = LLCInfo(
+        requirement: .requiredIfIndependent,
+        explanation: "An LLC is strongly recommended if operating independently or starting your own business. Not needed if employed by a company or union. Provides liability protection and tax benefits.",
+        costWithoutLLC: "$0 (work as employee)",
+        costWithLLC: "$50–$500+ (varies by state, plus registered agent fees)"
+    )
+
+    static let notNeeded = LLCInfo(
+        requirement: .notNeeded,
+        explanation: "No LLC needed if working as an employee. If you eventually start your own practice or business, consider forming one at that time.",
+        costWithoutLLC: "$0",
+        costWithLLC: "N/A"
+    )
+}
+
+nonisolated enum LLCRequirement: String, Codable, Sendable {
+    case notNeeded = "Not Needed"
+    case optional = "Optional"
+    case recommended = "Recommended"
+    case requiredIfIndependent = "Required if Independent"
+}
+
+extension BusinessPath {
+    static func generateDegreeRequirement(educationRequired: String, category: BusinessCategory) -> String {
+        let edu = educationRequired.lowercased()
+        if edu.contains("none") || edu.contains("no ") {
+            return "No degree required. Learn through practice, online tutorials, and on-the-job experience."
+        }
+        if edu.contains("certification") || edu.contains("cert") {
+            return "Online certification available. No degree required, but certification improves credibility."
+        }
+        if edu.contains("apprenticeship") {
+            return "Apprenticeship required. Typically 2–5 years of supervised training. No college degree needed."
+        }
+        if edu.contains("trade school") {
+            return "Trade school or vocational program. Typically 6 months to 2 years. No 4-year degree needed."
+        }
+        if edu.contains("license") {
+            return "State licensing required. Complete required coursework and pass licensing exam. No 4-year degree needed."
+        }
+        return "No formal degree required. Skills can be self-taught or learned through short courses."
+    }
+
+    static func generateLLCInfo(for category: BusinessCategory, isGig: Bool) -> LLCInfo {
+        if isGig {
+            return .optional
+        }
+        switch category {
+        case .skilledTrades:
+            return .requiredForIndependent
+        case .homeProperty, .autoTransport, .outdoorLandscape:
+            return .recommended
+        case .foodBeverage:
+            return LLCInfo(
+                requirement: .recommended,
+                explanation: "An LLC is recommended for food businesses for liability protection. Check local health department requirements and cottage food laws in your area.",
+                costWithoutLLC: "$0 (sole proprietor with permits)",
+                costWithLLC: "$50–$500+ (varies by state)"
+            )
+        case .digitalCreative, .productCraft:
+            return .optional
+        case .personalCare, .petServices, .eventsEntertainment:
+            return .recommended
+        }
     }
 }
 
