@@ -1,58 +1,77 @@
 import SwiftUI
 
 enum Theme {
+
     static let accent = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
-            ? UIColor(red: 52/255, green: 211/255, blue: 153/255, alpha: 1)
-            : UIColor(red: 16/255, green: 185/255, blue: 129/255, alpha: 1)
+            ? UIColor(hex6: 0x34D399)
+            : UIColor(hex6: 0x059669)
     })
 
     static let accentBlue = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
-            ? UIColor(red: 59/255, green: 130/255, blue: 246/255, alpha: 1)
-            : UIColor(red: 37/255, green: 99/255, blue: 235/255, alpha: 1)
+            ? UIColor(hex6: 0x60A5FA)
+            : UIColor(hex6: 0x2563EB)
     })
 
     static let background = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
-            ? UIColor(red: 10/255, green: 14/255, blue: 26/255, alpha: 1)
-            : UIColor(red: 247/255, green: 247/255, blue: 244/255, alpha: 1)
+            ? UIColor(hex6: 0x0F1117)
+            : UIColor(hex6: 0xF5F5F7)
     })
 
     static let cardBackground = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
-            ? UIColor(red: 20/255, green: 25/255, blue: 41/255, alpha: 1)
-            : UIColor.white
+            ? UIColor(hex6: 0x1C1E27)
+            : UIColor(hex6: 0xFFFFFF)
     })
 
     static let cardBackgroundLight = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
-            ? UIColor(red: 28/255, green: 34/255, blue: 55/255, alpha: 1)
-            : UIColor(red: 240/255, green: 240/255, blue: 237/255, alpha: 1)
+            ? UIColor(hex6: 0x262933)
+            : UIColor(hex6: 0xEFEFF1)
     })
 
     static let textPrimary = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
-            ? .white
-            : UIColor(red: 28/255, green: 28/255, blue: 30/255, alpha: 1)
+            ? UIColor(hex6: 0xF0F0F5)
+            : UIColor(hex6: 0x1A1A1E)
     })
 
     static let textSecondary = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
-            ? UIColor.white.withAlphaComponent(0.6)
-            : UIColor(red: 99/255, green: 99/255, blue: 102/255, alpha: 1)
+            ? UIColor(hex6: 0xA1A1AA)
+            : UIColor(hex6: 0x5C5C66)
     })
 
     static let textTertiary = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
-            ? UIColor.white.withAlphaComponent(0.4)
-            : UIColor(red: 150/255, green: 150/255, blue: 155/255, alpha: 1)
+            ? UIColor(hex6: 0x71717A)
+            : UIColor(hex6: 0x9A9AA2)
+    })
+
+    static let border = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(hex6: 0x2A2D38)
+            : UIColor(hex6: 0xE5E5EA)
     })
 
     static let cardShadow = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
-            ? .clear
+            ? UIColor(red: 0, green: 0, blue: 0, alpha: 0.25)
             : UIColor(red: 0, green: 0, blue: 0, alpha: 0.06)
+    })
+
+    static let success = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(hex6: 0x34D399)
+            : UIColor(hex6: 0x10B981)
+    })
+
+    static let warning = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(hex6: 0xFBBF24)
+            : UIColor(hex6: 0xD97706)
     })
 
     static func categoryColor(for category: BusinessCategory) -> Color {
@@ -60,25 +79,25 @@ enum Theme {
             let isDark = traits.userInterfaceStyle == .dark
             switch category {
             case .homeProperty:
-                return isDark ? UIColor(hex6: 0x60A5FA) : UIColor(hex6: 0x3B82F6)
+                return isDark ? UIColor(hex6: 0x60A5FA) : UIColor(hex6: 0x2563EB)
             case .autoTransport:
-                return isDark ? UIColor(hex6: 0x2DD4BF) : UIColor(hex6: 0x14B8A6)
+                return isDark ? UIColor(hex6: 0x2DD4BF) : UIColor(hex6: 0x0D9488)
             case .outdoorLandscape:
-                return isDark ? UIColor(hex6: 0x4ADE80) : UIColor(hex6: 0x22C55E)
+                return isDark ? UIColor(hex6: 0x4ADE80) : UIColor(hex6: 0x16A34A)
             case .foodBeverage:
-                return isDark ? UIColor(hex6: 0xFB923C) : UIColor(hex6: 0xF97316)
+                return isDark ? UIColor(hex6: 0xFB923C) : UIColor(hex6: 0xEA580C)
             case .petServices:
-                return isDark ? UIColor(hex6: 0x67E8F9) : UIColor(hex6: 0x06B6D4)
+                return isDark ? UIColor(hex6: 0x67E8F9) : UIColor(hex6: 0x0891B2)
             case .personalCare:
-                return isDark ? UIColor(hex6: 0x22D3EE) : UIColor(hex6: 0x0891B2)
+                return isDark ? UIColor(hex6: 0x22D3EE) : UIColor(hex6: 0x0E7490)
             case .digitalCreative:
-                return isDark ? UIColor(hex6: 0x818CF8) : UIColor(hex6: 0x6366F1)
+                return isDark ? UIColor(hex6: 0x818CF8) : UIColor(hex6: 0x4F46E5)
             case .productCraft:
-                return isDark ? UIColor(hex6: 0xFBBF24) : UIColor(hex6: 0xF59E0B)
+                return isDark ? UIColor(hex6: 0xFBBF24) : UIColor(hex6: 0xD97706)
             case .eventsEntertainment:
-                return isDark ? UIColor(hex6: 0xF472B6) : UIColor(hex6: 0xEC4899)
+                return isDark ? UIColor(hex6: 0xF472B6) : UIColor(hex6: 0xDB2777)
             case .skilledTrades:
-                return isDark ? UIColor(hex6: 0x94A3B8) : UIColor(hex6: 0x64748B)
+                return isDark ? UIColor(hex6: 0x94A3B8) : UIColor(hex6: 0x475569)
             }
         })
     }

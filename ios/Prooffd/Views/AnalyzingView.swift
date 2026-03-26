@@ -82,17 +82,25 @@ struct AnalyzingView: View {
                         [0, 1], [0.5, 1], [1, 1]
                     ],
                     colors: [
-                        Color(hex: "0A0E1A"), Color(hex: "0F1B2D"), Color(hex: "0A0E1A"),
-                        Color(hex: "0D1825"), Color(hex: "132A1E"), Color(hex: "0D1825"),
-                        Color(hex: "0A0E1A"), Color(hex: "0F1B2D"), Color(hex: "0A0E1A")
+                        Color(hex: "0F1117"), Color(hex: "131620"), Color(hex: "0F1117"),
+                        Color(hex: "111420"), Color(hex: "14201A"), Color(hex: "111420"),
+                        Color(hex: "0F1117"), Color(hex: "131620"), Color(hex: "0F1117")
                     ]
                 )
                 .ignoresSafeArea()
             } else {
-                LinearGradient(
-                    colors: [Color(.systemBackground), Color(.secondarySystemBackground), Color(.systemBackground)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
+                MeshGradient(
+                    width: 3, height: 3,
+                    points: [
+                        [0, 0], [0.5, 0], [1, 0],
+                        [0, 0.5], [0.5, 0.5], [1, 0.5],
+                        [0, 1], [0.5, 1], [1, 1]
+                    ],
+                    colors: [
+                        Color(hex: "F5F5F7"), Color(hex: "EDF2F0"), Color(hex: "F5F5F7"),
+                        Color(hex: "EFF3EE"), Color(hex: "E8EFE8"), Color(hex: "EEF1F5"),
+                        Color(hex: "F5F5F7"), Color(hex: "F0F0F3"), Color(hex: "F5F5F7")
+                    ]
                 )
                 .ignoresSafeArea()
             }

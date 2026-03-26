@@ -216,7 +216,7 @@ struct ShareCardPreviewSheet: View {
         )
         .frame(width: 340)
         .padding(16)
-        .background(Color(hex: "0A0E1A"))
+        .background(Color(hex: "0F1117"))
 
         let renderer = ImageRenderer(content: card)
         renderer.scale = 3.0

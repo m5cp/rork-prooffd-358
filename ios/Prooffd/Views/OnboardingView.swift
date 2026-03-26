@@ -114,9 +114,9 @@ struct OnboardingView: View {
                         [0, 1], [0.5, 1], [1, 1]
                     ],
                     colors: [
-                        Color(hex: "0A0E1A"), Color(hex: "0F1B2D"), Color(hex: "0A0E1A"),
-                        Color(hex: "0D1825"), Color(hex: "132A1E"), Color(hex: "0D1825"),
-                        Color(hex: "0A0E1A"), Color(hex: "0F1B2D"), Color(hex: "0A0E1A")
+                        Color(hex: "0F1117"), Color(hex: "131620"), Color(hex: "0F1117"),
+                        Color(hex: "111420"), Color(hex: "14201A"), Color(hex: "111420"),
+                        Color(hex: "0F1117"), Color(hex: "131620"), Color(hex: "0F1117")
                     ]
                 )
                 .ignoresSafeArea()
@@ -129,9 +129,9 @@ struct OnboardingView: View {
                         [0, 1], [0.5, 1], [1, 1]
                     ],
                     colors: [
-                        Color(hex: "F7F7F4"), Color(hex: "EEF4F0"), Color(hex: "F7F7F4"),
-                        Color(hex: "F0F4EE"), Color(hex: "E8F0E8"), Color(hex: "EEF2F6"),
-                        Color(hex: "F7F7F4"), Color(hex: "F0F0ED"), Color(hex: "F7F7F4")
+                        Color(hex: "F5F5F7"), Color(hex: "EDF2F0"), Color(hex: "F5F5F7"),
+                        Color(hex: "EFF3EE"), Color(hex: "E8EFE8"), Color(hex: "EEF1F5"),
+                        Color(hex: "F5F5F7"), Color(hex: "F0F0F3"), Color(hex: "F5F5F7")
                     ]
                 )
                 .ignoresSafeArea()
