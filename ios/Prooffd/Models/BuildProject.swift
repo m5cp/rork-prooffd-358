@@ -91,7 +91,9 @@ nonisolated struct BuildProject: Codable, Identifiable, Sendable {
     var totalSteps: Int { steps.count }
 
     var progressPercentage: Int {
-        totalSteps > 0 ? Int(Double(completedSteps) / Double(totalSteps) * 100) : 0
+        guard totalSteps > 0 else { return 0 }
+        if completedSteps >= totalSteps { return 100 }
+        return Int((Double(completedSteps) / Double(totalSteps) * 100).rounded())
     }
 
     var nextStep: BuildStep? {
