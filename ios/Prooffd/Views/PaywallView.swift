@@ -184,7 +184,7 @@ struct PaywallView: View {
                             ProgressView()
                                 .tint(.white)
                         } else {
-                            Text("Start Pro")
+                            Text("Start Free Trial")
                                 .font(.headline)
                         }
                     }
@@ -207,7 +207,7 @@ struct PaywallView: View {
 
                 Button {
                 } label: {
-                    Text("Start Pro")
+                    Text("Start Free Trial")
                         .font(.headline)
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
