@@ -208,6 +208,14 @@ struct SettingsView: View {
                             .foregroundStyle(Theme.textPrimary)
                     }
                     .listRowBackground(Theme.cardBackground)
+
+                    NavigationLink {
+                        AccessibilityView()
+                    } label: {
+                        Label("Accessibility", systemImage: "accessibility")
+                            .foregroundStyle(Theme.textPrimary)
+                    }
+                    .listRowBackground(Theme.cardBackground)
                 }
 
                 Section {
