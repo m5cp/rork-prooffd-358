@@ -183,28 +183,24 @@ struct WhatIfView: View {
         selected: T?,
         onSelect: @escaping (T) -> Void
     ) -> some View where T.RawValue == String {
-        ScrollView(.horizontal) {
-            HStack(spacing: 8) {
-                ForEach(options) { option in
-                    let isSelected = selected?.rawValue == option.rawValue
-                    Button {
-                        withAnimation(.spring(duration: 0.25)) {
-                            onSelect(option)
-                        }
-                    } label: {
-                        Text(option.rawValue)
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(isSelected ? .white : Theme.textSecondary)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(isSelected ? Theme.accentBlue : Theme.cardBackgroundLight)
-                            .clipShape(.capsule)
+        FlowLayout(spacing: 8) {
+            ForEach(options) { option in
+                let isSelected = selected?.rawValue == option.rawValue
+                Button {
+                    withAnimation(.spring(duration: 0.25)) {
+                        onSelect(option)
                     }
+                } label: {
+                    Text(option.rawValue)
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(isSelected ? .white : Theme.textSecondary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(isSelected ? Theme.accentBlue : Theme.cardBackgroundLight)
+                        .clipShape(.capsule)
                 }
             }
         }
-        .contentMargins(.horizontal, 0)
-        .scrollIndicators(.hidden)
     }
 
     private func whatIfBoolChip(_ title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {

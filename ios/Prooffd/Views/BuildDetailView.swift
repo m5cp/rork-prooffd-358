@@ -23,8 +23,11 @@ struct BuildDetailView: View {
                         todayStepSection(build)
                         stepsSection(build)
                         businessPlanSection(build)
+                        proFeaturesSection(build)
                         suggestionsSection(build)
-                        exportSection(build)
+                        if store.isPremium {
+                            exportButton(build)
+                        }
                         dangerZone
                         Color.clear.frame(height: 40)
                     }
@@ -280,36 +283,189 @@ struct BuildDetailView: View {
         .clipShape(.rect(cornerRadius: 14))
     }
 
-    private func exportSection(_ build: BuildProject) -> some View {
-        Group {
-            if store.isPremium {
-                Button {
-                    exportBuildPDF(build)
-                } label: {
-                    Label("Download Current Version", systemImage: "doc.fill")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Theme.accent)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(Theme.accent.opacity(0.12))
-                        .clipShape(.capsule)
+    private func proFeaturesSection(_ build: BuildProject) -> some View {
+        let path = BusinessPathDatabase.allPaths.first { $0.id == build.pathId }
+
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 8) {
+                Image(systemName: "briefcase.fill")
+                    .font(.caption)
+                    .foregroundStyle(Theme.accent)
+                Text("Business Tools")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                Spacer()
+                if !store.isPremium {
+                    HStack(spacing: 4) {
+                        Image(systemName: "crown.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.yellow)
+                        Text("Pro")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(Theme.accent)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Theme.accent.opacity(0.12))
+                    .clipShape(.capsule)
                 }
-            } else {
+            }
+            .padding(16)
+            .padding(.bottom, 4)
+
+            VStack(spacing: 0) {
+                proFeatureRow(
+                    title: "Draft Email",
+                    icon: "envelope.fill",
+                    description: "Pre-written outreach email",
+                    isLocked: !store.isPremium,
+                    content: path?.draftEmail
+                )
+                proFeatureDivider
+                proFeatureRow(
+                    title: "Draft Text Message",
+                    icon: "message.fill",
+                    description: "Ready-to-send text template",
+                    isLocked: !store.isPremium,
+                    content: path?.draftTextMessage
+                )
+                proFeatureDivider
+                proFeatureRow(
+                    title: "Sales Intro Script",
+                    icon: "person.wave.2.fill",
+                    description: "Word-for-word intro script",
+                    isLocked: !store.isPremium,
+                    content: path?.salesIntroScript
+                )
+                proFeatureDivider
+                proFeatureRow(
+                    title: "Follow-Up Script",
+                    icon: "arrow.uturn.forward",
+                    description: "Follow-up conversation template",
+                    isLocked: !store.isPremium,
+                    content: path?.followUpScript
+                )
+                proFeatureDivider
+                proFeatureRow(
+                    title: "Social Media Post",
+                    icon: "square.and.arrow.up.fill",
+                    description: "Ready-to-post content",
+                    isLocked: !store.isPremium,
+                    content: path?.socialMediaPost
+                )
+                proFeatureDivider
+                proFeatureRow(
+                    title: "Flyer Copy",
+                    icon: "doc.richtext.fill",
+                    description: "Print-ready flyer text",
+                    isLocked: !store.isPremium,
+                    content: path?.flyerCopy
+                )
+                proFeatureDivider
+                proFeatureRow(
+                    title: "Offer & Pricing Sheet",
+                    icon: "dollarsign.square.fill",
+                    description: "Suggested pricing structure",
+                    isLocked: !store.isPremium,
+                    content: path?.offerPricingSheet
+                )
+                proFeatureDivider
+                proFeatureRow(
+                    title: "Full Business Plan",
+                    icon: "doc.text.fill",
+                    description: "Comprehensive business plan",
+                    isLocked: !store.isPremium,
+                    content: path?.expandedBusinessPlan
+                )
+                proFeatureDivider
+                proFeatureRow(
+                    title: "PDF Export",
+                    icon: "arrow.down.doc.fill",
+                    description: "Download your build as PDF",
+                    isLocked: !store.isPremium,
+                    content: nil
+                )
+            }
+
+            if !store.isPremium {
                 Button {
                     showPaywall = true
                 } label: {
                     HStack(spacing: 8) {
-                        Image(systemName: "lock.fill")
-                        Text("Unlock PDF Export with Pro")
+                        Image(systemName: "lock.open.fill")
+                        Text("Unlock All Features with Pro")
                     }
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Theme.textSecondary)
+                    .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(Theme.cardBackground)
+                    .background(
+                        LinearGradient(
+                            colors: [Theme.accent, Theme.accentBlue],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
                     .clipShape(.capsule)
                 }
+                .padding(16)
             }
+        }
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(store.isPremium ? Color.clear : Theme.accent.opacity(0.2), lineWidth: 1)
+        )
+    }
+
+    private func proFeatureRow(title: String, icon: String, description: String, isLocked: Bool, content: String?) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.caption)
+                .foregroundStyle(isLocked ? Theme.textTertiary : Theme.accent)
+                .frame(width: 24)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(isLocked ? Theme.textTertiary : Theme.textPrimary)
+                Text(description)
+                    .font(.caption2)
+                    .foregroundStyle(Theme.textTertiary)
+            }
+            Spacer()
+            if isLocked {
+                Image(systemName: "lock.fill")
+                    .font(.caption2)
+                    .foregroundStyle(Theme.textTertiary)
+            } else {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.caption)
+                    .foregroundStyle(Theme.accent)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+    }
+
+    private var proFeatureDivider: some View {
+        Rectangle()
+            .fill(Theme.cardBackgroundLight)
+            .frame(height: 0.5)
+            .padding(.leading, 52)
+    }
+
+    private func exportButton(_ build: BuildProject) -> some View {
+        Button {
+            exportBuildPDF(build)
+        } label: {
+            Label("Download Current Version", systemImage: "doc.fill")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Theme.accent)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(Theme.accent.opacity(0.12))
+                .clipShape(.capsule)
         }
     }
 

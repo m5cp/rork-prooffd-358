@@ -6,6 +6,7 @@ struct ProfileTabView: View {
     @Environment(ThemeManager.self) private var themeManager
     @State private var showPaywall: Bool = false
     @State private var showRetakeConfirm: Bool = false
+    @State private var showProfileDetails: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -75,17 +76,64 @@ struct ProfileTabView: View {
                 }
 
                 Section("Your Profile") {
-                    if let budget = appState.userProfile.budget {
-                        profileRow(icon: "dollarsign.circle.fill", label: "Budget", value: budget.rawValue)
+                    Button {
+                        withAnimation(.spring(duration: 0.3)) {
+                            showProfileDetails.toggle()
+                        }
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "person.text.rectangle.fill")
+                                .foregroundStyle(Theme.accent)
+                                .frame(width: 22)
+                            Text("View My Answers")
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(Theme.textPrimary)
+                            Spacer()
+                            Image(systemName: showProfileDetails ? "chevron.up" : "chevron.down")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Theme.textTertiary)
+                        }
                     }
-                    if let hours = appState.userProfile.hoursPerDay {
-                        profileRow(icon: "clock.fill", label: "Hours/Day", value: hours.rawValue)
-                    }
-                    if let pref = appState.userProfile.workPreference {
-                        profileRow(icon: "briefcase.fill", label: "Work Type", value: pref.rawValue)
-                    }
-                    if !appState.userProfile.selectedCategories.isEmpty {
-                        profileRow(icon: "square.grid.2x2.fill", label: "Interests", value: appState.userProfile.selectedCategories.map(\.rawValue).joined(separator: ", "))
+                    .listRowBackground(Theme.cardBackground)
+                    .sensoryFeedback(.selection, trigger: showProfileDetails)
+
+                    if showProfileDetails {
+                        if let budget = appState.userProfile.budget {
+                            profileRow(icon: "dollarsign.circle.fill", label: "Budget", value: budget.rawValue)
+                        }
+                        if let hours = appState.userProfile.hoursPerDay {
+                            profileRow(icon: "clock.fill", label: "Hours/Day", value: hours.rawValue)
+                        }
+                        if let pref = appState.userProfile.workPreference {
+                            profileRow(icon: "briefcase.fill", label: "Work Type", value: pref.rawValue)
+                        }
+                        if let style = appState.userProfile.workStyle {
+                            profileRow(icon: "person.2.fill", label: "Work Style", value: style.rawValue)
+                        }
+                        if let tech = appState.userProfile.techComfort {
+                            profileRow(icon: "desktopcomputer", label: "Tech Comfort", value: tech.rawValue)
+                        }
+                        if let exp = appState.userProfile.experienceLevel {
+                            profileRow(icon: "star.fill", label: "Experience", value: exp.rawValue)
+                        }
+                        if let selling = appState.userProfile.sellingComfort {
+                            profileRow(icon: "tag.fill", label: "Selling Comfort", value: selling.rawValue)
+                        }
+                        if let interaction = appState.userProfile.customerInteraction {
+                            profileRow(icon: "person.wave.2.fill", label: "Customer Interaction", value: interaction.rawValue)
+                        }
+                        if let hasCar = appState.userProfile.hasCar {
+                            profileRow(icon: "car.fill", label: "Has Car", value: hasCar ? "Yes" : "No")
+                        }
+                        if let fastCash = appState.userProfile.needsFastCash {
+                            profileRow(icon: "bolt.fill", label: "Needs Fast Cash", value: fastCash ? "Yes" : "No")
+                        }
+                        if !appState.userProfile.selectedCategories.isEmpty {
+                            profileRow(icon: "square.grid.2x2.fill", label: "Interests", value: appState.userProfile.selectedCategories.map(\.rawValue).joined(separator: ", "))
+                        }
+                        if !appState.userProfile.workConditions.isEmpty {
+                            profileRow(icon: "wrench.and.screwdriver.fill", label: "Work Conditions", value: appState.userProfile.workConditions.map(\.rawValue).joined(separator: ", "))
+                        }
                     }
 
                     Button {

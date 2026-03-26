@@ -25,7 +25,7 @@ struct MyBuildsView: View {
                             .padding(.horizontal, 16)
                     }
 
-                    if !store.isPremium && appState.builds.count >= 2 {
+                    if !store.isPremium {
                         upgradePrompt
                             .padding(.horizontal, 16)
                     }
@@ -255,27 +255,63 @@ struct MyBuildsView: View {
         Button {
             showPaywall = true
         } label: {
-            HStack(spacing: 12) {
-                Image(systemName: "crown.fill")
-                    .font(.title3)
-                    .foregroundStyle(.yellow)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Unlock Full Business Plans")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Theme.textPrimary)
-                    Text("Get templates, scripts & export tools")
-                        .font(.caption)
-                        .foregroundStyle(Theme.textSecondary)
+            VStack(spacing: 14) {
+                HStack(spacing: 12) {
+                    ZStack {
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [Theme.accent, Theme.accentBlue],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 44, height: 44)
+                        Image(systemName: "crown.fill")
+                            .font(.body)
+                            .foregroundStyle(.white)
+                    }
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Unlock Pro Features")
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(Theme.textPrimary)
+                        Text("Get business plans, email templates, sales scripts, PDF exports & more")
+                            .font(.caption)
+                            .foregroundStyle(Theme.textSecondary)
+                            .lineLimit(2)
+                    }
+
+                    Spacer()
                 }
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundStyle(Theme.textTertiary)
+
+                HStack(spacing: 6) {
+                    Image(systemName: "lock.open.fill")
+                    Text("Upgrade to Pro")
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(
+                    LinearGradient(
+                        colors: [Theme.accent, Theme.accentBlue],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .clipShape(.capsule)
             }
             .padding(16)
             .background(Theme.cardBackground)
-            .clipShape(.rect(cornerRadius: 12))
+            .clipShape(.rect(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Theme.accent.opacity(0.2), lineWidth: 1)
+            )
+            .cardShadow()
         }
+        .buttonStyle(.plain)
     }
 
     private func checkForRatingPrompt() {
