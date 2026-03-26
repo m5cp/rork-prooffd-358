@@ -513,68 +513,63 @@ struct ResultCard: View {
 
     var body: some View {
         Button(action: onTap) {
-            HStack(spacing: 12) {
-                Text("\(rank)")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(Theme.textTertiary)
-                    .frame(width: 20)
+            VStack(spacing: 10) {
+                HStack(spacing: 12) {
+                    Text("\(rank)")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Theme.textTertiary)
+                        .frame(width: 20)
 
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(categoryColor.opacity(0.12))
-                        .frame(width: 44, height: 44)
-                    Image(systemName: result.businessPath.icon)
-                        .font(.body)
-                        .foregroundStyle(categoryColor)
-                }
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(categoryColor.opacity(0.12))
+                            .frame(width: 44, height: 44)
+                        Image(systemName: result.businessPath.icon)
+                            .font(.body)
+                            .foregroundStyle(categoryColor)
+                    }
 
-                VStack(alignment: .leading, spacing: 4) {
                     Text(result.businessPath.name)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Theme.textPrimary)
                         .lineLimit(1)
 
+                    Spacer(minLength: 4)
+
                     HStack(spacing: 6) {
-                        Text(result.businessPath.startupCostRange)
-                            .font(.caption2)
-                            .foregroundStyle(Theme.textTertiary)
-                        Text("•")
-                            .font(.caption2)
-                            .foregroundStyle(Theme.textTertiary)
-                        Text(result.businessPath.timeToFirstDollar)
-                            .font(.caption2)
-                            .foregroundStyle(Theme.textTertiary)
-                    }
-                }
-
-                Spacer(minLength: 4)
-
-                HStack(spacing: 6) {
-                    Button {
-                        withAnimation(.spring(duration: 0.3)) {
-                            appState.toggleFavorite(result.businessPath.id)
+                        Button {
+                            withAnimation(.spring(duration: 0.3)) {
+                                appState.toggleFavorite(result.businessPath.id)
+                            }
+                        } label: {
+                            Image(systemName: appState.isFavorite(result.businessPath.id) ? "heart.fill" : "heart")
+                                .font(.subheadline)
+                                .foregroundStyle(appState.isFavorite(result.businessPath.id) ? .pink : Theme.textTertiary)
+                                .frame(width: 32, height: 44)
                         }
-                    } label: {
-                        Image(systemName: appState.isFavorite(result.businessPath.id) ? "heart.fill" : "heart")
-                            .font(.subheadline)
-                            .foregroundStyle(appState.isFavorite(result.businessPath.id) ? .pink : Theme.textTertiary)
-                            .frame(width: 32, height: 44)
-                    }
-                    .accessibilityLabel(appState.isFavorite(result.businessPath.id) ? "Remove from favorites" : "Add to favorites")
+                        .accessibilityLabel(appState.isFavorite(result.businessPath.id) ? "Remove from favorites" : "Add to favorites")
 
-                    Button {
-                        onShare()
-                    } label: {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.caption)
-                            .foregroundStyle(Theme.textTertiary)
-                            .frame(width: 32, height: 44)
+                        Button {
+                            onShare()
+                        } label: {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.caption)
+                                .foregroundStyle(Theme.textTertiary)
+                                .frame(width: 32, height: 44)
+                        }
+                        .accessibilityLabel("Share this match")
                     }
-                    .accessibilityLabel("Share this match")
-
-                    matchBadge
-                        .fixedSize()
                 }
+
+                HStack(spacing: 8) {
+                    matchBadge
+
+                    infoTag(icon: "dollarsign.circle.fill", text: result.businessPath.startupCostRange)
+                    infoTag(icon: "clock.fill", text: result.businessPath.timeToFirstDollar)
+
+                    Spacer()
+                }
+                .padding(.leading, 32)
             }
             .padding(.leading, 12)
             .padding(.trailing, 10)
@@ -594,6 +589,21 @@ struct ResultCard: View {
             .padding(.vertical, 5)
             .background(badgeColor.opacity(0.12))
             .clipShape(.capsule)
+    }
+
+    private func infoTag(icon: String, text: String) -> some View {
+        HStack(spacing: 3) {
+            Image(systemName: icon)
+                .font(.system(size: 9))
+                .foregroundStyle(Theme.textTertiary)
+            Text(text)
+                .font(.caption2)
+                .foregroundStyle(Theme.textTertiary)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(Theme.cardBackgroundLight.opacity(0.6))
+        .clipShape(.capsule)
     }
 
     private var badgeColor: Color {

@@ -163,9 +163,26 @@ struct PaywallView: View {
             if let offering = store.offerings?.current,
                let package = offering.availablePackages.first {
                 VStack(spacing: 4) {
-                    Text(package.localizedPriceString + "/month")
-                        .font(.title2.bold())
-                        .foregroundStyle(Theme.textPrimary)
+                    if let intro = package.storeProduct.introductoryDiscount,
+                       intro.paymentMode == .freeTrial {
+                        Text("\(intro.subscriptionPeriod.periodTitle()) Free Trial")
+                            .font(.title2.bold())
+                            .foregroundStyle(Theme.textPrimary)
+                        Text("then \(package.localizedPriceString)/month")
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                    } else if let intro = package.storeProduct.introductoryDiscount {
+                        Text(intro.localizedPriceString + "/month")
+                            .font(.title2.bold())
+                            .foregroundStyle(Theme.textPrimary)
+                        Text("then \(package.localizedPriceString)/month")
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                    } else {
+                        Text(package.localizedPriceString + "/month")
+                            .font(.title2.bold())
+                            .foregroundStyle(Theme.textPrimary)
+                    }
                     Text("Cancel anytime")
                         .font(.caption)
                         .foregroundStyle(Theme.textTertiary)
@@ -184,7 +201,7 @@ struct PaywallView: View {
                             ProgressView()
                                 .tint(.white)
                         } else {
-                            Text("Start Free Trial")
+                            Text(purchaseButtonTitle(for: package))
                                 .font(.headline)
                         }
                     }
@@ -238,6 +255,20 @@ struct PaywallView: View {
             }
 
             subscriptionDisclosure
+        }
+    }
+
+    private func purchaseButtonTitle(for package: Package) -> String {
+        guard let intro = package.storeProduct.introductoryDiscount else {
+            return "Subscribe Now"
+        }
+        switch intro.paymentMode {
+        case .freeTrial:
+            return "Start Free Trial"
+        case .payAsYouGo, .payUpFront:
+            return "Start Intro Offer"
+        @unknown default:
+            return "Subscribe Now"
         }
     }
 
