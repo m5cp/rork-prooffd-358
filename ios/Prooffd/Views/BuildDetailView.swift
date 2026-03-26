@@ -617,75 +617,8 @@ struct BuildDetailView: View {
     }
 
     private func exportBuildPDF(_ build: BuildProject) {
-        let content = BuildPDFContent(build: build)
-        let renderer = ImageRenderer(content: content)
-        renderer.scale = 2.0
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(build.businessName) - Build Plan.pdf")
-        renderer.render { size, context in
-            var box = CGRect(origin: .zero, size: .init(width: size.width, height: size.height))
-            guard let pdf = CGContext(url as CFURL, mediaBox: &box, nil) else { return }
-            pdf.beginPDFPage(nil)
-            context(pdf)
-            pdf.endPDFPage()
-            pdf.closePDF()
+        if let url = PDFExportService.exportBuildPDF(build) {
+            PDFExportService.presentShareSheet(items: [url])
         }
-        let activityVC = UIActivityViewController(activityItems: [url], applicationActivities: nil)
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let root = windowScene.windows.first?.rootViewController {
-            var topController = root
-            while let presented = topController.presentedViewController { topController = presented }
-            activityVC.popoverPresentationController?.sourceView = topController.view
-            topController.present(activityVC, animated: true)
-        }
-    }
-}
-
-struct BuildPDFContent: View {
-    let build: BuildProject
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text(build.businessName)
-                .font(.title.bold())
-            Text("Progress: \(build.progressPercentage)% complete")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-            Divider()
-            Text("Steps")
-                .font(.headline)
-            ForEach(Array(build.steps.enumerated()), id: \.offset) { index, step in
-                HStack(alignment: .top) {
-                    Text("\(step.isCompleted ? "✓" : "○") \(index + 1). \(step.title)")
-                        .font(.body)
-                    Spacer()
-                    if let date = step.completedDate {
-                        Text(date.formatted(.dateTime.month(.abbreviated).day()))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                if let notes = step.notes, !notes.isEmpty {
-                    Text("  Notes: \(notes)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            if !build.pricingNotes.isEmpty {
-                Divider()
-                Text("Pricing").font(.headline)
-                Text(build.pricingNotes).font(.body).foregroundStyle(.secondary)
-            }
-            if !build.serviceNotes.isEmpty {
-                Text("Services").font(.headline)
-                Text(build.serviceNotes).font(.body).foregroundStyle(.secondary)
-            }
-            if !build.strategyNotes.isEmpty {
-                Text("Strategy").font(.headline)
-                Text(build.strategyNotes).font(.body).foregroundStyle(.secondary)
-            }
-        }
-        .padding(40)
-        .frame(width: 612)
-        .background(.white)
     }
 }

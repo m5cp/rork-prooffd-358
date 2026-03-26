@@ -24,6 +24,68 @@ nonisolated struct BuildProject: Codable, Identifiable, Sendable {
     var pricingNotes: String
     var strategyNotes: String
     var serviceNotes: String
+    let aiSafeScore: Int
+    let suggestedServices: [String]
+    let customerSources: [String]
+    let pricingTips: [String]
+    let scalingTips: [String]
+    let riskNotes: [String]
+
+    init(
+        id: String, pathId: String, pathName: String, pathIcon: String,
+        category: BusinessCategory, startupCost: String, timeToFirstDollar: String,
+        overview: String, startDate: Date, steps: [BuildStep],
+        businessName: String, pricingNotes: String, strategyNotes: String,
+        serviceNotes: String, aiSafeScore: Int = 0,
+        suggestedServices: [String] = [], customerSources: [String] = [],
+        pricingTips: [String] = [], scalingTips: [String] = [],
+        riskNotes: [String] = []
+    ) {
+        self.id = id
+        self.pathId = pathId
+        self.pathName = pathName
+        self.pathIcon = pathIcon
+        self.category = category
+        self.startupCost = startupCost
+        self.timeToFirstDollar = timeToFirstDollar
+        self.overview = overview
+        self.startDate = startDate
+        self.steps = steps
+        self.businessName = businessName
+        self.pricingNotes = pricingNotes
+        self.strategyNotes = strategyNotes
+        self.serviceNotes = serviceNotes
+        self.aiSafeScore = aiSafeScore
+        self.suggestedServices = suggestedServices
+        self.customerSources = customerSources
+        self.pricingTips = pricingTips
+        self.scalingTips = scalingTips
+        self.riskNotes = riskNotes
+    }
+
+    nonisolated init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        pathId = try c.decode(String.self, forKey: .pathId)
+        pathName = try c.decode(String.self, forKey: .pathName)
+        pathIcon = try c.decode(String.self, forKey: .pathIcon)
+        category = try c.decode(BusinessCategory.self, forKey: .category)
+        startupCost = try c.decode(String.self, forKey: .startupCost)
+        timeToFirstDollar = try c.decode(String.self, forKey: .timeToFirstDollar)
+        overview = try c.decode(String.self, forKey: .overview)
+        startDate = try c.decode(Date.self, forKey: .startDate)
+        steps = try c.decode([BuildStep].self, forKey: .steps)
+        businessName = try c.decode(String.self, forKey: .businessName)
+        pricingNotes = try c.decode(String.self, forKey: .pricingNotes)
+        strategyNotes = try c.decode(String.self, forKey: .strategyNotes)
+        serviceNotes = try c.decode(String.self, forKey: .serviceNotes)
+        aiSafeScore = try c.decodeIfPresent(Int.self, forKey: .aiSafeScore) ?? 0
+        suggestedServices = try c.decodeIfPresent([String].self, forKey: .suggestedServices) ?? []
+        customerSources = try c.decodeIfPresent([String].self, forKey: .customerSources) ?? []
+        pricingTips = try c.decodeIfPresent([String].self, forKey: .pricingTips) ?? []
+        scalingTips = try c.decodeIfPresent([String].self, forKey: .scalingTips) ?? []
+        riskNotes = try c.decodeIfPresent([String].self, forKey: .riskNotes) ?? []
+    }
 
     var completedSteps: Int { steps.filter(\.isCompleted).count }
     var totalSteps: Int { steps.count }
@@ -35,6 +97,8 @@ nonisolated struct BuildProject: Codable, Identifiable, Sendable {
     var nextStep: BuildStep? {
         steps.first { !$0.isCompleted }
     }
+
+    var zone: AIZone { AIZone.from(score: aiSafeScore) }
 
     var currentMilestone: String {
         switch progressPercentage {
@@ -105,6 +169,13 @@ nonisolated struct BuildProject: Codable, Identifiable, Sendable {
             order += 1
         }
 
+        let suggestedName = path.suggestedBusinessName.isEmpty ? path.name : path.suggestedBusinessName
+        let services = path.suggestedServices.isEmpty ? [path.name] : path.suggestedServices
+        let sources = path.customerSources
+        let tips = path.pricingTips
+        let scale = path.scalingTips
+        let risks = path.riskNotes
+
         return BuildProject(
             id: UUID().uuidString,
             pathId: path.id,
@@ -116,10 +187,16 @@ nonisolated struct BuildProject: Codable, Identifiable, Sendable {
             overview: path.overview,
             startDate: Date(),
             steps: steps,
-            businessName: path.name,
+            businessName: suggestedName,
             pricingNotes: path.starterPricing,
             strategyNotes: "Start with local outreach. Focus on getting your first 5 customers through personal connections and local groups.",
-            serviceNotes: path.overview.components(separatedBy: ".").first ?? path.overview
+            serviceNotes: path.overview.components(separatedBy: ".").first ?? path.overview,
+            aiSafeScore: path.aiProofRating,
+            suggestedServices: services,
+            customerSources: sources,
+            pricingTips: tips,
+            scalingTips: scale,
+            riskNotes: risks
         )
     }
 }
