@@ -19,9 +19,14 @@ class StreakTracker {
         totalDaysOpened = defaults.integer(forKey: totalDaysKey)
     }
 
+    private let streakBufferUsedKey = "streak_bufferUsed"
+    private(set) var streakBufferAvailable: Bool = true
+
     func recordAppOpen() {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
+
+        streakBufferAvailable = !defaults.bool(forKey: streakBufferUsedKey)
 
         if let lastDateData = defaults.object(forKey: lastOpenedKey) as? Date {
             let lastDate = calendar.startOfDay(for: lastDateData)
@@ -31,8 +36,13 @@ class StreakTracker {
                 return
             } else if daysBetween == 1 {
                 currentStreak += 1
+                resetStreakBuffer()
+            } else if daysBetween == 2 && streakBufferAvailable && currentStreak >= 2 {
+                currentStreak += 1
+                useStreakBuffer()
             } else {
                 currentStreak = 1
+                resetStreakBuffer()
             }
         } else {
             currentStreak = 1
@@ -48,6 +58,16 @@ class StreakTracker {
         defaults.set(currentStreak, forKey: currentStreakKey)
         defaults.set(longestStreak, forKey: longestStreakKey)
         defaults.set(totalDaysOpened, forKey: totalDaysKey)
+    }
+
+    private func useStreakBuffer() {
+        streakBufferAvailable = false
+        defaults.set(true, forKey: streakBufferUsedKey)
+    }
+
+    private func resetStreakBuffer() {
+        streakBufferAvailable = true
+        defaults.set(false, forKey: streakBufferUsedKey)
     }
 
     var streakEmoji: String {

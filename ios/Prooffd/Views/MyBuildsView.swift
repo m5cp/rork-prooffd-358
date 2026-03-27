@@ -264,6 +264,16 @@ struct MyBuildsView: View {
         }
     }
 
+    private func milestoneMessage(for progress: Int) -> String? {
+        switch progress {
+        case 25: return "Quarter way there — great momentum!"
+        case 50: return "Halfway done — you're crushing it!"
+        case 75: return "Almost there — the finish line is close!"
+        case 100: return "Launch ready — you did it!"
+        default: return nil
+        }
+    }
+
     private func buildCard(_ build: BuildProject) -> some View {
         Button {
             selectedBuild = build
@@ -313,7 +323,20 @@ struct MyBuildsView: View {
                 }
                 .frame(height: 4)
 
-                if let nextStep = build.nextStep {
+                if let msg = milestoneMessage(for: build.progressPercentage) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "sparkles")
+                            .font(.caption2)
+                            .foregroundStyle(Color(hex: "FBBF24"))
+                        Text(msg)
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(Color(hex: "FBBF24"))
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color(hex: "FBBF24").opacity(0.08))
+                    .clipShape(.capsule)
+                } else if let nextStep = build.nextStep {
                     HStack(spacing: 8) {
                         Image(systemName: "arrow.right.circle")
                             .font(.caption2)

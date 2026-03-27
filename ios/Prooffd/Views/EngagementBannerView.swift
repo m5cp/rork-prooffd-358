@@ -15,11 +15,11 @@ struct EngagementBannerView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 0) {
+                levelPill
+                Spacer(minLength: 8)
                 streakPill
                 Spacer(minLength: 8)
                 pointsPill
-                Spacer(minLength: 8)
-                badgesPill
             }
             .padding(12)
 
@@ -31,6 +31,24 @@ struct EngagementBannerView: View {
         .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 14))
         .cardShadow()
+    }
+
+    private var levelPill: some View {
+        let level = appState.currentLevel
+        let levelColor = Color(hex: level.color)
+        return HStack(spacing: 6) {
+            Image(systemName: level.icon)
+                .font(.caption)
+                .foregroundStyle(levelColor)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(level.title)
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(levelColor)
+                Text("Lv \(level.rank)")
+                    .font(.system(size: 10))
+                    .foregroundStyle(Theme.textTertiary)
+            }
+        }
     }
 
     private var streakPill: some View {

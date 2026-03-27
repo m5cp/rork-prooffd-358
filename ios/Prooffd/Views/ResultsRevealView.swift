@@ -4,7 +4,9 @@ struct ResultsRevealView: View {
     @Environment(AppState.self) private var appState
     @State private var countUpValue: Int = 0
     @State private var showTopMatch: Bool = false
+    @State private var showBadge: Bool = false
     @State private var showButton: Bool = false
+    @State private var confettiTrigger: Int = 0
 
     private var targetCount: Int {
         appState.matchResults.count
@@ -18,7 +20,7 @@ struct ResultsRevealView: View {
         ZStack {
             Theme.background.ignoresSafeArea()
 
-            VStack(spacing: 32) {
+            VStack(spacing: 28) {
                 Spacer()
 
                 VStack(spacing: 16) {
@@ -43,6 +45,27 @@ struct ResultsRevealView: View {
                         .foregroundStyle(Theme.textSecondary)
                 }
 
+                if showBadge {
+                    HStack(spacing: 10) {
+                        Image(systemName: "rosette")
+                            .font(.title3)
+                            .foregroundStyle(Color(hex: "FBBF24"))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Path Finder")
+                                .font(.subheadline.weight(.bold))
+                                .foregroundStyle(Theme.textPrimary)
+                            Text("+25 bonus points")
+                                .font(.caption)
+                                .foregroundStyle(Color(hex: "FBBF24"))
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(Color(hex: "FBBF24").opacity(0.1))
+                    .clipShape(.capsule)
+                    .transition(.scale(scale: 0.6).combined(with: .opacity))
+                }
+
                 if showTopMatch, let top = topMatch {
                     let catColor = Theme.categoryColor(for: top.businessPath.category)
                     VStack(spacing: 12) {
@@ -64,9 +87,16 @@ struct ResultsRevealView: View {
                                 Text(top.businessPath.name)
                                     .font(.headline)
                                     .foregroundStyle(Theme.textPrimary)
-                                Text("\(top.scorePercentage)% match")
-                                    .font(.caption.weight(.semibold))
-                                    .foregroundStyle(catColor)
+                                HStack(spacing: 8) {
+                                    Text("\(top.scorePercentage)% match")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(catColor)
+                                    Text("\u{2022}")
+                                        .foregroundStyle(Theme.textTertiary)
+                                    Text("AI Safe: \(top.businessPath.aiProofRating)")
+                                        .font(.caption.weight(.medium))
+                                        .foregroundStyle(Theme.textTertiary)
+                                }
                             }
 
                             Spacer()
@@ -100,6 +130,7 @@ struct ResultsRevealView: View {
             }
         }
         .sensoryFeedback(.impact(weight: .heavy), trigger: showTopMatch)
+        .sensoryFeedback(.success, trigger: showBadge)
         .task {
             await runReveal()
         }
@@ -122,6 +153,13 @@ struct ResultsRevealView: View {
         withAnimation(.spring(duration: 0.15)) {
             countUpValue = targetCount
         }
+
+        try? await Task.sleep(for: .milliseconds(400))
+
+        withAnimation(.spring(duration: 0.5, bounce: 0.3)) {
+            showBadge = true
+        }
+        appState.momentum.awardPoints(25, reason: .todayStep)
 
         try? await Task.sleep(for: .milliseconds(600))
 

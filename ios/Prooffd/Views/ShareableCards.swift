@@ -436,8 +436,9 @@ struct ShareableCardSheet: View {
 
     private func renderImage() {
         let card = cardContent
-            .frame(width: 340)
-            .padding(16)
+            .frame(width: 360, height: 640)
+            .padding(24)
+            .frame(width: 360, height: 640)
             .background(Color(hex: "0F1117"))
 
         let renderer = ImageRenderer(content: card)

@@ -22,6 +22,7 @@ class AppState {
     var celebratingBadge: MomentumBadge?
     var pendingSharePrompt: SharePromptType?
     var dailyRewards: DailyRewardTracker = DailyRewardTracker()
+    var dailyMicroAction: DailyMicroActionTracker = DailyMicroActionTracker()
 
     var hasUsedWhatIf: Bool {
         get { UserDefaults.standard.bool(forKey: "hasUsedWhatIf") }
@@ -405,9 +406,14 @@ class AppState {
         completedChallengeWeeks.contains(weekID)
     }
 
+    var currentLevel: UserLevel {
+        UserLevel.forPoints(momentum.totalPoints)
+    }
+
     func recordAppOpen() {
         streakTracker.recordAppOpen()
         momentum.awardPoints(2, reason: .dailyUse)
+        dailyMicroAction.resetIfNewDay()
         AnalyticsTracker.shared.trackAppOpen()
         checkAchievements()
         checkMomentumBadges()
@@ -415,6 +421,13 @@ class AppState {
         if dailyRewards.canClaim {
             dailyRewards.showRewardPopup = true
         }
+    }
+
+    func completeDailyMicroAction() {
+        guard !dailyMicroAction.completedToday else { return }
+        let action = dailyMicroAction.todayAction
+        dailyMicroAction.completeAction()
+        momentum.awardPoints(action.points, reason: .dailyUse)
     }
 
     func claimDailyReward() {

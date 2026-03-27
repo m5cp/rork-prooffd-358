@@ -301,21 +301,8 @@ struct DiscoverTabView: View {
 
     @ViewBuilder
     private var mainContent: some View {
-        VStack(spacing: 24) {
-            if appState.dailyRewards.canClaim {
-                DailyRewardBanner(
-                    canClaim: true,
-                    currentDay: appState.dailyRewards.currentDay
-                ) {
-                    appState.dailyRewards.showRewardPopup = true
-                }
-                .padding(.horizontal, 16)
-            }
-
+        VStack(spacing: 20) {
             EngagementBannerView()
-                .padding(.horizontal, 16)
-
-            headerBadges
                 .padding(.horizontal, 16)
 
             if !appState.hasCompletedQuiz {
@@ -328,6 +315,9 @@ struct DiscoverTabView: View {
                     .padding(.horizontal, 16)
             }
 
+            DailyMicroActionCard()
+                .padding(.horizontal, 16)
+
             StartHereSection(
                 onStartFast: { seeAllMode = .fastStart },
                 onStableCareer: { appState.selectedTab = 2 },
@@ -337,9 +327,6 @@ struct DiscoverTabView: View {
                 }
             )
 
-            whatIfButton
-                .padding(.horizontal, 16)
-
             horizontalSection(
                 title: "Recommended For You",
                 icon: "star.fill",
@@ -347,6 +334,9 @@ struct DiscoverTabView: View {
                 results: recommendedResults,
                 mode: .recommended
             )
+
+            whatIfButton
+                .padding(.horizontal, 16)
 
             if !trendingResults.isEmpty {
                 horizontalSection(
@@ -371,64 +361,7 @@ struct DiscoverTabView: View {
         .padding(.top, 8)
     }
 
-    private var headerBadges: some View {
-        HStack(spacing: 8) {
-            if appState.streakTracker.currentStreak > 0 {
-                HStack(spacing: 4) {
-                    Image(systemName: "flame.fill")
-                        .font(.caption)
-                        .foregroundStyle(.orange)
-                    Text("\(appState.streakTracker.currentStreak) day streak")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.orange)
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(Color.orange.opacity(0.12))
-                .clipShape(.capsule)
-            }
 
-            Text("\(allResults.count) paths matched")
-                .font(.caption)
-                .foregroundStyle(Theme.textTertiary)
-
-            Spacer()
-
-            Button {
-                showAchievements = true
-            } label: {
-                HStack(spacing: 4) {
-                    Image(systemName: "trophy.fill")
-                        .font(.caption2)
-                    Text("\(appState.momentum.earnedBadges.count)")
-                        .font(.caption.weight(.bold))
-                }
-                .foregroundStyle(Color(hex: "818CF8"))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(Color(hex: "818CF8").opacity(0.12))
-                .clipShape(.capsule)
-            }
-
-            if !appState.builds.isEmpty {
-                Button {
-                    appState.selectedTab = 1
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "hammer.fill")
-                            .font(.caption2)
-                        Text("\(appState.builds.count) builds")
-                            .font(.caption.weight(.bold))
-                    }
-                    .foregroundStyle(Theme.accentBlue)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(Theme.accentBlue.opacity(0.12))
-                    .clipShape(.capsule)
-                }
-            }
-        }
-    }
 
     private func topMatchCard(_ result: MatchResult) -> some View {
         let catColor = Theme.categoryColor(for: result.businessPath.category)

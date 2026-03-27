@@ -20,7 +20,7 @@ struct PrivacyPolicyView: View {
                     privacySection(
                         icon: "lock.shield.fill",
                         title: "Your Data Stays on Your Device",
-                        text: "All app usage data (quiz results, paths explored, progress) is stored locally on your device using standard iOS storage. None of this data is sent to external servers."
+                        text: "All user data, progress, and generated content are stored locally on your device using standard iOS storage. None of this data is sent to external servers unless you choose to share it."
                     )
 
                     privacySection(
@@ -33,6 +33,12 @@ struct PrivacyPolicyView: View {
                         icon: "hand.raised.slash.fill",
                         title: "No Tracking",
                         text: "We do not track you across apps or websites. We do not use device fingerprinting, ad attribution, or behavioral tracking systems. No personal information such as names, emails, or location is collected."
+                    )
+
+                    privacySection(
+                        icon: "square.and.arrow.up.fill",
+                        title: "Sharing Features",
+                        text: "The app allows you to generate and share content such as career matches, progress, or summaries. This content is created locally and is only shared if you initiate sharing using the device's native sharing options. We do not store or transmit this content externally."
                     )
 
                     privacySection(

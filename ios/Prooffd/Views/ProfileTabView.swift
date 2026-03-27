@@ -70,6 +70,7 @@ struct ProfileTabView: View {
                 }
 
                 Section("Stats") {
+                    levelRow
                     statsRow(icon: "flame.fill", color: .orange, label: "Streak", value: "\(appState.streakTracker.currentStreak) days")
                     statsRow(icon: "bolt.fill", color: Color(hex: "FBBF24"), label: "Points", value: "\(appState.momentum.totalPoints)")
                     Button {
@@ -132,6 +133,11 @@ struct ProfileTabView: View {
                     .listRowBackground(Theme.cardBackground)
 
                     statsRow(icon: "gift.fill", color: Color(hex: "FB923C"), label: "Daily Rewards", value: "Day \(appState.dailyRewards.currentDay)")
+                    if !appState.dailyMicroAction.completedToday {
+                        statsRow(icon: "target", color: Theme.accent, label: "Today's Action", value: "Pending")
+                    } else {
+                        statsRow(icon: "target", color: Theme.accent, label: "Today's Action", value: "Done")
+                    }
                 }
 
                 Section("Insights") {
@@ -516,6 +522,53 @@ struct ProfileTabView: View {
             }
             .pickerStyle(.segmented)
             .frame(width: 200)
+        }
+        .listRowBackground(Theme.cardBackground)
+    }
+
+    private var levelRow: some View {
+        let level = appState.currentLevel
+        let levelColor = Color(hex: level.color)
+        let progress = level.progressToNext(points: appState.momentum.totalPoints)
+        return HStack(spacing: 12) {
+            Image(systemName: level.icon)
+                .foregroundStyle(levelColor)
+                .frame(width: 22)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    Text(level.title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Theme.textPrimary)
+                    Text("Lv \(level.rank)")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(levelColor)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(levelColor.opacity(0.12))
+                        .clipShape(.capsule)
+                }
+                if let next = UserLevel.nextLevel(after: level) {
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            Capsule()
+                                .fill(Theme.cardBackgroundLight)
+                                .frame(height: 3)
+                            Capsule()
+                                .fill(levelColor)
+                                .frame(width: geo.size.width * progress, height: 3)
+                        }
+                    }
+                    .frame(height: 3)
+                    Text("\(next.minPoints - appState.momentum.totalPoints) pts to \(next.title)")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.textTertiary)
+                } else {
+                    Text("Max level reached")
+                        .font(.caption2)
+                        .foregroundStyle(levelColor)
+                }
+            }
+            Spacer()
         }
         .listRowBackground(Theme.cardBackground)
     }
