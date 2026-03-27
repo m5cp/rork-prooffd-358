@@ -302,16 +302,13 @@ struct DiscoverTabView: View {
     @ViewBuilder
     private var mainContent: some View {
         VStack(spacing: 20) {
-            EngagementBannerView()
-                .padding(.horizontal, 16)
-
             if !appState.hasCompletedQuiz {
                 quizPromptCard
                     .padding(.horizontal, 16)
             }
 
             if let topResult = recommendedResults.first {
-                topMatchCard(topResult)
+                topMatchHero(topResult)
                     .padding(.horizontal, 16)
             }
 
@@ -331,12 +328,9 @@ struct DiscoverTabView: View {
                 title: "Recommended For You",
                 icon: "star.fill",
                 iconColor: Theme.accent,
-                results: recommendedResults,
+                results: Array(recommendedResults.dropFirst()),
                 mode: .recommended
             )
-
-            whatIfButton
-                .padding(.horizontal, 16)
 
             if !trendingResults.isEmpty {
                 horizontalSection(
@@ -348,6 +342,9 @@ struct DiscoverTabView: View {
                     socialProof: true
                 )
             }
+
+            whatIfButton
+                .padding(.horizontal, 16)
 
             browseByCategorySection
 
@@ -363,54 +360,129 @@ struct DiscoverTabView: View {
 
 
 
-    private func topMatchCard(_ result: MatchResult) -> some View {
+    private func topMatchHero(_ result: MatchResult) -> some View {
         let catColor = Theme.categoryColor(for: result.businessPath.category)
+        let zone = result.businessPath.zone
+        let zoneColor: Color = zone == .safe ? Theme.accent : zone == .human ? Color(hex: "FBBF24") : .orange
         return Button {
             selectedResult = result
             appState.markPathExplored(result.businessPath.id)
         } label: {
-            VStack(spacing: 16) {
-                HStack(spacing: 12) {
-                    ZStack {
-                        Circle()
-                            .fill(catColor.opacity(0.15))
-                            .frame(width: 56, height: 56)
-                        Image(systemName: result.businessPath.icon)
-                            .font(.title2)
-                            .foregroundStyle(catColor)
+            VStack(spacing: 0) {
+                VStack(spacing: 14) {
+                    HStack {
+                        HStack(spacing: 6) {
+                            Image(systemName: "crown.fill")
+                                .font(.caption2)
+                                .foregroundStyle(Color(hex: "FBBF24"))
+                            Text("YOUR TOP MATCH")
+                                .font(.caption2.weight(.bold))
+                                .foregroundStyle(Color(hex: "FBBF24"))
+                                .tracking(0.5)
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(Color(hex: "FBBF24").opacity(0.12))
+                        .clipShape(.capsule)
+                        Spacer()
+                        Button {
+                            appState.toggleFavorite(result.businessPath.id)
+                        } label: {
+                            Image(systemName: appState.isFavorite(result.businessPath.id) ? "heart.fill" : "heart")
+                                .font(.body)
+                                .foregroundStyle(appState.isFavorite(result.businessPath.id) ? .pink : Theme.textTertiary)
+                                .frame(width: 36, height: 36)
+                        }
                     }
 
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Top Match")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(Theme.accent)
-                        Text(result.businessPath.name)
-                            .font(.title3.weight(.bold))
-                            .foregroundStyle(Theme.textPrimary)
+                    HStack(spacing: 14) {
+                        ZStack {
+                            Circle()
+                                .fill(catColor.opacity(0.15))
+                                .frame(width: 60, height: 60)
+                            Image(systemName: result.businessPath.icon)
+                                .font(.title2)
+                                .foregroundStyle(catColor)
+                        }
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(result.businessPath.name)
+                                .font(.title3.weight(.bold))
+                                .foregroundStyle(Theme.textPrimary)
+                                .lineLimit(2)
+                                .multilineTextAlignment(.leading)
+                            HStack(spacing: 8) {
+                                scoreRing(result.scorePercentage, size: 32)
+                                Text("\(result.scorePercentage)% Match")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(scoreColor(result.scorePercentage))
+                            }
+                        }
+
+                        Spacer(minLength: 0)
                     }
 
-                    Spacer()
+                    HStack(spacing: 8) {
+                        HStack(spacing: 4) {
+                            Image(systemName: zone.icon)
+                                .font(.caption2)
+                            Text("AI \(zone.label)")
+                                .font(.caption.weight(.semibold))
+                        }
+                        .foregroundStyle(zoneColor)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(zoneColor.opacity(0.1))
+                        .clipShape(.capsule)
 
-                    scoreRing(result.scorePercentage, size: 52)
+                        HStack(spacing: 4) {
+                            Image(systemName: "dollarsign.circle.fill")
+                                .font(.caption2)
+                            Text(result.businessPath.typicalMarketRates.isEmpty ? result.businessPath.startupCostRange : result.businessPath.typicalMarketRates)
+                                .font(.caption.weight(.medium))
+                        }
+                        .foregroundStyle(Theme.textSecondary)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(Theme.cardBackgroundLight)
+                        .clipShape(.capsule)
+
+                        Spacer()
+                    }
+
+                    if !result.businessPath.whyItWorksNow.isEmpty {
+                        Text(result.businessPath.whyItWorksNow)
+                            .font(.caption)
+                            .foregroundStyle(Theme.textSecondary)
+                            .lineLimit(2)
+                            .lineSpacing(2)
+                    }
                 }
+                .padding(20)
 
-                HStack(spacing: 16) {
-                    infoChip(icon: "dollarsign.circle.fill", text: result.businessPath.startupCostRange)
-                    infoChip(icon: "clock.fill", text: result.businessPath.timeToFirstDollar)
-                    Spacer()
-                    Button {
-                        appState.toggleFavorite(result.businessPath.id)
-                    } label: {
-                        Image(systemName: appState.isFavorite(result.businessPath.id) ? "heart.fill" : "heart")
-                            .font(.body)
-                            .foregroundStyle(appState.isFavorite(result.businessPath.id) ? .pink : Theme.textTertiary)
+                Button {
+                    if appState.hasBuild(for: result.businessPath.id) {
+                        appState.selectedTab = 1
+                    } else {
+                        selectedResult = result
+                        appState.markPathExplored(result.businessPath.id)
                     }
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: appState.hasBuild(for: result.businessPath.id) ? "hammer.fill" : "arrow.right.circle.fill")
+                        Text(appState.hasBuild(for: result.businessPath.id) ? "View Build" : "Start Plan")
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(catColor)
+                    .clipShape(.rect(bottomLeadingRadius: 16, bottomTrailingRadius: 16))
                 }
             }
-            .padding(20)
             .background(
                 LinearGradient(
-                    colors: [catColor.opacity(0.08), Theme.cardBackground],
+                    colors: [catColor.opacity(0.06), Theme.cardBackground],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -420,7 +492,7 @@ struct DiscoverTabView: View {
                 RoundedRectangle(cornerRadius: 16)
                     .stroke(catColor.opacity(0.2), lineWidth: 1)
             )
-            .cardShadow()
+            .shadow(color: catColor.opacity(0.15), radius: 16, y: 6)
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: appState.isFavorite(result.businessPath.id))

@@ -9,7 +9,7 @@ struct StartHereSection: View {
     @State private var diceRotation: Double = 0
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
                 Image(systemName: "hand.wave.fill")
                     .font(.caption.weight(.semibold))
@@ -20,67 +20,40 @@ struct StartHereSection: View {
             }
             .padding(.horizontal, 16)
 
-            Text("Not sure where to begin? Pick a path.")
-                .font(.subheadline)
-                .foregroundStyle(Theme.textSecondary)
-                .padding(.horizontal, 16)
-
-            VStack(spacing: 10) {
-                startCard(
+            HStack(spacing: 10) {
+                startCompactCard(
                     icon: "bolt.fill",
                     iconColor: Color(hex: "FB923C"),
                     title: "Make Money Today",
-                    subtitle: "Gigs that pay immediately with little setup",
                     action: onStartFast
                 )
 
-                startCard(
-                    icon: "building.2.fill",
-                    iconColor: Theme.accentBlue,
-                    title: "Trade Schools & Certifications",
-                    subtitle: "Skilled trades, healthcare, creative & professional certs",
-                    action: onStableCareer
-                )
-
-                diceRollCard
+                diceCompactCard
             }
             .padding(.horizontal, 16)
         }
     }
 
-    private var diceRollCard: some View {
+    private var diceCompactCard: some View {
         Button {
             rollDice()
         } label: {
-            HStack(spacing: 14) {
+            VStack(spacing: 10) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 12)
                         .fill(Color(hex: "818CF8").opacity(0.12))
-                        .frame(width: 48, height: 48)
+                        .frame(width: 44, height: 44)
                     Image(systemName: "dice.fill")
                         .font(.title3)
                         .foregroundStyle(Color(hex: "818CF8"))
                         .rotationEffect(.degrees(diceRotation))
                 }
-
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("Pick For Me")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Theme.textPrimary)
-                    Text("Roll the dice for 2 random suggestions")
-                        .font(.caption)
-                        .foregroundStyle(Theme.textSecondary)
-                        .lineLimit(2)
-                }
-
-                Spacer(minLength: 4)
-
-                Image(systemName: "dice.fill")
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(Color(hex: "818CF8"))
-                    .rotationEffect(.degrees(diceRotation))
+                Text("Pick For Me")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
             }
-            .padding(14)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
             .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 14))
             .overlay(
@@ -115,35 +88,23 @@ struct StartHereSection: View {
         }
     }
 
-    private func startCard(icon: String, iconColor: Color, title: String, subtitle: String, action: @escaping () -> Void) -> some View {
+    private func startCompactCard(icon: String, iconColor: Color, title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            HStack(spacing: 14) {
+            VStack(spacing: 10) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 12)
                         .fill(iconColor.opacity(0.12))
-                        .frame(width: 48, height: 48)
+                        .frame(width: 44, height: 44)
                     Image(systemName: icon)
                         .font(.title3)
                         .foregroundStyle(iconColor)
                 }
-
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(title)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Theme.textPrimary)
-                    Text(subtitle)
-                        .font(.caption)
-                        .foregroundStyle(Theme.textSecondary)
-                        .lineLimit(2)
-                }
-
-                Spacer(minLength: 4)
-
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(Theme.textTertiary)
+                Text(title)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
             }
-            .padding(14)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
             .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 14))
             .overlay(
