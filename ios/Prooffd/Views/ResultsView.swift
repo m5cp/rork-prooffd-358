@@ -401,17 +401,21 @@ struct DiscoverTabView: View {
             }
 
             if !appState.builds.isEmpty {
-                HStack(spacing: 4) {
-                    Image(systemName: "hammer.fill")
-                        .font(.caption2)
-                    Text("\(appState.builds.count)")
-                        .font(.caption.weight(.bold))
+                Button {
+                    appState.selectedTab = 1
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "hammer.fill")
+                            .font(.caption2)
+                        Text("\(appState.builds.count) builds")
+                            .font(.caption.weight(.bold))
+                    }
+                    .foregroundStyle(Theme.accentBlue)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Theme.accentBlue.opacity(0.12))
+                    .clipShape(.capsule)
                 }
-                .foregroundStyle(Theme.accentBlue)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(Theme.accentBlue.opacity(0.12))
-                .clipShape(.capsule)
             }
         }
     }
