@@ -10,22 +10,18 @@ struct ProfileTabView: View {
     @State private var showAchievements: Bool = false
     @State private var showMyPathShare: Bool = false
     @State private var showAvatarPicker: Bool = false
-    @State private var showPointsGuide: Bool = false
-    @State private var showReadinessDetail: Bool = false
     @State private var showNameEdit: Bool = false
     @State private var editingName: String = ""
-    @State private var showAnalytics: Bool = false
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 20) {
-                    heroProgressSection
-                    streakSection
-                    achievementsSection
-                    secondaryStatsSection
-                    actionsSection
+                VStack(spacing: 24) {
+                    heroSection
+                    streakCard
+                    achievementsGrid
+                    quickActions
                     settingsSection
                     Color.clear.frame(height: 40)
                 }
@@ -59,15 +55,6 @@ struct ProfileTabView: View {
                     shareText: "I'm building a business step-by-step with Prooffd! Download Prooffd: https://apps.apple.com/app/prooffd/id6743071053"
                 )
             }
-            .sheet(isPresented: $showPointsGuide) {
-                PointsGuideView()
-            }
-            .sheet(isPresented: $showReadinessDetail) {
-                ReadinessDetailView()
-            }
-            .sheet(isPresented: $showAnalytics) {
-                AnalyticsDashboardView()
-            }
             .sheet(isPresented: $showAvatarPicker) {
                 AvatarPickerView(selectedAvatar: Binding(
                     get: { appState.userProfile.avatar },
@@ -98,135 +85,147 @@ struct ProfileTabView: View {
         }
     }
 
-    // MARK: - Hero Progress Section
+    // MARK: - Hero Section
 
-    private var heroProgressSection: some View {
+    private var heroSection: some View {
         let level = appState.currentLevel
         let levelColor = Color(hex: level.color)
         let progress = level.progressToNext(points: appState.momentum.totalPoints)
 
-        return VStack(spacing: 20) {
-            HStack(spacing: 16) {
-                Button {
-                    showAvatarPicker = true
-                } label: {
-                    ZStack(alignment: .bottomTrailing) {
-                        AvatarView(avatar: appState.userProfile.avatar, size: 64)
-                            .overlay {
-                                if store.isPremium {
+        return VStack(spacing: 0) {
+            VStack(spacing: 24) {
+                HStack(spacing: 16) {
+                    Button {
+                        showAvatarPicker = true
+                    } label: {
+                        ZStack(alignment: .bottomTrailing) {
+                            AvatarView(avatar: appState.userProfile.avatar, size: 72)
+                                .overlay {
                                     Circle()
                                         .stroke(
-                                            LinearGradient(colors: [Theme.accent, Theme.accentBlue], startPoint: .topLeading, endPoint: .bottomTrailing),
-                                            lineWidth: 2.5
+                                            LinearGradient(
+                                                colors: [levelColor.opacity(0.8), levelColor.opacity(0.3)],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ),
+                                            lineWidth: 3
                                         )
-                                        .frame(width: 68, height: 68)
+                                        .frame(width: 78, height: 78)
                                 }
+                            Image(systemName: "pencil.circle.fill")
+                                .font(.system(size: 20))
+                                .foregroundStyle(.white)
+                                .background(Circle().fill(levelColor).frame(width: 18, height: 18))
+                        }
+                    }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Button {
+                            editingName = appState.userProfile.firstName
+                            showNameEdit = true
+                        } label: {
+                            HStack(spacing: 6) {
+                                Text(appState.userProfile.firstName.isEmpty ? "User" : appState.userProfile.firstName)
+                                    .font(.title2.weight(.bold))
+                                    .foregroundStyle(Theme.textPrimary)
+                                Image(systemName: "pencil")
+                                    .font(.caption2)
+                                    .foregroundStyle(Theme.textTertiary)
                             }
-                        Image(systemName: "pencil.circle.fill")
-                            .font(.system(size: 18))
-                            .foregroundStyle(Theme.accent)
-                            .background(Circle().fill(Theme.cardBackground).frame(width: 16, height: 16))
-                    }
-                }
+                        }
 
-                VStack(alignment: .leading, spacing: 6) {
-                    Button {
-                        editingName = appState.userProfile.firstName
-                        showNameEdit = true
-                    } label: {
-                        HStack(spacing: 6) {
-                            Text(appState.userProfile.firstName.isEmpty ? "User" : appState.userProfile.firstName)
-                                .font(.title3.weight(.bold))
-                                .foregroundStyle(Theme.textPrimary)
-                            Image(systemName: "pencil")
-                                .font(.caption2)
-                                .foregroundStyle(Theme.textTertiary)
+                        HStack(spacing: 8) {
+                            HStack(spacing: 5) {
+                                Image(systemName: level.icon)
+                                    .font(.caption.weight(.semibold))
+                                Text("Level \(level.rank)")
+                                    .font(.subheadline.weight(.bold))
+                            }
+                            .foregroundStyle(levelColor)
+
+                            Text(level.title)
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(Theme.textSecondary)
+                        }
+
+                        if store.isPremium {
+                            HStack(spacing: 4) {
+                                Image(systemName: "crown.fill")
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(.yellow)
+                                Text("Pro")
+                                    .font(.caption.weight(.bold))
+                                    .foregroundStyle(Theme.accent)
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(Theme.accent.opacity(0.1))
+                            .clipShape(.capsule)
                         }
                     }
 
-                    HStack(spacing: 6) {
-                        Image(systemName: level.icon)
-                            .font(.caption)
-                            .foregroundStyle(levelColor)
-                        Text("Level \(level.rank) \u{2014} \(level.title)")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(levelColor)
-                    }
-
-                    if store.isPremium {
-                        HStack(spacing: 4) {
-                            Image(systemName: "crown.fill")
-                                .font(.system(size: 9))
-                                .foregroundStyle(.yellow)
-                            Text("Pro Member")
-                                .font(.caption2.weight(.semibold))
-                                .foregroundStyle(Theme.accent)
-                        }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(Theme.accent.opacity(0.1))
-                        .clipShape(.capsule)
-                    }
-                }
-
-                Spacer()
-            }
-
-            VStack(spacing: 8) {
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule()
-                            .fill(Theme.cardBackgroundLight)
-                            .frame(height: 8)
-                        Capsule()
-                            .fill(
-                                LinearGradient(
-                                    colors: [levelColor.opacity(0.7), levelColor],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .frame(width: geo.size.width * progress, height: 8)
-                    }
-                }
-                .frame(height: 8)
-
-                HStack {
-                    Text("\(appState.momentum.totalPoints) pts")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(levelColor)
                     Spacer()
-                    if let next = UserLevel.nextLevel(after: level) {
-                        Text("\(next.minPoints - appState.momentum.totalPoints) pts to \(next.title)")
-                            .font(.caption)
-                            .foregroundStyle(Theme.textTertiary)
-                    } else {
-                        Text("Max level reached")
-                            .font(.caption)
+                }
+
+                VStack(spacing: 10) {
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            Capsule()
+                                .fill(levelColor.opacity(0.12))
+                                .frame(height: 10)
+                            Capsule()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [levelColor, levelColor.opacity(0.7)],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .frame(width: max(geo.size.width * progress, 6), height: 10)
+                        }
+                    }
+                    .frame(height: 10)
+
+                    HStack {
+                        Text("\(appState.momentum.totalPoints) pts")
+                            .font(.caption.weight(.bold))
                             .foregroundStyle(levelColor)
+                        Spacer()
+                        if let next = UserLevel.nextLevel(after: level) {
+                            Text("\(next.minPoints - appState.momentum.totalPoints) to \(next.title)")
+                                .font(.caption)
+                                .foregroundStyle(Theme.textTertiary)
+                        } else {
+                            Text("Max level")
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(levelColor)
+                        }
                     }
                 }
-            }
 
-            Text(progressMessage)
-                .font(.subheadline)
-                .foregroundStyle(Theme.textSecondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                Text(progressMessage)
+                    .font(.callout)
+                    .foregroundStyle(Theme.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(24)
         }
-        .padding(20)
         .background(
-            LinearGradient(
-                colors: [levelColor.opacity(0.06), Theme.cardBackground],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            ZStack {
+                Theme.cardBackground
+                LinearGradient(
+                    colors: [levelColor.opacity(0.08), .clear],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            }
         )
-        .clipShape(.rect(cornerRadius: 20))
+        .clipShape(.rect(cornerRadius: 24))
         .overlay(
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(levelColor.opacity(0.15), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 24)
+                .stroke(levelColor.opacity(0.12), lineWidth: 1)
         )
-        .shadow(color: levelColor.opacity(0.1), radius: 12, y: 4)
+        .shadow(color: levelColor.opacity(0.08), radius: 16, y: 6)
     }
 
     private var progressMessage: String {
@@ -241,230 +240,165 @@ struct ProfileTabView: View {
         }
     }
 
-    // MARK: - Streak Section
+    // MARK: - Streak
 
-    private var streakSection: some View {
-        HStack(spacing: 14) {
+    private var streakCard: some View {
+        let isActive = appState.streakTracker.currentStreak > 0
+
+        return HStack(spacing: 16) {
             ZStack {
                 Circle()
-                    .fill(appState.streakTracker.currentStreak > 0 ? Color.orange.opacity(0.12) : Theme.cardBackgroundLight)
-                    .frame(width: 48, height: 48)
+                    .fill(isActive ? Color.orange.opacity(0.12) : Theme.cardBackgroundLight)
+                    .frame(width: 52, height: 52)
                 Image(systemName: "flame.fill")
-                    .font(.title3)
-                    .foregroundStyle(appState.streakTracker.currentStreak > 0 ? .orange : Theme.textTertiary)
+                    .font(.title2)
+                    .foregroundStyle(isActive ? .orange : Theme.textTertiary)
+                    .symbolEffect(.pulse, options: .repeating.speed(0.5), isActive: appState.streakTracker.currentStreak >= 7)
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(appState.streakTracker.currentStreak > 0
-                    ? "\(appState.streakTracker.currentStreak) Day Streak"
-                    : "Start Your Streak")
-                    .font(.headline)
-                    .foregroundStyle(Theme.textPrimary)
+                HStack(spacing: 8) {
+                    Text(isActive ? "\(appState.streakTracker.currentStreak)" : "0")
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(isActive ? .orange : Theme.textTertiary)
+                        .contentTransition(.numericText())
+                    Text(appState.streakTracker.currentStreak == 1 ? "day" : "days")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(Theme.textSecondary)
+                }
                 Text(appState.streakTracker.streakMessage)
                     .font(.caption)
-                    .foregroundStyle(Theme.textSecondary)
+                    .foregroundStyle(Theme.textTertiary)
                     .lineLimit(1)
             }
 
             Spacer()
 
             if appState.streakTracker.streakBufferAvailable && appState.streakTracker.currentStreak >= 2 {
-                HStack(spacing: 4) {
+                VStack(spacing: 2) {
                     Image(systemName: "shield.fill")
-                        .font(.system(size: 9))
+                        .font(.caption)
                     Text("Protected")
-                        .font(.caption2.weight(.medium))
+                        .font(.system(size: 9, weight: .semibold))
                 }
                 .foregroundStyle(Theme.accent)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Theme.accent.opacity(0.1))
-                .clipShape(.capsule)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(Theme.accent.opacity(0.08))
+                .clipShape(.rect(cornerRadius: 10))
             }
         }
-        .padding(16)
+        .padding(18)
         .background(Theme.cardBackground)
-        .clipShape(.rect(cornerRadius: 16))
+        .clipShape(.rect(cornerRadius: 18))
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(appState.streakTracker.currentStreak > 0 ? Color.orange.opacity(0.12) : Theme.border.opacity(0.3), lineWidth: 0.5)
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(isActive ? Color.orange.opacity(0.1) : Theme.border.opacity(0.3), lineWidth: 0.5)
         )
         .cardShadow()
     }
 
-    // MARK: - Achievements Section
+    // MARK: - Achievements
 
-    private var achievementsSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
+    private var achievementsGrid: some View {
+        let earnedBadges = MomentumBadge.all.filter { appState.momentum.hasBadge($0.id) }
+        let earnedAchievements = AchievementDatabase.all.filter { appState.isAchievementUnlocked($0.id) }
+        let totalEarned = earnedBadges.count + earnedAchievements.count
+        let totalAvailable = MomentumBadge.all.count + AchievementDatabase.all.count
+
+        return VStack(alignment: .leading, spacing: 16) {
             HStack {
-                HStack(spacing: 8) {
-                    Image(systemName: "trophy.fill")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(Color(hex: "818CF8"))
-                    Text("Achievements")
-                        .font(.title3.weight(.bold))
-                        .foregroundStyle(Theme.textPrimary)
-                }
+                Text("Achievements")
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(Theme.textPrimary)
                 Spacer()
                 Button {
                     showAchievements = true
                 } label: {
-                    Text("See All")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(Theme.accent)
+                    HStack(spacing: 4) {
+                        Text("\(totalEarned)/\(totalAvailable)")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Theme.textSecondary)
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(Theme.textTertiary)
+                    }
                 }
             }
 
-            let earnedBadges = MomentumBadge.all.filter { appState.momentum.hasBadge($0.id) }
-            let earnedAchievements = AchievementDatabase.all.filter { appState.isAchievementUnlocked($0.id) }
-
-            if earnedBadges.isEmpty && earnedAchievements.isEmpty {
-                VStack(spacing: 8) {
+            if totalEarned == 0 {
+                VStack(spacing: 10) {
                     Image(systemName: "trophy")
-                        .font(.title2)
-                        .foregroundStyle(Theme.textTertiary)
-                    Text("Complete actions to earn badges")
-                        .font(.caption)
+                        .font(.largeTitle)
+                        .foregroundStyle(Theme.textTertiary.opacity(0.5))
+                    Text("Complete actions to unlock badges")
+                        .font(.subheadline)
                         .foregroundStyle(Theme.textTertiary)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
+                .padding(.vertical, 32)
                 .background(Theme.cardBackground)
-                .clipShape(.rect(cornerRadius: 14))
+                .clipShape(.rect(cornerRadius: 16))
                 .cardShadow()
             } else {
                 let columns = [
-                    GridItem(.flexible(), spacing: 10),
-                    GridItem(.flexible(), spacing: 10),
-                    GridItem(.flexible(), spacing: 10)
+                    GridItem(.flexible(), spacing: 12),
+                    GridItem(.flexible(), spacing: 12),
+                    GridItem(.flexible(), spacing: 12)
                 ]
 
-                LazyVGrid(columns: columns, spacing: 10) {
+                LazyVGrid(columns: columns, spacing: 12) {
                     ForEach(earnedBadges) { badge in
-                        earnedBadgeCell(badge)
+                        badgeCell(icon: badge.icon, title: badge.title, color: Color(hex: badge.color))
                     }
                     ForEach(earnedAchievements) { achievement in
-                        earnedAchievementCell(achievement)
+                        badgeCell(icon: achievement.icon, title: achievement.title, color: Color(hex: achievement.color))
                     }
                 }
             }
         }
     }
 
-    private func earnedBadgeCell(_ badge: MomentumBadge) -> some View {
-        let color = Color(hex: badge.color)
-        return VStack(spacing: 8) {
+    private func badgeCell(icon: String, title: String, color: Color) -> some View {
+        VStack(spacing: 10) {
             ZStack {
                 Circle()
-                    .fill(color.opacity(0.15))
-                    .frame(width: 44, height: 44)
-                Image(systemName: badge.icon)
-                    .font(.body)
+                    .fill(color.opacity(0.12))
+                    .frame(width: 48, height: 48)
+                Image(systemName: icon)
+                    .font(.body.weight(.medium))
                     .foregroundStyle(color)
             }
-            Text(badge.title)
+            Text(title)
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(Theme.textPrimary)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
+        .padding(.vertical, 14)
         .background(color.opacity(0.04))
-        .clipShape(.rect(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(color.opacity(0.15), lineWidth: 0.5)
-        )
-    }
-
-    private func earnedAchievementCell(_ achievement: Achievement) -> some View {
-        let color = Color(hex: achievement.color)
-        return VStack(spacing: 8) {
-            ZStack {
-                Circle()
-                    .fill(color.opacity(0.15))
-                    .frame(width: 44, height: 44)
-                Image(systemName: achievement.icon)
-                    .font(.body)
-                    .foregroundStyle(color)
-            }
-            Text(achievement.title)
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(Theme.textPrimary)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(color.opacity(0.04))
-        .clipShape(.rect(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(color.opacity(0.15), lineWidth: 0.5)
-        )
-    }
-
-    // MARK: - Secondary Stats
-
-    private var secondaryStatsSection: some View {
-        let columns = sizeClass == .regular
-            ? [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)]
-            : [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)]
-
-        return LazyVGrid(columns: columns, spacing: 10) {
-            statCell(icon: "hammer.fill", color: Theme.accentBlue, label: "Builds", value: "\(appState.builds.count)")
-            statCell(icon: "eye.fill", color: Color(hex: "818CF8"), label: "Explored", value: "\(appState.exploredPathIDs.count)")
-            statCell(icon: "heart.fill", color: .pink, label: "Favorites", value: "\(appState.favoritePathIDs.count)")
-            statCell(icon: "calendar", color: Theme.accent, label: "Total Days", value: "\(appState.streakTracker.totalDaysOpened)")
-        }
-    }
-
-    private func statCell(icon: String, color: Color, label: String, value: String) -> some View {
-        VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.body)
-                .foregroundStyle(color)
-            Text(value)
-                .font(.title3.weight(.bold))
-                .foregroundStyle(Theme.textPrimary)
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(Theme.textTertiary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
-        .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 14))
-        .cardShadow()
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(color.opacity(0.12), lineWidth: 0.5)
+        )
     }
 
-    // MARK: - Actions
+    // MARK: - Quick Actions
 
-    private var actionsSection: some View {
+    private var quickActions: some View {
         VStack(spacing: 0) {
-            actionRow(icon: "gauge.open.with.lines.needle.33percent.and.arrowtriangle", color: Theme.accent, title: "Readiness Score", detail: "\(appState.readinessScore)/100") {
-                showReadinessDetail = true
-            }
-            actionDivider
-            actionRow(icon: "square.and.arrow.up.fill", color: Theme.accentBlue, title: "Share My Path", detail: nil) {
+            actionRow(icon: "square.and.arrow.up.fill", color: Theme.accentBlue, title: "Share My Path") {
                 showMyPathShare = true
             }
-            actionDivider
-            actionRow(icon: "chart.bar.fill", color: Theme.accent, title: "Engagement Dashboard", detail: nil) {
-                showAnalytics = true
-            }
-            actionDivider
-            actionRow(icon: "questionmark.circle.fill", color: Color(hex: "FBBF24"), title: "How to Earn Points", detail: nil) {
-                showPointsGuide = true
-            }
         }
         .background(Theme.cardBackground)
-        .clipShape(.rect(cornerRadius: 14))
+        .clipShape(.rect(cornerRadius: 16))
         .cardShadow()
     }
 
-    private func actionRow(icon: String, color: Color, title: String, detail: String?, action: @escaping () -> Void) -> some View {
+    private func actionRow(icon: String, color: Color, title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 12) {
                 Image(systemName: icon)
@@ -474,25 +408,13 @@ struct ProfileTabView: View {
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(Theme.textPrimary)
                 Spacer()
-                if let detail {
-                    Text(detail)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Theme.textSecondary)
-                }
                 Image(systemName: "chevron.right")
                     .font(.caption2)
                     .foregroundStyle(Theme.textTertiary)
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 13)
+            .padding(.vertical, 14)
         }
-    }
-
-    private var actionDivider: some View {
-        Rectangle()
-            .fill(Theme.cardBackgroundLight)
-            .frame(height: 0.5)
-            .padding(.leading, 50)
     }
 
     // MARK: - Settings
@@ -599,7 +521,7 @@ struct ProfileTabView: View {
             }
         }
         .background(Theme.cardBackground)
-        .clipShape(.rect(cornerRadius: 14))
+        .clipShape(.rect(cornerRadius: 16))
         .cardShadow()
     }
 
