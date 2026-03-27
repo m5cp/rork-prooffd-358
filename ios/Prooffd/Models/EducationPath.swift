@@ -90,6 +90,7 @@ nonisolated enum EducationCategory: String, Codable, Sendable, CaseIterable, Ide
     case technology = "Technology"
     case business = "Business"
     case creative = "Creative"
+    case military = "Military"
 
     var id: String { rawValue }
 
@@ -101,6 +102,7 @@ nonisolated enum EducationCategory: String, Codable, Sendable, CaseIterable, Ide
         case .technology: return "desktopcomputer"
         case .business: return "briefcase.fill"
         case .creative: return "paintbrush.fill"
+        case .military: return "shield.checkered"
         }
     }
 }

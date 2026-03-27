@@ -7,7 +7,7 @@ enum CareerPathDatabase {
 }
 
 enum EducationPathDatabase {
-    static let all: [EducationPath] = trades + certifications + healthcare + technology + business + creative
+    static let all: [EducationPath] = trades + certifications + healthcare + technology + business + creative + military
 
     static let trades: [EducationPath] = [
         EducationPath(
@@ -1477,6 +1477,61 @@ enum EducationPathDatabase {
                 "Apprentice at a flower shop or event company",
                 "Build a portfolio of your best work",
                 "Start freelancing for weddings and events"
+            ],
+            linkedJobIds: ["event-planning"]
+        ),
+    ]
+
+    static let military: [EducationPath] = [
+        EducationPath(
+            id: "military_enlisted", title: "Military — Enlisted", icon: "shield.checkered",
+            category: .military, aiSafeScore: 92,
+            overview: "Enlist in the U.S. military and receive paid training, housing, healthcare, and a guaranteed salary from day one. No degree required. The military trains and certifies you in hundreds of career fields — from mechanics and IT to medical and logistics. Transferable skills and veterans benefits (GI Bill) open doors after service.",
+            whyItWorksNow: "All branches are actively recruiting with signing bonuses and expanded benefits. Military experience is highly valued by employers, and the GI Bill covers college tuition after service.",
+            futureDemand: "Very strong — national defense needs are constant, and veterans are prioritized in hiring across government and private sectors.",
+            typicalSalaryRange: "$24K – $45K+ (base pay, plus housing, food, and healthcare)",
+            prerequisites: ["U.S. citizen or permanent resident", "Age 17–39 (varies by branch)", "High school diploma or GED", "Pass the ASVAB test", "Meet physical fitness standards"],
+            testRequirements: ["ASVAB (Armed Services Vocational Aptitude Battery)", "Physical fitness test", "Medical exam at MEPS"],
+            deliveryType: "Basic training + MOS/rating school",
+            timeToComplete: "8–16 weeks basic training + job training (varies)",
+            costRange: "$0 (fully paid — you earn a salary during training)",
+            fundingOptions: ["Fully funded — salary from day one", "GI Bill for post-service education", "Tuition Assistance during service", "Signing bonuses for in-demand roles"],
+            howToFindPrograms: ["Visit your local military recruiter", "Explore goarmy.com, navy.com, airforce.com, marines.com, or gocoastguard.com", "Take the ASVAB practice test online"],
+            employerSponsoredOptions: ["The military IS the employer — full salary, housing, and benefits from day one"],
+            militaryPath: "This is the military path. Enlisted service members receive hands-on training and certifications that transfer directly to civilian careers.",
+            basicSteps: [
+                "Research branches and MOS/rating options that interest you",
+                "Visit a recruiter and take the ASVAB test",
+                "Complete processing at MEPS (medical and paperwork)",
+                "Ship to basic training (8–16 weeks)",
+                "Complete your MOS/rating job training school",
+                "Serve your contract and earn certifications, experience, and GI Bill benefits"
+            ],
+            linkedJobIds: ["handyman", "courier-delivery", "appliance-repair"]
+        ),
+        EducationPath(
+            id: "military_officer", title: "Military — Officer", icon: "star.circle.fill",
+            category: .military, aiSafeScore: 90,
+            overview: "Commission as a military officer and lead teams from day one. Requires a 4-year college degree (any major). Officers manage personnel, operations, and complex projects across every field — from engineering and aviation to intelligence and healthcare. Higher starting pay, leadership experience, and strong post-military career prospects.",
+            whyItWorksNow: "Officer candidates are in high demand, especially in technical fields. Military leadership experience is among the most respected credentials in the job market.",
+            futureDemand: "Very strong — officers transition into senior management, government, defense contractors, and executive leadership roles at high rates.",
+            typicalSalaryRange: "$44K – $75K+ (base pay, plus housing, food, and healthcare)",
+            prerequisites: ["U.S. citizen", "Bachelor's degree (any major)", "Age 18–34 (varies by branch and commissioning source)", "Pass the AFOQT, OAR, or equivalent test", "Meet physical fitness standards", "No disqualifying medical conditions"],
+            testRequirements: ["Branch-specific officer aptitude test (AFOQT, OAR, etc.)", "Physical fitness test", "Medical exam at MEPS", "Officer Candidate School or ROTC completion"],
+            deliveryType: "OCS, ROTC, or Service Academy",
+            timeToComplete: "10–16 weeks OCS (after college) or 4 years ROTC (during college)",
+            costRange: "$0 (ROTC scholarships cover tuition; OCS is fully paid)",
+            fundingOptions: ["ROTC scholarships (full tuition + stipend)", "Service Academy (free education)", "OCS after earning a degree", "Student loan repayment programs"],
+            howToFindPrograms: ["Contact an Officer recruiter for your preferred branch", "Apply to ROTC programs at your university", "Explore service academy nominations through your congressional representative"],
+            employerSponsoredOptions: ["ROTC provides full-ride scholarships at 1,000+ universities", "Service Academies provide free education and a guaranteed career"],
+            militaryPath: "This is the officer commissioning path. Officers lead teams and gain management experience that translates to senior civilian roles.",
+            basicSteps: [
+                "Earn a 4-year bachelor's degree (any major)",
+                "Choose a commissioning path: OCS, ROTC, or Service Academy",
+                "Pass the officer aptitude test and physical requirements",
+                "Complete Officer Candidate School or commission through ROTC",
+                "Attend your branch-specific officer training course",
+                "Lead teams and gain leadership credentials valued across all industries"
             ],
             linkedJobIds: ["event-planning"]
         ),

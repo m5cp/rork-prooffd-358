@@ -25,6 +25,7 @@ struct EducationCategoryListSheet: View {
         case .technology: return Theme.accentBlue
         case .business: return Color(hex: "FB923C")
         case .creative: return Color(hex: "818CF8")
+        case .military: return Color(hex: "4ADE80")
         }
     }
 
