@@ -15,6 +15,7 @@ struct ExploreTabView: View {
                 VStack(spacing: 24) {
                     filterBar
                     educationOverviewSection
+                    sponsoredBannerSection
                     shareLoopSection
                     Color.clear.frame(height: 40)
                 }
@@ -311,6 +312,33 @@ struct ExploreTabView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 24)
+    }
+
+    private var sponsoredBannerSection: some View {
+        let programs = SponsoredPlacementDatabase.featuredPrograms
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 6) {
+                Image(systemName: "star.circle.fill")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color(hex: "FB923C"))
+                Text("Featured Programs")
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(Theme.textPrimary)
+                Spacer()
+                Text("Sponsored")
+                    .font(.system(size: 9, weight: .medium))
+                    .foregroundStyle(Theme.textTertiary)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 2)
+                    .background(Theme.cardBackgroundLight)
+                    .clipShape(.capsule)
+            }
+
+            ForEach(programs.prefix(2)) { program in
+                SponsoredBannerCard(program: program)
+            }
+        }
+        .padding(.horizontal, 16)
     }
 
     private var shareLoopSection: some View {

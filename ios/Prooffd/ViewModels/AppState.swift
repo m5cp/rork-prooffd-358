@@ -21,6 +21,7 @@ class AppState {
     var quickActionBuildId: String?
     var celebratingBadge: MomentumBadge?
     var pendingSharePrompt: SharePromptType?
+    var dailyRewards: DailyRewardTracker = DailyRewardTracker()
 
     var hasUsedWhatIf: Bool {
         get { UserDefaults.standard.bool(forKey: "hasUsedWhatIf") }
@@ -100,6 +101,7 @@ class AppState {
     func completeQuiz() {
         saveProfile()
         hasCompletedQuiz = true
+        AnalyticsTracker.shared.trackQuizCompletion()
         withAnimation(.spring(duration: 0.5)) {
             currentScreen = .analyzing
         }
@@ -177,6 +179,7 @@ class AppState {
         guard !builds.contains(where: { $0.pathId == path.id }) else { return }
         let build = BuildProject.create(from: path)
         builds.append(build)
+        AnalyticsTracker.shared.trackBuildStarted()
         saveBuilds()
     }
 
@@ -197,6 +200,7 @@ class AppState {
         if builds[buildIndex].steps[stepIndex].isCompleted {
             builds[buildIndex].steps[stepIndex].completedDate = Date()
             momentum.awardPoints(5, reason: .checklistItem)
+            AnalyticsTracker.shared.trackStepCompleted()
 
             if !completedFirstStep {
                 completedFirstStep = true
@@ -375,6 +379,7 @@ class AppState {
     func markPathExplored(_ pathID: String) {
         exploredPathIDs.insert(pathID)
         saveExploredPaths()
+        AnalyticsTracker.shared.trackPathExplored()
         checkAchievements()
     }
 
@@ -388,6 +393,7 @@ class AppState {
         if momentum.canShare() {
             momentum.recordShare()
         }
+        AnalyticsTracker.shared.trackShare()
         checkAchievements()
     }
 
@@ -402,9 +408,18 @@ class AppState {
     func recordAppOpen() {
         streakTracker.recordAppOpen()
         momentum.awardPoints(2, reason: .dailyUse)
+        AnalyticsTracker.shared.trackAppOpen()
         checkAchievements()
         checkMomentumBadges()
         NotificationService.shared.scheduleStreakReminder(currentStreak: streakTracker.currentStreak)
+        if dailyRewards.canClaim {
+            dailyRewards.showRewardPopup = true
+        }
+    }
+
+    func claimDailyReward() {
+        let reward = dailyRewards.claimReward()
+        momentum.awardPoints(reward.points, reason: .dailyUse)
     }
 
     // MARK: - Readiness

@@ -14,6 +14,7 @@ struct ProfileTabView: View {
     @State private var showReadinessDetail: Bool = false
     @State private var showNameEdit: Bool = false
     @State private var editingName: String = ""
+    @State private var showAnalytics: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -122,6 +123,33 @@ struct ProfileTabView: View {
                                 .frame(width: 22)
                             Text("How to Earn Points & Badges")
                                 .foregroundStyle(Theme.textPrimary)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption2)
+                                .foregroundStyle(Theme.textTertiary)
+                        }
+                    }
+                    .listRowBackground(Theme.cardBackground)
+
+                    statsRow(icon: "gift.fill", color: Color(hex: "FB923C"), label: "Daily Rewards", value: "Day \(appState.dailyRewards.currentDay)")
+                }
+
+                Section("Insights") {
+                    Button {
+                        showAnalytics = true
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "chart.bar.fill")
+                                .foregroundStyle(Theme.accent)
+                                .frame(width: 22)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Engagement Dashboard")
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundStyle(Theme.textPrimary)
+                                Text("View your usage data & sponsor metrics")
+                                    .font(.caption)
+                                    .foregroundStyle(Theme.textTertiary)
+                            }
                             Spacer()
                             Image(systemName: "chevron.right")
                                 .font(.caption2)
@@ -433,6 +461,9 @@ struct ProfileTabView: View {
             }
             .sheet(isPresented: $showReadinessDetail) {
                 ReadinessDetailView()
+            }
+            .sheet(isPresented: $showAnalytics) {
+                AnalyticsDashboardView()
             }
             .sheet(isPresented: $showAvatarPicker) {
                 AvatarPickerView(selectedAvatar: Binding(
