@@ -313,6 +313,11 @@ struct DiscoverTabView: View {
                     .padding(.horizontal, 16)
             }
 
+            if let topResult = recommendedResults.first {
+                topMatchCard(topResult)
+                    .padding(.horizontal, 16)
+            }
+
             StartHereSection(
                 onStartFast: { seeAllMode = .fastStart },
                 onStableCareer: { appState.selectedTab = 2 },
@@ -321,11 +326,6 @@ struct DiscoverTabView: View {
                     showRandomPicks = true
                 }
             )
-
-            if let topResult = recommendedResults.first {
-                topMatchCard(topResult)
-                    .padding(.horizontal, 16)
-            }
 
             whatIfButton
                 .padding(.horizontal, 16)

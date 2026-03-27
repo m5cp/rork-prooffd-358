@@ -29,8 +29,8 @@ struct StartHereSection: View {
                 startCard(
                     icon: "bolt.fill",
                     iconColor: Color(hex: "FB923C"),
-                    title: "Start Something Fast",
-                    subtitle: "Low cost, quick to launch businesses",
+                    title: "Make Money Today",
+                    subtitle: "Gigs that pay immediately with little setup",
                     action: onStartFast
                 )
 
