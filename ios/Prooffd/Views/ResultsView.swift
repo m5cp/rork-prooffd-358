@@ -69,7 +69,7 @@ struct DiscoverTabView: View {
     @State private var trendingPool: [MatchResult] = []
     @State private var trendingRefreshTick: Int = 0
     @Environment(\.horizontalSizeClass) private var sizeClass
-    private let trendingTimer = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
+    private let trendingTimer = Timer.publish(every: 3600, on: .main, in: .common).autoconnect()
 
     private var allResults: [MatchResult] {
         appState.matchResults
