@@ -43,7 +43,7 @@ struct DiscoverView: View {
                 PathDetailView(result: result)
             }
             .sheet(item: $shareResult) { result in
-                ShareCardView(result: result, userName: appState.userProfile.firstName, totalMatches: appState.matchResults.count)
+                ShareCardPresenterSheet(content: .topMatch(from: result))
             }
             .sheet(isPresented: $showRandomPicks) {
                 RandomPicksView(picks: randomPicks, onSelect: { result in

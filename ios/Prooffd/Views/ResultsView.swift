@@ -151,7 +151,7 @@ struct DiscoverTabView: View {
                 PathDetailView(result: result)
             }
             .sheet(item: $shareResult) { result in
-                ShareCardView(result: result, userName: appState.userProfile.firstName, totalMatches: appState.matchResults.count)
+                ShareCardPresenterSheet(content: .topMatch(from: result))
             }
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
@@ -177,34 +177,11 @@ struct DiscoverTabView: View {
             }
             .sheet(isPresented: $showProgressShare) {
                 if let build = appState.activeBuild {
-                    ShareableCardSheet(
-                        cardContent: AnyView(
-                            ProgressShareCard(
-                                buildName: build.businessName,
-                                progressPercent: build.progressPercentage,
-                                streakDays: appState.streakTracker.currentStreak,
-                                nextStep: build.nextStep?.title ?? "",
-                                totalPoints: appState.momentum.totalPoints
-                            )
-                        ),
-                        shareText: "I'm building \(build.businessName) step-by-step with Prooffd — \(build.progressPercentage)% complete! Download Prooffd: https://apps.apple.com/app/prooffd/id6743071053"
-                    )
+                    ShareCardPresenterSheet(content: .progress(from: build))
                 }
             }
             .sheet(item: $showJobShare) { result in
-                ShareableCardSheet(
-                    cardContent: AnyView(
-                        JobSelectionShareCard(
-                            jobTitle: result.businessPath.name,
-                            matchPercent: result.scorePercentage,
-                            aiSafeScore: result.businessPath.aiProofRating,
-                            startupCost: result.businessPath.startupCostRange,
-                            timeToFirst: result.businessPath.timeToFirstDollar,
-                            icon: result.businessPath.icon
-                        )
-                    ),
-                    shareText: "I found my business match on Prooffd — \(result.businessPath.name) with a \(result.scorePercentage)% match! Download Prooffd: https://apps.apple.com/app/prooffd/id6743071053"
-                )
+                ShareCardPresenterSheet(content: .topMatch(from: result))
             }
             .sheet(item: $seeAllMode) { mode in
                 SeeAllView(mode: mode, results: resultsForMode(mode))

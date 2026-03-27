@@ -354,44 +354,15 @@ struct ExploreTabView: View {
 
     private func shareApp() {
         if let topResult = appState.matchResults.first {
-            let card = ShareScoreCardRenderable(
-                result: topResult,
-                userName: appState.userProfile.firstName,
-                totalMatches: appState.matchResults.count
-            )
-            .frame(width: 340)
-            .padding(16)
-            .background(Color(hex: "0F1117"))
-
-            let renderer = ImageRenderer(content: card)
-            renderer.scale = 3.0
-            let shareText = "I just found my top career matches on Prooffd — challenge yourself to find yours! Download Prooffd: https://apps.apple.com/app/prooffd/id6743071053"
-            var items: [Any] = [shareText]
-            if let image = renderer.uiImage {
-                items.insert(image, at: 0)
-            }
-            let activityVC = UIActivityViewController(activityItems: items, applicationActivities: nil)
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let root = windowScene.windows.first?.rootViewController {
-                var topController = root
-                while let presented = topController.presentedViewController { topController = presented }
-                activityVC.popoverPresentationController?.sourceView = topController.view
-                activityVC.popoverPresentationController?.sourceRect = CGRect(x: topController.view.bounds.midX, y: topController.view.bounds.midY, width: 0, height: 0)
-                activityVC.popoverPresentationController?.permittedArrowDirections = []
-                topController.present(activityVC, animated: true)
+            let content = ShareCardContent.topMatch(from: topResult)
+            let card = TopMatchShareCardView(content: content, style: .clean, format: .story)
+            if let image = ShareCardRenderer.render(view: card, format: .story) {
+                let shareText = "I just found my top career matches on Prooffd — challenge yourself to find yours! Download Prooffd: https://apps.apple.com/app/prooffd/id6743071053"
+                ShareCardRenderer.share(image: image, text: shareText)
             }
         } else {
             let shareText = "Check out Prooffd — find your perfect career or business match! Download: https://apps.apple.com/app/prooffd/id6743071053"
-            let activityVC = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let root = windowScene.windows.first?.rootViewController {
-                var topController = root
-                while let presented = topController.presentedViewController { topController = presented }
-                activityVC.popoverPresentationController?.sourceView = topController.view
-                activityVC.popoverPresentationController?.sourceRect = CGRect(x: topController.view.bounds.midX, y: topController.view.bounds.midY, width: 0, height: 0)
-                activityVC.popoverPresentationController?.permittedArrowDirections = []
-                topController.present(activityVC, animated: true)
-            }
+            ShareCardRenderer.share(image: UIImage(), text: shareText)
         }
     }
 }

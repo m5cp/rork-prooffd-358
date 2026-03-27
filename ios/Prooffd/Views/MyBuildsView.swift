@@ -60,18 +60,7 @@ struct MyBuildsView: View {
             }
             .sheet(isPresented: $showProgressShare) {
                 if let build = appState.activeBuild {
-                    ShareableCardSheet(
-                        cardContent: AnyView(
-                            ProgressShareCard(
-                                buildName: build.businessName,
-                                progressPercent: build.progressPercentage,
-                                streakDays: appState.streakTracker.currentStreak,
-                                nextStep: build.nextStep?.title ?? "",
-                                totalPoints: appState.momentum.totalPoints
-                            )
-                        ),
-                        shareText: "I'm building \(build.businessName) step-by-step with Prooffd \u{2014} \(build.progressPercentage)% complete! Download Prooffd: https://apps.apple.com/app/prooffd/id6743071053"
-                    )
+                    ShareCardPresenterSheet(content: .progress(from: build))
                 }
             }
         }

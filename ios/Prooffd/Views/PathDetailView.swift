@@ -67,7 +67,7 @@ struct PathDetailView: View {
                 PaywallView()
             }
             .sheet(isPresented: $showShareSheet) {
-                ShareCardView(result: result, userName: appState.userProfile.firstName, totalMatches: appState.matchResults.count)
+                ShareCardPresenterSheet(content: .topMatch(from: result))
             }
             .overlay {
                 if showBuildAdded {

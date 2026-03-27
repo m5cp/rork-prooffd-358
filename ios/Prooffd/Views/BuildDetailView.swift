@@ -142,19 +142,7 @@ struct BuildDetailView: View {
                     PaywallView()
                 }
                 .sheet(isPresented: $showProgressShareCard) {
-                    let nextStep = build.steps.first(where: { !$0.isCompleted })?.title ?? ""
-                    ShareableCardSheet(
-                        cardContent: AnyView(
-                            ProgressShareCard(
-                                buildName: build.businessName,
-                                progressPercent: build.progressPercentage,
-                                streakDays: appState.streakTracker.currentStreak,
-                                nextStep: nextStep,
-                                totalPoints: appState.momentum.totalPoints
-                            )
-                        ),
-                        shareText: "I'm building \(build.businessName) step-by-step with Prooffd \u{2014} \(build.progressPercentage)% complete! Download Prooffd: https://apps.apple.com/app/prooffd/id6743071053"
-                    )
+                    ShareCardPresenterSheet(content: .progress(from: build))
                 }
                 .alert("Remove Build?", isPresented: $showDeleteConfirm) {
                     Button("Cancel", role: .cancel) {}

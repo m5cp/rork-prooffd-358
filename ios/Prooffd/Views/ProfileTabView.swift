@@ -40,20 +40,11 @@ struct ProfileTabView: View {
                 AchievementsView()
             }
             .sheet(isPresented: $showMyPathShare) {
-                let build = appState.activeBuild
-                ShareableCardSheet(
-                    cardContent: AnyView(
-                        MyPathShareCard(
-                            userName: appState.userProfile.firstName,
-                            selectedJob: build?.pathName ?? "Exploring",
-                            progressPercent: build?.progressPercentage ?? 0,
-                            streakDays: appState.streakTracker.currentStreak,
-                            aiSafeScore: build?.aiSafeScore ?? 0,
-                            totalPoints: appState.momentum.totalPoints
-                        )
-                    ),
-                    shareText: "I'm building a business step-by-step with Prooffd! Download Prooffd: https://apps.apple.com/app/prooffd/id6743071053"
-                )
+                if let build = appState.activeBuild {
+                    ShareCardPresenterSheet(content: .progress(from: build))
+                } else if let topMatch = appState.matchResults.first {
+                    ShareCardPresenterSheet(content: .topMatch(from: topMatch))
+                }
             }
             .sheet(isPresented: $showAvatarPicker) {
                 AvatarPickerView(selectedAvatar: Binding(
