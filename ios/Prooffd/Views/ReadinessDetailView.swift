@@ -257,9 +257,9 @@ struct ReadinessDetailView: View {
                 checkDivider
                 profileCheckRow(
                     label: "Education willingness",
-                    earned: appState.userProfile.educationWillingness != nil ? 1 : 0,
+                    earned: !appState.userProfile.educationWillingnesses.isEmpty ? 1 : 0,
                     max: 1,
-                    done: appState.userProfile.educationWillingness != nil,
+                    done: !appState.userProfile.educationWillingnesses.isEmpty,
                     icon: "graduationcap.fill",
                     color: Theme.accent
                 )

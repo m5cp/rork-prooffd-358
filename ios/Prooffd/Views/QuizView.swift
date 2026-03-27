@@ -463,9 +463,61 @@ struct QuizView: View {
 
     private var educationWillingnessStep: some View {
         VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "What level of training are you open to?", subtitle: "Some paths require more education than others.")
-            optionList(EducationWillingness.allCases, selected: viewModel.profile.educationWillingness) {
-                viewModel.profile.educationWillingness = $0
+            quizHeader(title: "What level of training are you open to?", subtitle: "Select all that apply.")
+            VStack(spacing: 10) {
+                ForEach(EducationWillingness.allCases) { edu in
+                    let isSelected = viewModel.profile.educationWillingnesses.contains(edu)
+                    Button {
+                        withAnimation(.spring(duration: 0.25)) {
+                            viewModel.toggleEducation(edu)
+                        }
+                    } label: {
+                        HStack(spacing: 14) {
+                            ZStack {
+                                Circle()
+                                    .fill(isSelected ? Theme.accent.opacity(0.2) : Theme.cardBackgroundLight)
+                                    .frame(width: 42, height: 42)
+                                Image(systemName: edu.icon)
+                                    .font(.body.weight(.semibold))
+                                    .foregroundStyle(isSelected ? Theme.accent : Theme.textTertiary)
+                            }
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack(spacing: 8) {
+                                    Text(edu.rawValue)
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(isSelected ? .white : Theme.textPrimary)
+                                    Spacer()
+                                    Text("\(edu.matchScore)% match")
+                                        .font(.caption2.weight(.bold))
+                                        .foregroundStyle(isSelected ? .white.opacity(0.8) : Theme.accent)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 3)
+                                        .background(isSelected ? .white.opacity(0.15) : Theme.accent.opacity(0.12))
+                                        .clipShape(.capsule)
+                                }
+                                Text(edu.subtitle)
+                                    .font(.caption)
+                                    .foregroundStyle(isSelected ? .white.opacity(0.7) : Theme.textTertiary)
+                                    .lineLimit(2)
+                            }
+                        }
+                        .padding(14)
+                        .background(isSelected ? Theme.accentBlue : Theme.cardBackground)
+                        .clipShape(.rect(cornerRadius: 14))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(isSelected ? Theme.accentBlue : Theme.accentBlue.opacity(0.1), lineWidth: isSelected ? 2 : 1)
+                        )
+                    }
+                    .sensoryFeedback(.selection, trigger: isSelected)
+                }
+            }
+
+            if !viewModel.profile.educationWillingnesses.isEmpty {
+                Text("\(viewModel.profile.educationWillingnesses.count) selected")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Theme.accent)
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
         }
     }

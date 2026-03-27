@@ -247,8 +247,8 @@ struct ProfileTabView: View {
                         if let timeline = appState.userProfile.incomeTimeline {
                             profileRow(icon: "clock.arrow.circlepath", label: "Income Timeline", value: timeline.rawValue)
                         }
-                        if let education = appState.userProfile.educationWillingness {
-                            profileRow(icon: "graduationcap.fill", label: "Education Willingness", value: education.rawValue)
+                        if !appState.userProfile.educationWillingnesses.isEmpty {
+                            profileRow(icon: "graduationcap.fill", label: "Education Willingness", value: appState.userProfile.educationWillingnesses.map(\.rawValue).joined(separator: ", "))
                         }
                     }
 

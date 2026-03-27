@@ -109,6 +109,30 @@ enum MatchingEngine {
                 }
             }
 
+            maxScore += 7
+            if !profile.educationWillingnesses.isEmpty {
+                let eduReq = path.educationRequired.lowercased()
+                let requiredLevel: EducationWillingness
+                if eduReq.contains("4-year") || eduReq.contains("bachelor") || eduReq.contains("degree") {
+                    requiredLevel = .fourYear
+                } else if eduReq.contains("2-year") || eduReq.contains("associate") {
+                    requiredLevel = .twoYear
+                } else if eduReq.contains("trade") || eduReq.contains("bootcamp") || eduReq.contains("apprentice") {
+                    requiredLevel = .tradeSchool
+                } else if eduReq.contains("cert") || eduReq.contains("license") || eduReq.contains("training") {
+                    requiredLevel = .shortCert
+                } else {
+                    requiredLevel = .selfTaught
+                }
+                if profile.educationWillingnesses.contains(requiredLevel) {
+                    score += 7
+                } else if profile.educationWillingnesses.contains(where: { EducationWillingness.allCases.firstIndex(of: $0)! >= EducationWillingness.allCases.firstIndex(of: requiredLevel)! }) {
+                    score += 5
+                } else {
+                    score += 2
+                }
+            }
+
             maxScore += 2
             if let fastCash = profile.needsFastCash {
                 if fastCash && path.fastCashPotential { score += 2 }

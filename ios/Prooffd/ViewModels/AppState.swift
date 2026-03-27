@@ -457,7 +457,7 @@ class AppState {
         if userProfile.workStyle != nil { score += 1 }
         if !userProfile.workEnvironments.isEmpty { score += 2 }
         if userProfile.incomeTimeline != nil { score += 1 }
-        if userProfile.educationWillingness != nil { score += 1 }
+        if !userProfile.educationWillingnesses.isEmpty { score += 1 }
         return min(score, 50)
     }
 

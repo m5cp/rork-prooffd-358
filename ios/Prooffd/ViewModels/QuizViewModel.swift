@@ -42,7 +42,7 @@ class QuizViewModel {
         case 7: return profile.techComfort != nil
         case 8: return profile.experienceLevel != nil
         case 9: return profile.incomeTimeline != nil
-        case 10: return profile.educationWillingness != nil
+        case 10: return !profile.educationWillingnesses.isEmpty
         case 11: return profile.customerInteraction != nil
         case 12: return profile.sellingComfort != nil
         case 13: return profile.hasCar != nil
@@ -66,7 +66,7 @@ class QuizViewModel {
         if profile.techComfort != nil { pts += 5 }
         if profile.experienceLevel != nil { pts += 5 }
         if profile.incomeTimeline != nil { pts += 5 }
-        if profile.educationWillingness != nil { pts += 5 }
+        if !profile.educationWillingnesses.isEmpty { pts += 5 }
         if profile.customerInteraction != nil { pts += 5 }
         if profile.sellingComfort != nil { pts += 5 }
         if profile.hasCar != nil { pts += 5 }
@@ -124,6 +124,14 @@ class QuizViewModel {
             profile.workEnvironments.removeAll { $0 == env }
         } else {
             profile.workEnvironments.append(env)
+        }
+    }
+
+    func toggleEducation(_ edu: EducationWillingness) {
+        if profile.educationWillingnesses.contains(edu) {
+            profile.educationWillingnesses.removeAll { $0 == edu }
+        } else {
+            profile.educationWillingnesses.append(edu)
         }
     }
 

@@ -177,6 +177,36 @@ nonisolated enum EducationWillingness: String, CaseIterable, Identifiable, Codab
     case fourYear = "4-year degree"
 
     var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .selfTaught: return "laptopcomputer"
+        case .shortCert: return "certificate"
+        case .tradeSchool: return "wrench.and.screwdriver.fill"
+        case .twoYear: return "building.columns.fill"
+        case .fourYear: return "graduationcap.fill"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .selfTaught: return "Best for self-starters who learn by doing and want to move fast."
+        case .shortCert: return "Great for focused learners who want a credential quickly."
+        case .tradeSchool: return "Ideal for hands-on people who thrive in structured programs."
+        case .twoYear: return "Perfect for those who want deeper expertise with flexibility."
+        case .fourYear: return "For people who want a comprehensive foundation and professional network."
+        }
+    }
+
+    var matchScore: Int {
+        switch self {
+        case .selfTaught: return 95
+        case .shortCert: return 88
+        case .tradeSchool: return 82
+        case .twoYear: return 74
+        case .fourYear: return 65
+        }
+    }
 }
 
 nonisolated struct UserProfile: Codable, Sendable {
@@ -195,7 +225,7 @@ nonisolated struct UserProfile: Codable, Sendable {
     var needsFastCash: Bool?
     var workEnvironments: [WorkEnvironment] = []
     var incomeTimeline: IncomeTimeline?
-    var educationWillingness: EducationWillingness?
+    var educationWillingnesses: [EducationWillingness] = []
     var avatarId: String = ""
 
     var avatar: AvatarOption {
