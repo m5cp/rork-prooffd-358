@@ -392,6 +392,8 @@ struct ShareableCardSheet: View {
                         .background(showCheckmark ? Theme.accent.opacity(0.7) : Theme.accent)
                         .clipShape(.rect(cornerRadius: 14))
                     }
+                    .accessibilityLabel(showCheckmark ? "Card shared successfully" : "Share card")
+                    .accessibilityHint("Opens the share sheet")
 
                     Button {
                         saveToPhotos()
@@ -408,6 +410,7 @@ struct ShareableCardSheet: View {
                         .background(Theme.cardBackground)
                         .clipShape(.rect(cornerRadius: 14))
                     }
+                    .accessibilityLabel("Save card to Photos")
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 16)

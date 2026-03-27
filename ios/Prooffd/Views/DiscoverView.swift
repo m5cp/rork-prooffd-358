@@ -76,12 +76,14 @@ struct DiscoverView: View {
                     .font(.subheadline)
                     .foregroundStyle(Theme.textSecondary)
             }
+            .accessibilityElement(children: .combine)
 
             Button {
                 showTopMatchAndAlternatives()
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "sparkles")
+                        .accessibilityHidden(true)
                     Text("Find My Best Option")
                 }
                 .font(.headline)
@@ -97,6 +99,7 @@ struct DiscoverView: View {
                 )
                 .clipShape(.rect(cornerRadius: 14))
             }
+            .accessibilityHint("Shows your top match and alternatives")
             .sensoryFeedback(.impact(weight: .medium), trigger: showBestOptions)
 
             HStack(spacing: 10) {
@@ -150,6 +153,7 @@ struct DiscoverView: View {
                         .font(.subheadline)
                         .foregroundStyle(color)
                 }
+                .accessibilityHidden(true)
                 Text(title)
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(Theme.textSecondary)
@@ -159,6 +163,7 @@ struct DiscoverView: View {
             .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(title)
     }
 
     private func showTopMatchAndAlternatives() {
@@ -223,6 +228,7 @@ struct DiscoverView: View {
         let catColor = Theme.categoryColor(for: result.businessPath.category)
         let zone = result.businessPath.zone
         let zoneColor: Color = zone == .safe ? Theme.accent : zone == .human ? Color(hex: "FBBF24") : .orange
+        let rankLabel = rank == 1 ? "Top Match" : "Alternative \(rank - 1)"
 
         return Button {
             showBestOptions = false
@@ -318,6 +324,8 @@ struct DiscoverView: View {
             .cardShadow()
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("\(rankLabel), \(result.businessPath.name), \(result.scorePercentage) percent match, AI Safe Zone \(zone.label)")
+        .accessibilityHint("Opens details for \(result.businessPath.name)")
     }
 
     // MARK: - Top Match Hero
@@ -336,6 +344,7 @@ struct DiscoverView: View {
                     Image(systemName: "crown.fill")
                         .font(.caption2)
                         .foregroundStyle(Color(hex: "FBBF24"))
+                        .accessibilityHidden(true)
                     Text("YOUR BEST MOVE RIGHT NOW")
                         .font(.caption2.weight(.heavy))
                         .foregroundStyle(Theme.textTertiary)
@@ -355,6 +364,7 @@ struct DiscoverView: View {
                             .font(.title2)
                             .foregroundStyle(catColor)
                     }
+                    .accessibilityHidden(true)
 
                     VStack(alignment: .leading, spacing: 6) {
                         Text(result.businessPath.name)
@@ -398,6 +408,7 @@ struct DiscoverView: View {
                 } label: {
                     HStack(spacing: 8) {
                         Image(systemName: "arrow.right.circle.fill")
+                            .accessibilityHidden(true)
                         Text("Start Plan")
                     }
                     .font(.subheadline.weight(.semibold))
@@ -407,6 +418,7 @@ struct DiscoverView: View {
                     .background(catColor)
                     .clipShape(.capsule)
                 }
+                .accessibilityLabel("Start Plan for \(result.businessPath.name)")
             }
             .padding(20)
             .background(
@@ -424,6 +436,8 @@ struct DiscoverView: View {
             .cardShadow()
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Top Match, \(result.businessPath.name), \(result.scorePercentage) percent match, AI Safe Zone \(zone.label), typical market rate \(result.businessPath.typicalMarketRates)")
     }
 
     // MARK: - Start Here
@@ -434,6 +448,7 @@ struct DiscoverView: View {
                 Image(systemName: "hand.wave.fill")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(Theme.accent)
+                    .accessibilityHidden(true)
                 Text("Start Here Today")
                     .font(.title3.weight(.bold))
                     .foregroundStyle(Theme.textPrimary)
@@ -472,6 +487,7 @@ struct DiscoverView: View {
                         .font(.title3)
                         .foregroundStyle(iconColor)
                 }
+                .accessibilityHidden(true)
                 Text(title)
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(Theme.textPrimary)
@@ -487,6 +503,7 @@ struct DiscoverView: View {
             .cardShadow()
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(title)
     }
 
     // MARK: - Helpers

@@ -18,6 +18,7 @@ struct DailyMicroActionCard: View {
                 Image(systemName: "target")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(Theme.accent)
+                    .accessibilityHidden(true)
                 Text("Today's Action")
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(Theme.textPrimary)
@@ -30,6 +31,7 @@ struct DailyMicroActionCard: View {
                             .font(.caption2.weight(.semibold))
                     }
                     .foregroundStyle(Theme.accent)
+                    .accessibilityLabel("Completed")
                 } else {
                     Text("+\(action.points) pts")
                         .font(.caption2.weight(.bold))
@@ -38,6 +40,7 @@ struct DailyMicroActionCard: View {
                         .padding(.vertical, 3)
                         .background(Color(hex: "FBBF24").opacity(0.12))
                         .clipShape(.capsule)
+                        .accessibilityLabel("\(action.points) points reward")
                 }
             }
 
@@ -73,6 +76,7 @@ struct DailyMicroActionCard: View {
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "checkmark.circle.fill")
+                            .accessibilityHidden(true)
                         Text("Mark Done")
                     }
                     .font(.caption.weight(.semibold))
@@ -82,9 +86,13 @@ struct DailyMicroActionCard: View {
                     .background(Theme.accent)
                     .clipShape(.capsule)
                 }
+                .accessibilityLabel("Mark \(action.title) as done")
+                .accessibilityHint("Earns \(action.points) points")
                 .sensoryFeedback(.success, trigger: showCheckAnimation)
             }
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Today's Action: \(action.title), \(isCompleted ? "completed" : "not completed")")
         .padding(14)
         .background(
             LinearGradient(
@@ -99,4 +107,5 @@ struct DailyMicroActionCard: View {
                 .stroke(Theme.accent.opacity(0.15), lineWidth: 0.5)
         )
     }
+
 }

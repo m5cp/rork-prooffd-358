@@ -5,6 +5,7 @@ struct OnboardingView: View {
     var onSkipQuiz: () -> Void
     @State private var currentPage: Int = 0
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private let pages: [OnboardingPage] = [
         OnboardingPage(
@@ -40,7 +41,8 @@ struct OnboardingView: View {
                             Image(systemName: page.icon)
                                 .font(.system(.largeTitle, design: .default, weight: .bold))
                                 .foregroundStyle(Theme.accent)
-                                .symbolEffect(.pulse, options: .repeating)
+                                .symbolEffect(.pulse, options: .repeating, isActive: !reduceMotion)
+                                .accessibilityHidden(true)
 
                             Text(page.headline)
                                 .font(.largeTitle.bold())
@@ -73,7 +75,7 @@ struct OnboardingView: View {
 
                     Button {
                         if currentPage < pages.count - 1 {
-                            withAnimation(.spring(duration: 0.4)) {
+                            withAnimation(reduceMotion ? .none : .spring(duration: 0.4)) {
                                 currentPage += 1
                             }
                         } else {

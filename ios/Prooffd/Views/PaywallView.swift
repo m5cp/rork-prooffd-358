@@ -133,6 +133,7 @@ struct PaywallView: View {
                         .font(.body)
                         .foregroundStyle(Theme.accent)
                         .frame(width: 28)
+                        .accessibilityHidden(true)
 
                     Text(feature.0)
                         .font(.subheadline.weight(.medium))
@@ -143,7 +144,10 @@ struct PaywallView: View {
                     Image(systemName: "checkmark")
                         .font(.caption.weight(.bold))
                         .foregroundStyle(Theme.accent)
+                        .accessibilityHidden(true)
                 }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Included: \(feature.0)")
                 .padding(.vertical, 14)
                 .padding(.horizontal, 16)
 
@@ -246,6 +250,7 @@ struct PaywallView: View {
                     .font(.caption)
                     .foregroundStyle(Theme.textTertiary)
             }
+            .accessibilityLabel("Restore previous purchases")
 
             if let error = store.error {
                 Text(error)

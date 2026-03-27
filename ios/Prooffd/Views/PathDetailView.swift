@@ -119,6 +119,7 @@ struct PathDetailView: View {
                 .background(appState.isFavorite(path.id) ? Color.pink.opacity(0.1) : Theme.cardBackground)
                 .clipShape(.capsule)
             }
+            .accessibilityLabel(appState.isFavorite(path.id) ? "Remove from favorites" : "Add to favorites")
             .sensoryFeedback(.selection, trigger: appState.isFavorite(path.id))
 
             Button {
@@ -138,6 +139,7 @@ struct PathDetailView: View {
                 .background(Theme.cardBackground)
                 .clipShape(.capsule)
             }
+            .accessibilityLabel(appState.isPathHidden(path.id) ? "Show this path in results" : "Hide this path from results")
 
             Spacer()
         }
@@ -817,6 +819,8 @@ struct PathDetailView: View {
                 .padding(.vertical, 14)
                 .background(Theme.accent.opacity(0.12))
                 .clipShape(.capsule)
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("\(path.name) is already in your builds")
             } else {
                 Button {
                     appState.addBuild(from: path)
@@ -828,6 +832,7 @@ struct PathDetailView: View {
                 } label: {
                     HStack(spacing: 8) {
                         Image(systemName: "hammer.fill")
+                            .accessibilityHidden(true)
                         Text("Start This Build")
                     }
                     .font(.headline)
@@ -843,6 +848,8 @@ struct PathDetailView: View {
                     )
                     .clipShape(.capsule)
                 }
+                .accessibilityLabel("Start building \(path.name)")
+                .accessibilityHint("Adds this path to your builds with a step-by-step plan")
                 .sensoryFeedback(.impact(weight: .medium), trigger: showBuildAdded)
             }
         }
@@ -861,6 +868,8 @@ struct PathDetailView: View {
                     .background(Theme.accentBlue)
                     .clipShape(.capsule)
             }
+            .accessibilityLabel("Share match card for \(path.name)")
+            .accessibilityHint("Creates a shareable image card")
 
             if store.isPremium {
                 Button {
@@ -874,6 +883,7 @@ struct PathDetailView: View {
                         .background(Theme.accent.opacity(0.12))
                         .clipShape(.capsule)
                 }
+                .accessibilityLabel("Export \(path.name) details as PDF")
             }
         }
     }
@@ -883,6 +893,7 @@ struct PathDetailView: View {
             Image(systemName: icon)
                 .font(.caption)
                 .foregroundStyle(Theme.accent)
+                .accessibilityHidden(true)
             Text(title)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Theme.textPrimary)

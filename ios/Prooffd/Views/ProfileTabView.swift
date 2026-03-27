@@ -118,6 +118,8 @@ struct ProfileTabView: View {
                                 .background(Circle().fill(levelColor).frame(width: 18, height: 18))
                         }
                     }
+                    .accessibilityLabel("Change avatar")
+                    .accessibilityHint("Opens avatar picker")
 
                     VStack(alignment: .leading, spacing: 8) {
                         Button {
@@ -131,8 +133,11 @@ struct ProfileTabView: View {
                                 Image(systemName: "pencil")
                                     .font(.caption2)
                                     .foregroundStyle(Theme.textTertiary)
+                                    .accessibilityHidden(true)
                             }
                         }
+                        .accessibilityLabel("Edit name: \(appState.userProfile.firstName.isEmpty ? "User" : appState.userProfile.firstName)")
+                        .accessibilityHint("Double tap to change your display name")
 
                         HStack(spacing: 8) {
                             HStack(spacing: 5) {
@@ -185,6 +190,9 @@ struct ProfileTabView: View {
                         }
                     }
                     .frame(height: 10)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Level progress")
+                    .accessibilityValue("\(Int(progress * 100)) percent to next level")
 
                     HStack {
                         Text("\(appState.momentum.totalPoints) pts")
@@ -255,6 +263,7 @@ struct ProfileTabView: View {
                     .foregroundStyle(isActive ? .orange : Theme.textTertiary)
                     .symbolEffect(.pulse, options: .repeating.speed(0.5), isActive: appState.streakTracker.currentStreak >= 7)
             }
+            .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 8) {
@@ -286,6 +295,7 @@ struct ProfileTabView: View {
                 .padding(.vertical, 6)
                 .background(Theme.accent.opacity(0.08))
                 .clipShape(.rect(cornerRadius: 10))
+                .accessibilityLabel("Streak protected for one day")
             }
         }
         .padding(18)
@@ -296,6 +306,8 @@ struct ProfileTabView: View {
                 .stroke(isActive ? Color.orange.opacity(0.1) : Theme.border.opacity(0.3), lineWidth: 0.5)
         )
         .cardShadow()
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Streak: \(appState.streakTracker.currentStreak) \(appState.streakTracker.currentStreak == 1 ? "day" : "days")\(appState.streakTracker.streakBufferAvailable && appState.streakTracker.currentStreak >= 2 ? ", streak protected" : "")")
     }
 
     // MARK: - Achievements
@@ -369,6 +381,7 @@ struct ProfileTabView: View {
                     .font(.body.weight(.medium))
                     .foregroundStyle(color)
             }
+            .accessibilityHidden(true)
             Text(title)
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(Theme.textPrimary)
@@ -383,6 +396,8 @@ struct ProfileTabView: View {
             RoundedRectangle(cornerRadius: 14)
                 .stroke(color.opacity(0.12), lineWidth: 0.5)
         )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Badge: \(title), earned")
     }
 
     // MARK: - Quick Actions
@@ -455,6 +470,7 @@ struct ProfileTabView: View {
                 Image(systemName: "bell.fill")
                     .foregroundStyle(Theme.accent)
                     .frame(width: 22)
+                    .accessibilityHidden(true)
                 Toggle("Gentle Reminders", isOn: Binding(
                     get: { NotificationService.shared.notificationsEnabled },
                     set: { newValue in
@@ -470,6 +486,10 @@ struct ProfileTabView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Gentle Reminders")
+            .accessibilityValue(NotificationService.shared.notificationsEnabled ? "On" : "Off")
+            .accessibilityHint("Double tap to toggle notifications")
 
             settingsDivider
 

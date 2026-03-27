@@ -117,6 +117,7 @@ struct BuildDetailView: View {
                                     .clipShape(Circle())
                                     .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
                             }
+                            .accessibilityLabel("Scroll to top")
                             .padding(.trailing, 16)
                             .padding(.bottom, 16)
                             .transition(.scale.combined(with: .opacity))
@@ -193,6 +194,8 @@ struct BuildDetailView: View {
                         .foregroundStyle(Theme.textTertiary)
                 }
             }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Build progress: \(build.progressPercentage) percent complete")
             .padding(.top, 8)
 
             VStack(spacing: 6) {
@@ -243,6 +246,7 @@ struct BuildDetailView: View {
             Image(systemName: icon)
                 .font(.system(size: 9))
                 .foregroundStyle(Theme.accent)
+                .accessibilityHidden(true)
             Text(value)
                 .font(.caption2.weight(.medium))
                 .foregroundStyle(Theme.textSecondary)
@@ -418,6 +422,7 @@ struct BuildDetailView: View {
                         .font(.body)
                         .foregroundStyle(step.isCompleted ? Theme.accent : Theme.textTertiary)
                 }
+                .accessibilityLabel(step.isCompleted ? "Mark \(step.title) incomplete" : "Mark \(step.title) complete")
                 .sensoryFeedback(.selection, trigger: step.isCompleted)
 
                 VStack(alignment: .leading, spacing: 4) {
@@ -470,6 +475,7 @@ struct BuildDetailView: View {
                         .frame(width: 28, height: 28)
                         .contentShape(Rectangle())
                 }
+                .accessibilityLabel("Edit step options for \(step.title)")
             }
             .padding(.vertical, 4)
 
@@ -1272,6 +1278,8 @@ struct BuildDetailView: View {
                 .background(Theme.accent.opacity(0.12))
                 .clipShape(.capsule)
         }
+        .accessibilityLabel("Export build as PDF")
+        .accessibilityHint("Downloads your build plan as a PDF document")
     }
 
     private func shareProgressButton(_ build: BuildProject) -> some View {
@@ -1280,6 +1288,7 @@ struct BuildDetailView: View {
         } label: {
             HStack(spacing: 8) {
                 Image(systemName: "square.and.arrow.up")
+                    .accessibilityHidden(true)
                 Text("Share Progress")
             }
             .font(.subheadline.weight(.semibold))
@@ -1289,6 +1298,8 @@ struct BuildDetailView: View {
             .background(Theme.accentBlue.opacity(0.12))
             .clipShape(.capsule)
         }
+        .accessibilityLabel("Share build progress")
+        .accessibilityHint("Creates a shareable card of your progress")
     }
 
     private var upgradeCard: some View {
@@ -1356,6 +1367,7 @@ struct BuildDetailView: View {
             Image(systemName: icon)
                 .font(.caption)
                 .foregroundStyle(Theme.accent)
+                .accessibilityHidden(true)
             Text(title)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Theme.textPrimary)

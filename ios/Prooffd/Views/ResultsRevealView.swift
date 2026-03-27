@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ResultsRevealView: View {
     @Environment(AppState.self) private var appState
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var countUpValue: Int = 0
     @State private var showTopMatch: Bool = false
     @State private var showBadge: Bool = false
@@ -27,7 +28,8 @@ struct ResultsRevealView: View {
                     Image(systemName: "checkmark.seal.fill")
                         .font(.system(size: 56))
                         .foregroundStyle(Theme.accent)
-                        .symbolEffect(.bounce, options: .nonRepeating)
+                        .symbolEffect(.bounce, options: .nonRepeating, isActive: !reduceMotion)
+                        .accessibilityHidden(true)
 
                     Text("Analysis Complete")
                         .font(.title2.bold())
@@ -50,6 +52,7 @@ struct ResultsRevealView: View {
                         Image(systemName: "rosette")
                             .font(.title3)
                             .foregroundStyle(Color(hex: "FBBF24"))
+                            .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Path Finder")
                                 .font(.subheadline.weight(.bold))
@@ -63,7 +66,9 @@ struct ResultsRevealView: View {
                     .padding(.vertical, 12)
                     .background(Color(hex: "FBBF24").opacity(0.1))
                     .clipShape(.capsule)
-                    .transition(.scale(scale: 0.6).combined(with: .opacity))
+                    .transition(reduceMotion ? .opacity : .scale(scale: 0.6).combined(with: .opacity))
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("Badge earned: Path Finder, plus 25 bonus points")
                 }
 
                 if showTopMatch, let top = topMatch {
@@ -82,6 +87,7 @@ struct ResultsRevealView: View {
                                     .font(.title3)
                                     .foregroundStyle(catColor)
                             }
+                            .accessibilityHidden(true)
 
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(top.businessPath.name)
@@ -93,6 +99,7 @@ struct ResultsRevealView: View {
                                         .foregroundStyle(catColor)
                                     Text("\u{2022}")
                                         .foregroundStyle(Theme.textTertiary)
+                                        .accessibilityHidden(true)
                                     Text("AI Safe: \(top.businessPath.aiProofRating)")
                                         .font(.caption.weight(.medium))
                                         .foregroundStyle(Theme.textTertiary)
@@ -106,7 +113,9 @@ struct ResultsRevealView: View {
                         .clipShape(.rect(cornerRadius: 14))
                     }
                     .padding(.horizontal, 32)
-                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .bottom)))
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("Your number 1 match: \(top.businessPath.name), \(top.scorePercentage) percent match, AI Safe score \(top.businessPath.aiProofRating)")
                 }
 
                 Spacer()
@@ -137,6 +146,15 @@ struct ResultsRevealView: View {
     }
 
     private func runReveal() async {
+        if reduceMotion {
+            countUpValue = targetCount
+            showBadge = true
+            appState.momentum.awardPoints(25, reason: .todayStep)
+            showTopMatch = true
+            showButton = true
+            return
+        }
+
         let steps = min(targetCount, 30)
         let duration = 1.5
         let stepDelay = duration / Double(steps)

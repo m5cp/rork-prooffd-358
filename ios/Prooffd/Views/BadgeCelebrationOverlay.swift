@@ -5,6 +5,7 @@ struct BadgeCelebrationOverlay: View {
     let onDismiss: () -> Void
     @State private var appear: Bool = false
     @State private var shimmer: Bool = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ZStack {
@@ -17,7 +18,7 @@ struct BadgeCelebrationOverlay: View {
                     Circle()
                         .fill(Color(hex: badge.color).opacity(0.2))
                         .frame(width: 120, height: 120)
-                        .scaleEffect(shimmer ? 1.15 : 1.0)
+                        .scaleEffect(reduceMotion ? 1.0 : (shimmer ? 1.15 : 1.0))
 
                     Circle()
                         .fill(Color(hex: badge.color).opacity(0.1))
@@ -26,8 +27,9 @@ struct BadgeCelebrationOverlay: View {
                     Image(systemName: badge.icon)
                         .font(.system(size: 40))
                         .foregroundStyle(Color(hex: badge.color))
-                        .scaleEffect(appear ? 1 : 0.3)
+                        .scaleEffect(reduceMotion ? 1 : (appear ? 1 : 0.3))
                 }
+                .accessibilityHidden(true)
 
                 VStack(spacing: 8) {
                     Text("Badge Unlocked!")
@@ -62,15 +64,21 @@ struct BadgeCelebrationOverlay: View {
             .background(.ultraThinMaterial)
             .clipShape(.rect(cornerRadius: 24))
             .padding(.horizontal, 40)
-            .scaleEffect(appear ? 1 : 0.7)
+            .scaleEffect(reduceMotion ? 1 : (appear ? 1 : 0.7))
             .opacity(appear ? 1 : 0)
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Badge unlocked: \(badge.title). \(badge.description)")
         .onAppear {
-            withAnimation(.spring(duration: 0.5, bounce: 0.3)) {
+            if reduceMotion {
                 appear = true
-            }
-            withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
-                shimmer = true
+            } else {
+                withAnimation(.spring(duration: 0.5, bounce: 0.3)) {
+                    appear = true
+                }
+                withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
+                    shimmer = true
+                }
             }
         }
     }

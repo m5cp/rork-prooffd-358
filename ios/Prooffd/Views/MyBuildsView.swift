@@ -90,6 +90,7 @@ struct MyBuildsView: View {
                 Image(systemName: message.icon)
                     .font(.title3)
                     .foregroundStyle(message.color)
+                    .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(message.title)
                         .font(.subheadline.weight(.semibold))
@@ -100,6 +101,7 @@ struct MyBuildsView: View {
                 }
                 Spacer()
             }
+            .accessibilityElement(children: .combine)
             .padding(14)
             .background(
                 LinearGradient(
@@ -176,6 +178,7 @@ struct MyBuildsView: View {
                 Image(systemName: "star.fill")
                     .font(.caption)
                     .foregroundStyle(Theme.accent)
+                    .accessibilityHidden(true)
                 Text("Today's Step")
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(Theme.textPrimary)
@@ -199,6 +202,8 @@ struct MyBuildsView: View {
                         .font(.system(size: 11, weight: .bold))
                         .foregroundStyle(Theme.accent)
                 }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(today.build.progressPercentage) percent complete")
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(today.step.title)
@@ -221,6 +226,7 @@ struct MyBuildsView: View {
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.circle.fill")
+                        .accessibilityHidden(true)
                     Text("Mark Complete  +10 pts")
                 }
                 .font(.subheadline.weight(.semibold))
@@ -230,6 +236,7 @@ struct MyBuildsView: View {
                 .background(Theme.accent)
                 .clipShape(.capsule)
             }
+            .accessibilityLabel("Mark step complete, earn 10 points")
             .sensoryFeedback(.success, trigger: celebrationBuildId)
         }
         .padding(16)
@@ -276,6 +283,7 @@ struct MyBuildsView: View {
                             .font(.body)
                             .foregroundStyle(Theme.categoryColor(for: build.category))
                     }
+                    .accessibilityHidden(true)
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text(build.businessName)
@@ -316,6 +324,7 @@ struct MyBuildsView: View {
                     }
                 }
                 .frame(height: 6)
+                .accessibilityHidden(true)
 
                 if let nextStep = build.nextStep {
                     HStack(spacing: 8) {
@@ -352,6 +361,9 @@ struct MyBuildsView: View {
             .cardShadow()
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(build.businessName), \(build.progressPercentage) percent complete, \(build.completedSteps) of \(build.totalSteps) steps done")
+        .accessibilityHint("Opens build details")
     }
 
     // MARK: - Empty State
@@ -475,6 +487,7 @@ struct MyBuildsView: View {
                         .font(.body)
                         .foregroundStyle(Theme.accentBlue)
                 }
+                .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Share Your Progress")
@@ -490,6 +503,7 @@ struct MyBuildsView: View {
                 Image(systemName: "chevron.right")
                     .font(.caption.weight(.bold))
                     .foregroundStyle(Theme.textTertiary)
+                    .accessibilityHidden(true)
             }
             .padding(14)
             .background(Theme.cardBackground)
@@ -497,6 +511,8 @@ struct MyBuildsView: View {
             .cardShadow()
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Share Your Progress")
+        .accessibilityHint("Creates a shareable card of your building progress")
     }
 
     private func checkForRatingPrompt() {

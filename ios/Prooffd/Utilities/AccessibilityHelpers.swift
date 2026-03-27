@@ -19,6 +19,39 @@ extension View {
     func accessibleLabel(_ label: String) -> some View {
         self.accessibilityLabel(label)
     }
+
+    func accessibleCard(label: String, hint: String? = nil) -> some View {
+        self
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(label)
+            .accessibilityHint(hint != nil ? Text(hint!) : Text(""))
+    }
+
+    func decorativeAccessibility() -> some View {
+        self.accessibilityHidden(true)
+    }
+
+    func progressAccessibility(label: String, value: Int, total: Int = 100) -> some View {
+        self
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(label)
+            .accessibilityValue("\(value) percent")
+    }
+}
+
+struct ReducedMotionModifier: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    let animation: Animation?
+
+    func body(content: Content) -> some View {
+        content.animation(reduceMotion ? nil : animation, value: true)
+    }
+}
+
+extension View {
+    func motionSafe(_ animation: Animation?) -> some View {
+        modifier(ReducedMotionModifier(animation: animation))
+    }
 }
 
 struct AdaptiveHStack<Content: View>: View {
