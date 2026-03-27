@@ -1,6 +1,12 @@
 import Foundation
 import UserNotifications
 
+nonisolated enum ActivityLevel: Sendable {
+    case active
+    case moderate
+    case low
+}
+
 @Observable
 class NotificationService {
     static let shared = NotificationService()
@@ -20,6 +26,7 @@ class NotificationService {
 
     private let usedIndicesKey = "usedNotificationIndices"
     private let lastScheduleDateKey = "lastNotificationScheduleDate"
+    private let activityDatesKey = "recentActivityDates"
     private let maxDailyNotifications = 1
     private let scheduleDaysAhead = 14
 
@@ -31,6 +38,41 @@ class NotificationService {
         set {
             UserDefaults.standard.set(Array(newValue), forKey: usedIndicesKey)
         }
+    }
+
+    private var recentActivityDates: [Date] {
+        get {
+            let timestamps = UserDefaults.standard.array(forKey: activityDatesKey) as? [Double] ?? []
+            return timestamps.map { Date(timeIntervalSince1970: $0) }
+        }
+        set {
+            let timestamps = newValue.map { $0.timeIntervalSince1970 }
+            UserDefaults.standard.set(timestamps, forKey: activityDatesKey)
+        }
+    }
+
+    private var activityLevel: ActivityLevel {
+        let calendar = Calendar.current
+        let now = Date()
+        let recentDays = recentActivityDates.filter { calendar.dateComponents([.day], from: $0, to: now).day ?? 99 < 14 }
+        let uniqueDays = Set(recentDays.map { calendar.startOfDay(for: $0) })
+        switch uniqueDays.count {
+        case 7...14: return .active
+        case 3..<7: return .moderate
+        default: return .low
+        }
+    }
+
+    func recordActivity() {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        var dates = recentActivityDates.filter {
+            (calendar.dateComponents([.day], from: $0, to: today).day ?? 99) < 30
+        }
+        if !dates.contains(where: { calendar.isDate($0, inSameDayAs: today) }) {
+            dates.append(today)
+        }
+        recentActivityDates = dates
     }
 
     private init() {}
@@ -75,22 +117,30 @@ class NotificationService {
             currentUsed.removeAll()
         }
 
-        let totalNeeded = scheduleDaysAhead * maxDailyNotifications
+        let skipInterval: Int
+        switch activityLevel {
+        case .active: skipInterval = 1
+        case .moderate: skipInterval = 2
+        case .low: skipInterval = 3
+        }
+
+        let totalNeeded = scheduleDaysAhead / skipInterval
         let picked = NotificationMessages.randomMessages(count: totalNeeded, excluding: currentUsed)
 
         let deliveryHours = [10]
 
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
+        var messageCounter = 0
 
-        for dayOffset in 0..<scheduleDaysAhead {
+        for dayOffset in stride(from: 0, to: scheduleDaysAhead, by: skipInterval) {
             guard let date = calendar.date(byAdding: .day, value: dayOffset, to: today) else { continue }
 
             for slot in 0..<maxDailyNotifications {
-                let messageIndex = dayOffset * maxDailyNotifications + slot
-                guard messageIndex < picked.count else { continue }
+                guard messageCounter < picked.count else { continue }
 
-                let (catalogIndex, message) = picked[messageIndex]
+                let (catalogIndex, message) = picked[messageCounter]
+                messageCounter += 1
 
                 let content = UNMutableNotificationContent()
                 content.title = message.title

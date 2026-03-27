@@ -424,6 +424,7 @@ class AppState {
         AnalyticsTracker.shared.trackAppOpen()
         checkAchievements()
         checkMomentumBadges()
+        NotificationService.shared.recordActivity()
         NotificationService.shared.scheduleStreakReminder(currentStreak: streakTracker.currentStreak)
         if dailyRewards.canClaim {
             dailyRewards.showRewardPopup = true
