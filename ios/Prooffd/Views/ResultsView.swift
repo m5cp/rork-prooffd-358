@@ -361,8 +361,6 @@ struct DiscoverTabView: View {
 
             browseByCategorySection
 
-            sponsoredSection
-
             if !store.isPremium {
                 upgradePrompt
                     .padding(.horizontal, 16)
@@ -764,39 +762,7 @@ struct DiscoverTabView: View {
         .buttonStyle(.plain)
     }
 
-    private var sponsoredSection: some View {
-        let programs = SponsoredPlacementDatabase.featuredPrograms
-        return VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 8) {
-                Image(systemName: "graduationcap.fill")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Theme.accentBlue)
-                Text("Featured Programs")
-                    .font(.title3.weight(.bold))
-                    .foregroundStyle(Theme.textPrimary)
-                Spacer()
-                Text("Sponsored")
-                    .font(.system(size: 9, weight: .medium))
-                    .foregroundStyle(Theme.textTertiary)
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 2)
-                    .background(Theme.cardBackgroundLight)
-                    .clipShape(.capsule)
-            }
-            .padding(.horizontal, 16)
 
-            ScrollView(.horizontal) {
-                HStack(spacing: 12) {
-                    ForEach(programs) { program in
-                        SponsoredCardView(program: program)
-                            .frame(width: 280)
-                    }
-                }
-            }
-            .contentMargins(.horizontal, 16)
-            .scrollIndicators(.hidden)
-        }
-    }
 
     private var upgradePrompt: some View {
         Button {

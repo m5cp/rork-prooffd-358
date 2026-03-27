@@ -13,7 +13,6 @@ struct AnalyticsDashboardView: View {
                     heroStats
                     engagementGrid
                     weeklyActivityCard
-                    sponsorMetricsCard
                     socialProofPreview
                     Color.clear.frame(height: 20)
                 }
@@ -205,36 +204,7 @@ struct AnalyticsDashboardView: View {
         return formatter.veryShortWeekdaySymbols.map { $0 }
     }
 
-    private var sponsorMetricsCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 8) {
-                Image(systemName: "megaphone.fill")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color(hex: "FB923C"))
-                Text("Sponsor Placement Metrics")
-                    .font(.title3.weight(.bold))
-                    .foregroundStyle(Theme.textPrimary)
-            }
 
-            VStack(spacing: 1) {
-                engagementRow(label: "Total Impressions", value: "\(SponsoredPlacementDatabase.totalImpressions)", icon: "eye.fill", color: Color(hex: "FB923C"))
-                engagementRow(label: "Total Taps", value: "\(SponsoredPlacementDatabase.totalTaps)", icon: "hand.tap.fill", color: Color(hex: "FB923C"))
-
-                let ctr = SponsoredPlacementDatabase.totalImpressions > 0
-                    ? Double(SponsoredPlacementDatabase.totalTaps) / Double(SponsoredPlacementDatabase.totalImpressions) * 100
-                    : 0
-                engagementRow(label: "Click-Through Rate", value: String(format: "%.1f%%", ctr), icon: "percent", color: Color(hex: "FB923C"))
-            }
-            .background(Theme.cardBackground)
-            .clipShape(.rect(cornerRadius: 14))
-            .cardShadow()
-
-            Text("Present these metrics to potential sponsors to demonstrate user engagement with featured placements.")
-                .font(.caption)
-                .foregroundStyle(Theme.textTertiary)
-                .lineSpacing(2)
-        }
-    }
 
     private var socialProofPreview: some View {
         VStack(alignment: .leading, spacing: 14) {

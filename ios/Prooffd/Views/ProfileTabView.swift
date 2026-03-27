@@ -146,7 +146,7 @@ struct ProfileTabView: View {
                                 Text("Engagement Dashboard")
                                     .font(.subheadline.weight(.medium))
                                     .foregroundStyle(Theme.textPrimary)
-                                Text("View your usage data & sponsor metrics")
+                                Text("View your usage data & engagement metrics")
                                     .font(.caption)
                                     .foregroundStyle(Theme.textTertiary)
                             }
