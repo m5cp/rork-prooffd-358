@@ -7,6 +7,28 @@ nonisolated struct BuildStep: Codable, Identifiable, Sendable {
     let order: Int
     var completedDate: Date?
     var notes: String?
+    var targetDate: Date?
+
+    nonisolated init(id: String, title: String, isCompleted: Bool, order: Int, completedDate: Date? = nil, notes: String? = nil, targetDate: Date? = nil) {
+        self.id = id
+        self.title = title
+        self.isCompleted = isCompleted
+        self.order = order
+        self.completedDate = completedDate
+        self.notes = notes
+        self.targetDate = targetDate
+    }
+
+    nonisolated init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        title = try c.decode(String.self, forKey: .title)
+        isCompleted = try c.decode(Bool.self, forKey: .isCompleted)
+        order = try c.decode(Int.self, forKey: .order)
+        completedDate = try c.decodeIfPresent(Date.self, forKey: .completedDate)
+        notes = try c.decodeIfPresent(String.self, forKey: .notes)
+        targetDate = try c.decodeIfPresent(Date.self, forKey: .targetDate)
+    }
 }
 
 nonisolated struct BuildProject: Codable, Identifiable, Sendable {

@@ -223,6 +223,13 @@ class AppState {
         saveBuilds()
     }
 
+    func updateStepTargetDate(buildId: String, stepId: String, date: Date?) {
+        guard let buildIndex = builds.firstIndex(where: { $0.id == buildId }),
+              let stepIndex = builds[buildIndex].steps.firstIndex(where: { $0.id == stepId }) else { return }
+        builds[buildIndex].steps[stepIndex].targetDate = date
+        saveBuilds()
+    }
+
     func updateBuildField(buildId: String, field: BuildField, value: String) {
         guard let index = builds.firstIndex(where: { $0.id == buildId }) else { return }
         switch field {

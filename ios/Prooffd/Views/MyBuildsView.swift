@@ -14,30 +14,25 @@ struct MyBuildsView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    streakBanner
-                        .padding(.horizontal, 16)
-
-                    if let today = appState.todayStep {
-                        todayStepSection(today)
-                            .padding(.horizontal, 16)
-                    }
-
-                    if !appState.builds.isEmpty {
-                        momentumSection
-                            .padding(.horizontal, 16)
-                    }
-
                     if appState.builds.isEmpty {
                         emptyState
                             .padding(.horizontal, 16)
                     } else {
+                        if let today = appState.todayStep {
+                            todayStepSection(today)
+                                .padding(.horizontal, 16)
+                        }
+
+                        encouragementBanner
+                            .padding(.horizontal, 16)
+
                         buildsListSection
                             .padding(.horizontal, 16)
-                    }
 
-                    if !appState.builds.isEmpty {
-                        shareProgressSection
-                            .padding(.horizontal, 16)
+                        if !appState.builds.isEmpty {
+                            shareProgressSection
+                                .padding(.horizontal, 16)
+                        }
                     }
 
                     if !store.isPremium {
@@ -82,46 +77,98 @@ struct MyBuildsView: View {
         }
     }
 
-    private var streakBanner: some View {
-        HStack(spacing: 14) {
-            HStack(spacing: 8) {
-                Image(systemName: "flame.fill")
+    // MARK: - Encouragement Banner
+
+    @ViewBuilder
+    private var encouragementBanner: some View {
+        let maxProgress = appState.builds.map(\.progressPercentage).max() ?? 0
+        let totalCompleted = appState.builds.flatMap(\.steps).filter(\.isCompleted).count
+        let message = encouragementMessage(progress: maxProgress, stepsCompleted: totalCompleted)
+
+        if let message {
+            HStack(spacing: 12) {
+                Image(systemName: message.icon)
                     .font(.title3)
-                    .foregroundStyle(appState.streakTracker.currentStreak > 0 ? .orange : Theme.textTertiary)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(appState.streakTracker.currentStreak > 0
-                        ? "\(appState.streakTracker.currentStreak) Day Streak"
-                        : "Start Your Streak")
-                        .font(.subheadline.weight(.bold))
+                    .foregroundStyle(message.color)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(message.title)
+                        .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Theme.textPrimary)
-                    Text(appState.streakTracker.streakMessage)
-                        .font(.caption2)
-                        .foregroundStyle(Theme.textTertiary)
-                        .lineLimit(1)
+                    Text(message.subtitle)
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
                 }
+                Spacer()
             }
-
-            Spacer()
-
-            Button {
-                showAchievements = true
-            } label: {
-                HStack(spacing: 4) {
-                    Image(systemName: "trophy.fill")
-                        .font(.caption2)
-                    Text("\(appState.momentum.earnedBadges.count)")
-                        .font(.caption.weight(.bold))
-                }
-                .foregroundStyle(Color(hex: "818CF8"))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(Color(hex: "818CF8").opacity(0.12))
-                .clipShape(.capsule)
-            }
+            .padding(14)
+            .background(
+                LinearGradient(
+                    colors: [message.color.opacity(0.08), Theme.cardBackground],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .clipShape(.rect(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(message.color.opacity(0.15), lineWidth: 0.5)
+            )
+            .cardShadow()
         }
-        .padding(14)
-        .tintedCard(.orange)
     }
+
+    private struct EncouragementContent {
+        let icon: String
+        let title: String
+        let subtitle: String
+        let color: Color
+    }
+
+    private func encouragementMessage(progress: Int, stepsCompleted: Int) -> EncouragementContent? {
+        if stepsCompleted == 1 {
+            return EncouragementContent(
+                icon: "sparkles",
+                title: "First step done!",
+                subtitle: "You're officially building. Keep the momentum going.",
+                color: Theme.accent
+            )
+        }
+        if progress >= 50 && progress < 75 {
+            return EncouragementContent(
+                icon: "flame.fill",
+                title: "Halfway there",
+                subtitle: "You're making real progress. The finish line is getting closer.",
+                color: .orange
+            )
+        }
+        if progress >= 25 && progress < 50 {
+            return EncouragementContent(
+                icon: "bolt.fill",
+                title: "Building momentum",
+                subtitle: "Quarter of the way done \u{2014} you're ahead of most people.",
+                color: Color(hex: "FBBF24")
+            )
+        }
+        if progress >= 75 && progress < 100 {
+            return EncouragementContent(
+                icon: "trophy.fill",
+                title: "Almost there",
+                subtitle: "You're in the final stretch. Keep pushing!",
+                color: Color(hex: "818CF8")
+            )
+        }
+        if progress >= 100 {
+            return EncouragementContent(
+                icon: "checkmark.seal.fill",
+                title: "Launch ready",
+                subtitle: "You completed your plan. Time to make it happen.",
+                color: Theme.accent
+            )
+        }
+        return nil
+    }
+
+    // MARK: - Today's Step
 
     private func todayStepSection(_ today: (build: BuildProject, step: BuildStep)) -> some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -201,76 +248,17 @@ struct MyBuildsView: View {
         .cardShadow()
     }
 
-    private var momentumSection: some View {
-        VStack(spacing: 12) {
-            HStack(spacing: 8) {
-                Image(systemName: "bolt.fill")
-                    .font(.caption)
-                    .foregroundStyle(Color(hex: "FBBF24"))
-                Text("Momentum")
-                    .font(.subheadline.weight(.bold))
-                    .foregroundStyle(Theme.textPrimary)
-                Spacer()
-                Text("\(appState.momentum.totalPoints) pts")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(Color(hex: "FBBF24"))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(Color(hex: "FBBF24").opacity(0.12))
-                    .clipShape(.capsule)
-            }
-
-            ScrollView(.horizontal) {
-                HStack(spacing: 10) {
-                    ForEach(MomentumBadge.all) { badge in
-                        let earned = appState.momentum.hasBadge(badge.id)
-                        VStack(spacing: 6) {
-                            ZStack {
-                                Circle()
-                                    .fill(earned ? Color(hex: badge.color).opacity(0.15) : Theme.cardBackgroundLight)
-                                    .frame(width: 36, height: 36)
-                                Image(systemName: badge.icon)
-                                    .font(.caption)
-                                    .foregroundStyle(earned ? Color(hex: badge.color) : Theme.textTertiary.opacity(0.4))
-                            }
-                            Text(badge.title)
-                                .font(.system(size: 10, weight: .medium))
-                                .foregroundStyle(earned ? Theme.textSecondary : Theme.textTertiary.opacity(0.5))
-                                .lineLimit(1)
-                        }
-                        .frame(width: 64)
-                        .opacity(earned ? 1 : 0.5)
-                    }
-                }
-            }
-            .contentMargins(.horizontal, 0)
-            .scrollIndicators(.hidden)
-        }
-        .padding(16)
-        .background(Theme.cardBackground)
-        .clipShape(.rect(cornerRadius: 14))
-        .cardShadow()
-    }
+    // MARK: - Builds List
 
     private var buildsListSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Active Builds")
+            Text("Your Plans")
                 .font(.title3.weight(.bold))
                 .foregroundStyle(Theme.textPrimary)
 
             ForEach(appState.builds) { build in
                 buildCard(build)
             }
-        }
-    }
-
-    private func milestoneMessage(for progress: Int) -> String? {
-        switch progress {
-        case 25: return "Quarter way there — great momentum!"
-        case 50: return "Halfway done — you're crushing it!"
-        case 75: return "Almost there — the finish line is close!"
-        case 100: return "Launch ready — you did it!"
-        default: return nil
         }
     }
 
@@ -303,9 +291,9 @@ struct MyBuildsView: View {
 
                     VStack(alignment: .trailing, spacing: 2) {
                         Text("\(build.progressPercentage)%")
-                            .font(.subheadline.weight(.bold))
+                            .font(.title3.weight(.bold))
                             .foregroundStyle(Theme.accent)
-                        Text("\(build.completedSteps)/\(build.totalSteps) steps")
+                        Text("\(build.completedSteps)/\(build.totalSteps)")
                             .font(.caption2)
                             .foregroundStyle(Theme.textTertiary)
                     }
@@ -315,28 +303,21 @@ struct MyBuildsView: View {
                     ZStack(alignment: .leading) {
                         Capsule()
                             .fill(Theme.cardBackgroundLight)
-                            .frame(height: 4)
+                            .frame(height: 6)
                         Capsule()
-                            .fill(Theme.accent)
-                            .frame(width: geo.size.width * Double(build.progressPercentage) / 100.0, height: 4)
+                            .fill(
+                                LinearGradient(
+                                    colors: [Theme.accent, Theme.accent.opacity(0.7)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .frame(width: geo.size.width * Double(build.progressPercentage) / 100.0, height: 6)
                     }
                 }
-                .frame(height: 4)
+                .frame(height: 6)
 
-                if let msg = milestoneMessage(for: build.progressPercentage) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "sparkles")
-                            .font(.caption2)
-                            .foregroundStyle(Color(hex: "FBBF24"))
-                        Text(msg)
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(Color(hex: "FBBF24"))
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color(hex: "FBBF24").opacity(0.08))
-                    .clipShape(.capsule)
-                } else if let nextStep = build.nextStep {
+                if let nextStep = build.nextStep {
                     HStack(spacing: 8) {
                         Image(systemName: "arrow.right.circle")
                             .font(.caption2)
@@ -346,6 +327,18 @@ struct MyBuildsView: View {
                             .foregroundStyle(Theme.textSecondary)
                             .lineLimit(1)
                         Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption2)
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+                } else if build.progressPercentage >= 100 {
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark.seal.fill")
+                            .font(.caption2)
+                            .foregroundStyle(Theme.accent)
+                        Text("Plan complete")
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(Theme.accent)
                     }
                 }
             }
@@ -361,6 +354,8 @@ struct MyBuildsView: View {
         .buttonStyle(.plain)
     }
 
+    // MARK: - Empty State
+
     private var emptyState: some View {
         VStack(spacing: 20) {
             Image(systemName: "hammer.fill")
@@ -371,7 +366,7 @@ struct MyBuildsView: View {
                 Text("No active builds yet")
                     .font(.title3.weight(.bold))
                     .foregroundStyle(Theme.textPrimary)
-                Text("Find a business match in Discover, then tap \"Start This Build\" to begin your step-by-step journey.")
+                Text("Find a business match in Discover, then tap \"Start This Build\" to begin your step-by-step plan.")
                     .font(.subheadline)
                     .foregroundStyle(Theme.textSecondary)
                     .multilineTextAlignment(.center)
@@ -400,6 +395,8 @@ struct MyBuildsView: View {
         .cardShadow()
     }
 
+    // MARK: - Upgrade Prompt
+
     private var upgradePrompt: some View {
         Button {
             showPaywall = true
@@ -425,7 +422,7 @@ struct MyBuildsView: View {
                         Text("Unlock Pro Features")
                             .font(.subheadline.weight(.bold))
                             .foregroundStyle(Theme.textPrimary)
-                        Text("Business plans, email templates, sales scripts, PDF exports & more")
+                        Text("Marketing scripts, outreach templates, PDF exports & more")
                             .font(.caption)
                             .foregroundStyle(Theme.textSecondary)
                             .lineLimit(2)
@@ -462,6 +459,8 @@ struct MyBuildsView: View {
         }
         .buttonStyle(.plain)
     }
+
+    // MARK: - Share Progress
 
     private var shareProgressSection: some View {
         Button {
