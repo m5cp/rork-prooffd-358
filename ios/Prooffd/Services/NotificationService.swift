@@ -6,13 +6,21 @@ class NotificationService {
     static let shared = NotificationService()
 
     var notificationsEnabled: Bool {
-        get { UserDefaults.standard.bool(forKey: "notificationsEnabled") }
-        set { UserDefaults.standard.set(newValue, forKey: "notificationsEnabled") }
+        get {
+            if !UserDefaults.standard.bool(forKey: "notificationsInitialized") {
+                return true
+            }
+            return UserDefaults.standard.bool(forKey: "notificationsEnabled")
+        }
+        set {
+            UserDefaults.standard.set(true, forKey: "notificationsInitialized")
+            UserDefaults.standard.set(newValue, forKey: "notificationsEnabled")
+        }
     }
 
     private let usedIndicesKey = "usedNotificationIndices"
     private let lastScheduleDateKey = "lastNotificationScheduleDate"
-    private let maxDailyNotifications = 3
+    private let maxDailyNotifications = 1
     private let scheduleDaysAhead = 14
 
     private var usedIndices: Set<Int> {
@@ -40,6 +48,18 @@ class NotificationService {
         }
     }
 
+    func requestPermissionIfFirstLaunch() {
+        guard !UserDefaults.standard.bool(forKey: "notificationsInitialized") else { return }
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+            Task { @MainActor in
+                self.notificationsEnabled = granted
+                if granted {
+                    self.scheduleGentleReminders()
+                }
+            }
+        }
+    }
+
     func disableNotifications() {
         notificationsEnabled = false
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
@@ -58,7 +78,7 @@ class NotificationService {
         let totalNeeded = scheduleDaysAhead * maxDailyNotifications
         let picked = NotificationMessages.randomMessages(count: totalNeeded, excluding: currentUsed)
 
-        let deliveryHours = [9, 13, 19]
+        let deliveryHours = [10]
 
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())

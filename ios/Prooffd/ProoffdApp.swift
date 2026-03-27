@@ -27,6 +27,7 @@ struct ProoffdApp: App {
                     handleQuickAction(url: url)
                 }
                 .task {
+                    NotificationService.shared.requestPermissionIfFirstLaunch()
                     NotificationService.shared.refreshRemindersIfNeeded()
                 }
         }

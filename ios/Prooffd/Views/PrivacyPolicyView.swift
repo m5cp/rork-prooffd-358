@@ -42,6 +42,12 @@ struct PrivacyPolicyView: View {
                     )
 
                     privacySection(
+                        icon: "bell.fill",
+                        title: "Notifications",
+                        text: "The app may send local notifications to remind you of your progress and encourage daily engagement. Notifications are enabled by default and can be turned off at any time in your Profile settings. All notification content is generated locally on your device. We do not use third-party push notification services or track notification interactions."
+                    )
+
+                    privacySection(
                         icon: "cart.fill",
                         title: "Subscriptions",
                         text: "In-app purchases are handled securely by Apple and our payment partner RevenueCat. We do not store or have access to your payment details."
