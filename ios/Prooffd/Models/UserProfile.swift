@@ -181,7 +181,7 @@ nonisolated enum EducationWillingness: String, CaseIterable, Identifiable, Codab
     var icon: String {
         switch self {
         case .selfTaught: return "laptopcomputer"
-        case .shortCert: return "certificate"
+        case .shortCert: return "rosette"
         case .tradeSchool: return "wrench.and.screwdriver.fill"
         case .twoYear: return "building.columns.fill"
         case .fourYear: return "graduationcap.fill"

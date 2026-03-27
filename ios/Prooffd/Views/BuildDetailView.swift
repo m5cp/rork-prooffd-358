@@ -1,5 +1,12 @@
 import SwiftUI
 
+private struct ScrollOffsetKey: PreferenceKey {
+    nonisolated static let defaultValue: CGFloat = 0
+    nonisolated static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
 struct BuildDetailView: View {
     let buildId: String
     @Environment(AppState.self) private var appState
@@ -13,6 +20,7 @@ struct BuildDetailView: View {
     @State private var shareImage: UIImage?
     @State private var showShareSheet: Bool = false
     @State private var showProgressShareCard: Bool = false
+    @State private var showScrollToTop: Bool = false
 
     private var build: BuildProject? {
         appState.builds.first { $0.id == buildId }
@@ -26,31 +34,71 @@ struct BuildDetailView: View {
     var body: some View {
         NavigationStack {
             if let build {
-                ScrollView {
-                    VStack(spacing: 20) {
-                        progressHeader(build)
-                        todayStepSection(build)
-                        stepsSection(build)
-                        overviewSection(build)
-                        llcInfoSection
-                        degreeSection
-                        businessPlanEditorSection(build)
-                        actionPlanSection
-                        pricingSection
-                        unlockTiersSection(build)
-                        proContentSections(build)
-                        fullBusinessPlanSection
-                        suggestionsSection(build)
-                        if store.isPremium {
-                            exportButton(build)
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        VStack(spacing: 20) {
+                            Color.clear.frame(height: 0).id("top")
+                            progressHeader(build)
+                            todayStepSection(build)
+                            stepsSection(build)
+                            overviewSection(build)
+                            llcInfoSection
+                            degreeSection
+                            businessPlanEditorSection(build)
+                            actionPlanSection
+                            pricingSection
+                            unlockTiersSection(build)
+                            proContentSections(build)
+                            fullBusinessPlanSection
+                            suggestionsSection(build)
+                            if store.isPremium {
+                                exportButton(build)
+                            }
+                            shareProgressButton(build)
+                            dangerZone
+                            Color.clear.frame(height: 40)
                         }
-                        shareProgressButton(build)
-                        dangerZone
-                        Color.clear.frame(height: 40)
+                        .padding(.horizontal, 16)
+                        .background(
+                            GeometryReader { geo in
+                                Color.clear.preference(
+                                    key: ScrollOffsetKey.self,
+                                    value: geo.frame(in: .named("scroll")).minY
+                                )
+                            }
+                        )
                     }
-                    .padding(.horizontal, 16)
+                    .coordinateSpace(name: "scroll")
+                    .scrollIndicators(.hidden)
+                    .onPreferenceChange(ScrollOffsetKey.self) { value in
+                        let shouldShow = value < -300
+                        if shouldShow != showScrollToTop {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                showScrollToTop = shouldShow
+                            }
+                        }
+                    }
+                    .overlay(alignment: .bottomTrailing) {
+                        if showScrollToTop {
+                            Button {
+                                withAnimation(.spring(duration: 0.4, bounce: 0.1)) {
+                                    proxy.scrollTo("top", anchor: .top)
+                                }
+                            } label: {
+                                Image(systemName: "arrow.up")
+                                    .font(.body.weight(.semibold))
+                                    .foregroundStyle(.white)
+                                    .frame(width: 44, height: 44)
+                                    .background(Theme.accent)
+                                    .clipShape(Circle())
+                                    .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
+                            }
+                            .padding(.trailing, 16)
+                            .padding(.bottom, 16)
+                            .transition(.scale.combined(with: .opacity))
+                        }
+                    }
                 }
-                .scrollIndicators(.hidden)
                 .background(Theme.background)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
