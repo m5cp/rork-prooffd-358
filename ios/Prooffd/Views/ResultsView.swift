@@ -363,6 +363,15 @@ struct DiscoverTabView: View {
                         .clipShape(.capsule)
                         Spacer()
                         Button {
+                            showJobShare = result
+                        } label: {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.caption)
+                                .foregroundStyle(Theme.textTertiary)
+                                .frame(width: 32, height: 36)
+                        }
+                        .accessibilityLabel("Share top match")
+                        Button {
                             appState.toggleFavorite(result.businessPath.id)
                         } label: {
                             Image(systemName: appState.isFavorite(result.businessPath.id) ? "heart.fill" : "heart")

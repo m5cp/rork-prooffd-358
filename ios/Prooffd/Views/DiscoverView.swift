@@ -10,6 +10,7 @@ struct DiscoverView: View {
     @State private var showBestOptions: Bool = false
     @State private var bestOptions: [MatchResult] = []
     @State private var showFastMoney: Bool = false
+    @State private var showTopMatchShare: Bool = false
 
     private var topMatch: MatchResult? {
         appState.matchResults.first
@@ -57,6 +58,11 @@ struct DiscoverView: View {
             }
             .sheet(isPresented: $showBestOptions) {
                 bestOptionsSheet
+            }
+            .sheet(isPresented: $showTopMatchShare) {
+                if let top = topMatch {
+                    ShareCardPresenterSheet(content: .topMatch(from: top))
+                }
             }
             .sheet(isPresented: $showFastMoney) {
                 SeeAllView(mode: .fastStart, results: appState.matchResults.filter { $0.businessPath.fastCashPotential })
@@ -350,6 +356,16 @@ struct DiscoverView: View {
                         .foregroundStyle(Theme.textTertiary)
                         .tracking(0.5)
                     Spacer()
+                    Button {
+                        showTopMatchShare = true
+                    } label: {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.caption)
+                            .foregroundStyle(Theme.textTertiary)
+                            .frame(width: 32, height: 32)
+                            .contentShape(Rectangle())
+                    }
+                    .accessibilityLabel("Share top match")
                     Text("\(result.scorePercentage)% match")
                         .font(.caption.weight(.bold))
                         .foregroundStyle(scoreColor(result.scorePercentage))

@@ -253,30 +253,50 @@ struct BuildDetailView: View {
         let stepsCompleted = build.completedSteps
 
         if stepsCompleted == 1 {
-            encouragementRow(icon: "sparkles", message: "You've taken the first step \u{2014} that's the hardest part.", color: Theme.accent)
+            encouragementRow(icon: "sparkles", message: "You've taken the first step \u{2014} that's the hardest part.", color: Theme.accent, showShare: true)
         } else if progress >= 25 && progress < 50 {
-            encouragementRow(icon: "bolt.fill", message: "You're making real progress. Keep this energy going.", color: Color(hex: "FBBF24"))
+            encouragementRow(icon: "bolt.fill", message: "You're making real progress. Keep this energy going.", color: Color(hex: "FBBF24"), showShare: true)
         } else if progress >= 50 && progress < 75 {
-            encouragementRow(icon: "flame.fill", message: "Halfway there \u{2014} you're ahead of most people who start.", color: .orange)
+            encouragementRow(icon: "flame.fill", message: "Halfway there \u{2014} you're ahead of most people who start.", color: .orange, showShare: true)
         } else if progress >= 75 && progress < 100 {
             encouragementRow(icon: "trophy.fill", message: "Almost done. The finish line is right ahead.", color: Color(hex: "818CF8"))
         } else if progress >= 100 {
-            encouragementRow(icon: "checkmark.seal.fill", message: "Plan complete! You're ready to launch.", color: Theme.accent)
+            encouragementRow(icon: "checkmark.seal.fill", message: "Plan complete! You're ready to launch.", color: Theme.accent, showShare: true)
         }
     }
 
-    private func encouragementRow(icon: String, message: String, color: Color) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.body)
-                .foregroundStyle(color)
-            Text(message)
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(Theme.textPrimary)
-                .fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 0)
+    private func encouragementRow(icon: String, message: String, color: Color, showShare: Bool = false) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.body)
+                    .foregroundStyle(color)
+                Text(message)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Theme.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+            }
+            .padding(14)
+
+            if showShare {
+                Button {
+                    showProgressShareCard = true
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.caption2)
+                        Text("Share Milestone")
+                            .font(.caption.weight(.medium))
+                    }
+                    .foregroundStyle(color)
+                    .padding(.horizontal, 14)
+                    .padding(.bottom, 12)
+                }
+                .accessibilityLabel("Share this milestone")
+                .accessibilityHint("Creates a shareable card of your progress")
+            }
         }
-        .padding(14)
         .background(
             LinearGradient(
                 colors: [color.opacity(0.08), Theme.cardBackground],

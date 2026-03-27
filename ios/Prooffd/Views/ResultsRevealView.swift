@@ -8,6 +8,7 @@ struct ResultsRevealView: View {
     @State private var showBadge: Bool = false
     @State private var showButton: Bool = false
     @State private var confettiTrigger: Int = 0
+    @State private var showShareSheet: Bool = false
 
     private var targetCount: Int {
         appState.matchResults.count
@@ -121,16 +122,34 @@ struct ResultsRevealView: View {
                 Spacer()
 
                 if showButton {
-                    Button {
-                        appState.completeResultsReveal()
-                    } label: {
-                        Text("View All Matches")
-                            .font(.headline)
-                            .foregroundStyle(.white)
+                    VStack(spacing: 12) {
+                        Button {
+                            appState.completeResultsReveal()
+                        } label: {
+                            Text("View All Matches")
+                                .font(.headline)
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(Theme.accent)
+                                .clipShape(.capsule)
+                        }
+
+                        Button {
+                            showShareSheet = true
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "square.and.arrow.up")
+                                    .font(.subheadline.weight(.medium))
+                                Text("Share Results")
+                                    .font(.subheadline.weight(.medium))
+                            }
+                            .foregroundStyle(Theme.textSecondary)
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(Theme.accent)
-                            .clipShape(.capsule)
+                            .padding(.vertical, 14)
+                        }
+                        .accessibilityLabel("Share your quiz results")
+                        .accessibilityHint("Opens a share card for your top matches")
                     }
                     .padding(.horizontal, 24)
                     .padding(.bottom, 48)
@@ -140,6 +159,9 @@ struct ResultsRevealView: View {
         }
         .sensoryFeedback(.impact(weight: .heavy), trigger: showTopMatch)
         .sensoryFeedback(.success, trigger: showBadge)
+        .sheet(isPresented: $showShareSheet) {
+            ShareCardPresenterSheet(content: .quizResults(from: appState.matchResults))
+        }
         .task {
             await runReveal()
         }
