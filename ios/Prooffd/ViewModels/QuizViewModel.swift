@@ -9,7 +9,7 @@ class QuizViewModel {
     var hasShownCheckpoint: Bool = false
     var checkpointMatches: [MatchResult] = []
 
-    let totalSteps: Int = 14
+    let totalSteps: Int = 8
 
     var progress: Double {
         if currentStep == 0 { return 0.05 }
@@ -18,14 +18,13 @@ class QuizViewModel {
 
     var progressText: String {
         if currentStep == 0 { return "Profile" }
-        return "\(currentStep) of 13"
+        return "\(currentStep) of \(totalSteps - 1)"
     }
 
     var motivationMessage: String? {
         switch currentStep {
         case 3: return "Great start — keep going!"
-        case 7: return "Matches are getting sharper"
-        case 11: return "Almost done — just a few more"
+        case 6: return "Almost done — just a couple more"
         default: return nil
         }
     }
@@ -35,23 +34,17 @@ class QuizViewModel {
         case 0: return !profile.firstName.trimmingCharacters(in: .whitespaces).isEmpty
         case 1: return !profile.selectedCategories.isEmpty
         case 2: return profile.budget != nil
-        case 3: return profile.workPreference != nil
-        case 4: return profile.hoursPerDay != nil
-        case 5: return !profile.workEnvironments.isEmpty
-        case 6: return profile.workStyle != nil
-        case 7: return profile.techComfort != nil
-        case 8: return profile.experienceLevel != nil
-        case 9: return profile.incomeTimeline != nil
-        case 10: return !profile.educationWillingnesses.isEmpty
-        case 11: return profile.customerInteraction != nil
-        case 12: return profile.sellingComfort != nil
-        case 13: return profile.hasCar != nil
+        case 3: return profile.hoursPerDay != nil
+        case 4: return profile.workPreference != nil
+        case 5: return profile.workStyle != nil
+        case 6: return profile.techComfort != nil
+        case 7: return profile.incomeTimeline != nil
         default: return false
         }
     }
 
     var canShowEarlyResults: Bool {
-        currentStep >= 6 && !profile.selectedCategories.isEmpty && profile.budget != nil
+        currentStep >= 4 && !profile.selectedCategories.isEmpty && profile.budget != nil
     }
 
     var pointsEarned: Int {
@@ -59,23 +52,17 @@ class QuizViewModel {
         if !profile.firstName.isEmpty { pts += 5 }
         if !profile.selectedCategories.isEmpty { pts += 10 }
         if profile.budget != nil { pts += 10 }
+        if profile.hoursPerDay != nil { pts += 10 }
         if profile.workPreference != nil { pts += 10 }
-        if profile.hoursPerDay != nil { pts += 5 }
-        if !profile.workEnvironments.isEmpty { pts += 5 }
-        if profile.workStyle != nil { pts += 5 }
-        if profile.techComfort != nil { pts += 5 }
-        if profile.experienceLevel != nil { pts += 5 }
-        if profile.incomeTimeline != nil { pts += 5 }
-        if !profile.educationWillingnesses.isEmpty { pts += 5 }
-        if profile.customerInteraction != nil { pts += 5 }
-        if profile.sellingComfort != nil { pts += 5 }
-        if profile.hasCar != nil { pts += 5 }
+        if profile.workStyle != nil { pts += 10 }
+        if profile.techComfort != nil { pts += 10 }
+        if profile.incomeTimeline != nil { pts += 10 }
         return pts
     }
 
     func next() {
         guard canAdvance, currentStep < totalSteps - 1 else { return }
-        if currentStep == 4 && !hasShownCheckpoint {
+        if currentStep == 3 && !hasShownCheckpoint {
             hasShownCheckpoint = true
             generateCheckpointMatches()
             showCheckpoint = true

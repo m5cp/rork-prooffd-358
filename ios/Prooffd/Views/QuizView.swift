@@ -139,7 +139,7 @@ struct QuizView: View {
                         .font(.title2.bold())
                         .foregroundStyle(.white)
 
-                    Text("Based on your first 4 answers")
+                    Text("Based on your first answers")
                         .font(.subheadline)
                         .foregroundStyle(.white.opacity(0.7))
                 }
@@ -150,19 +150,6 @@ struct QuizView: View {
                     }
                 }
                 .padding(.horizontal, 8)
-
-                HStack(spacing: 6) {
-                    Image(systemName: "star.fill")
-                        .font(.caption)
-                        .foregroundStyle(.yellow)
-                    Text("+35 pts earned so far")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.yellow)
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(Color.yellow.opacity(0.15))
-                .clipShape(.capsule)
 
                 Spacer()
 
@@ -260,17 +247,11 @@ struct QuizView: View {
                 case 0: nameStep
                 case 1: categoryStep
                 case 2: budgetStep
-                case 3: workPreferenceStep
-                case 4: hoursStep
-                case 5: workEnvironmentStep
-                case 6: workStyleStep
-                case 7: techComfortStep
-                case 8: experienceStep
-                case 9: incomeTimelineStep
-                case 10: educationWillingnessStep
-                case 11: customerInteractionStep
-                case 12: sellingComfortStep
-                case 13: hasCarStep
+                case 3: hoursStep
+                case 4: workPreferenceStep
+                case 5: workStyleStep
+                case 6: techComfortStep
+                case 7: incomeTimelineStep
                 default: EmptyView()
                 }
             }
@@ -347,20 +328,20 @@ struct QuizView: View {
         }
     }
 
-    private var workPreferenceStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "Work preference?", subtitle: "Do you prefer physical or digital work?")
-            optionList(WorkPreference.allCases, selected: viewModel.profile.workPreference) {
-                viewModel.profile.workPreference = $0
-            }
-        }
-    }
-
     private var hoursStep: some View {
         VStack(alignment: .leading, spacing: 16) {
             quizHeader(title: "Hours per day?", subtitle: "How much time can you dedicate daily?")
             optionList(HoursPerDay.allCases, selected: viewModel.profile.hoursPerDay) {
                 viewModel.profile.hoursPerDay = $0
+            }
+        }
+    }
+
+    private var workPreferenceStep: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            quizHeader(title: "Work preference?", subtitle: "Do you prefer physical or digital work?")
+            optionList(WorkPreference.allCases, selected: viewModel.profile.workPreference) {
+                viewModel.profile.workPreference = $0
             }
         }
     }
@@ -383,155 +364,11 @@ struct QuizView: View {
         }
     }
 
-    private var experienceStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "Experience level?", subtitle: "What's your overall work experience?")
-            optionList(ExperienceLevel.allCases, selected: viewModel.profile.experienceLevel) {
-                viewModel.profile.experienceLevel = $0
-            }
-        }
-    }
-
-    private var customerInteractionStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "Customer interaction?", subtitle: "How much do you want to interact with customers?")
-            optionList(CustomerInteraction.allCases, selected: viewModel.profile.customerInteraction) {
-                viewModel.profile.customerInteraction = $0
-            }
-        }
-    }
-
-    private var sellingComfortStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "Comfort with selling?", subtitle: "How comfortable are you with sales?")
-            optionList(SellingComfort.allCases, selected: viewModel.profile.sellingComfort) {
-                viewModel.profile.sellingComfort = $0
-            }
-        }
-    }
-
-    private var workEnvironmentStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "Where do you want to work?", subtitle: "Select all that apply.")
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 12)], spacing: 12) {
-                ForEach(WorkEnvironment.allCases) { env in
-                    let isSelected = viewModel.profile.workEnvironments.contains(env)
-                    Button {
-                        withAnimation(.spring(duration: 0.25)) {
-                            viewModel.toggleEnvironment(env)
-                        }
-                    } label: {
-                        VStack(spacing: 8) {
-                            Image(systemName: env.icon)
-                                .font(.title2)
-                                .foregroundStyle(isSelected ? .white : Theme.accentBlue)
-                            Text(env.rawValue)
-                                .font(.caption.weight(.medium))
-                                .multilineTextAlignment(.center)
-                        }
-                        .foregroundStyle(isSelected ? .white : Theme.textSecondary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(isSelected ? Theme.accentBlue.opacity(0.85) : Theme.cardBackground)
-                        .clipShape(.rect(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(isSelected ? Theme.accentBlue : Theme.accentBlue.opacity(0.15), lineWidth: isSelected ? 2 : 1)
-                        )
-                    }
-                    .sensoryFeedback(.selection, trigger: isSelected)
-                }
-            }
-
-            if !viewModel.profile.workEnvironments.isEmpty {
-                Text("\(viewModel.profile.workEnvironments.count) selected")
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(Theme.accentBlue)
-                    .frame(maxWidth: .infinity, alignment: .center)
-            }
-        }
-    }
-
     private var incomeTimelineStep: some View {
         VStack(alignment: .leading, spacing: 16) {
             quizHeader(title: "How soon do you need income?", subtitle: "This helps us match you with realistic timelines.")
             optionList(IncomeTimeline.allCases, selected: viewModel.profile.incomeTimeline) {
                 viewModel.profile.incomeTimeline = $0
-            }
-        }
-    }
-
-    private var educationWillingnessStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "What level of training are you open to?", subtitle: "Select all that apply.")
-            VStack(spacing: 10) {
-                ForEach(EducationWillingness.allCases) { edu in
-                    let isSelected = viewModel.profile.educationWillingnesses.contains(edu)
-                    Button {
-                        withAnimation(.spring(duration: 0.25)) {
-                            viewModel.toggleEducation(edu)
-                        }
-                    } label: {
-                        HStack(spacing: 14) {
-                            ZStack {
-                                Circle()
-                                    .fill(isSelected ? Theme.accent.opacity(0.2) : Theme.cardBackgroundLight)
-                                    .frame(width: 42, height: 42)
-                                Image(systemName: edu.icon)
-                                    .font(.body.weight(.semibold))
-                                    .foregroundStyle(isSelected ? Theme.accent : Theme.textTertiary)
-                            }
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack(spacing: 8) {
-                                    Text(edu.rawValue)
-                                        .font(.subheadline.weight(.semibold))
-                                        .foregroundStyle(isSelected ? .white : Theme.textPrimary)
-                                    Spacer()
-                                    Text("\(edu.matchScore)% match")
-                                        .font(.caption2.weight(.bold))
-                                        .foregroundStyle(isSelected ? .white.opacity(0.8) : Theme.accent)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 3)
-                                        .background(isSelected ? .white.opacity(0.15) : Theme.accent.opacity(0.12))
-                                        .clipShape(.capsule)
-                                }
-                                Text(edu.subtitle)
-                                    .font(.caption)
-                                    .foregroundStyle(isSelected ? .white.opacity(0.7) : Theme.textTertiary)
-                                    .lineLimit(2)
-                            }
-                        }
-                        .padding(14)
-                        .background(isSelected ? Theme.accentBlue : Theme.cardBackground)
-                        .clipShape(.rect(cornerRadius: 14))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(isSelected ? Theme.accentBlue : Theme.accentBlue.opacity(0.1), lineWidth: isSelected ? 2 : 1)
-                        )
-                    }
-                    .sensoryFeedback(.selection, trigger: isSelected)
-                }
-            }
-
-            if !viewModel.profile.educationWillingnesses.isEmpty {
-                Text("\(viewModel.profile.educationWillingnesses.count) selected")
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(Theme.accent)
-                    .frame(maxWidth: .infinity, alignment: .center)
-            }
-        }
-    }
-
-    private var hasCarStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "Do you have a car?", subtitle: "Some businesses require reliable transportation.")
-            HStack(spacing: 12) {
-                boolButton("Yes", icon: "car.fill", isSelected: viewModel.profile.hasCar == true) {
-                    viewModel.profile.hasCar = true
-                }
-                boolButton("No", icon: "figure.walk", isSelected: viewModel.profile.hasCar == false) {
-                    viewModel.profile.hasCar = false
-                }
             }
         }
     }

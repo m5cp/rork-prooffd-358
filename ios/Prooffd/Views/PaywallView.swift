@@ -8,23 +8,22 @@ struct PaywallView: View {
     @State private var showPrivacy: Bool = false
     @State private var showEULA: Bool = false
 
-    private let features = [
-        ("50 Matched Business Paths", "chart.bar.fill"),
-        ("Draft Email Templates", "envelope.fill"),
-        ("Text Message Templates", "message.fill"),
-        ("Sales Intro Scripts", "person.wave.2.fill"),
-        ("Social Media Posts", "square.and.arrow.up.fill"),
-        ("Offer & Pricing Sheets", "dollarsign.square.fill"),
-        ("One-Page Business Plans", "doc.text.fill"),
-        ("PDF Export", "doc.fill")
+    private let benefits: [(String, String)] = [
+        ("doc.text.fill", "Business plan templates"),
+        ("text.bubble.fill", "Client outreach scripts"),
+        ("envelope.fill", "Draft email templates"),
+        ("square.and.arrow.up.fill", "Export to PDF"),
+        ("chart.bar.fill", "50 matched business paths"),
+        ("wand.and.stars", "Deeper launch tools")
     ]
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: 28) {
                     headerSection
-                    featuresGrid
+                    previewCard
+                    benefitsList
                     priceSection
                     Color.clear.frame(height: 20)
                 }
@@ -54,9 +53,7 @@ struct PaywallView: View {
                 TermsOfServiceView()
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button {
-                                showTerms = false
-                            } label: {
+                            Button { showTerms = false } label: {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundStyle(Theme.textTertiary)
                                     .font(.title3)
@@ -70,9 +67,7 @@ struct PaywallView: View {
                 PrivacyPolicyView()
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button {
-                                showPrivacy = false
-                            } label: {
+                            Button { showPrivacy = false } label: {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundStyle(Theme.textTertiary)
                                     .font(.title3)
@@ -86,9 +81,7 @@ struct PaywallView: View {
                 TermsOfServiceView()
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button {
-                                showEULA = false
-                            } label: {
+                            Button { showEULA = false } label: {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundStyle(Theme.textTertiary)
                                     .font(.title3)
@@ -100,42 +93,84 @@ struct PaywallView: View {
     }
 
     private var headerSection: some View {
-        VStack(spacing: 16) {
-            ZStack {
-                Circle()
-                    .fill(
-                        LinearGradient(colors: [Theme.accent, Theme.accentBlue], startPoint: .topLeading, endPoint: .bottomTrailing)
-                    )
-                    .frame(width: 80, height: 80)
-                Image(systemName: "crown.fill")
-                    .font(.largeTitle)
-                    .foregroundStyle(.white)
-            }
-            .padding(.top, 16)
-            .accessibilityHidden(true)
-
-            Text("Unlock Prooffd Pro")
-                .font(.title.bold())
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Get your complete\nbusiness launch kit")
+                .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(Theme.textPrimary)
+                .padding(.top, 16)
 
-            Text("Get everything you need to start\nyour business today")
-                .font(.subheadline)
+            Text("Unlock templates, scripts, exports, and deeper planning tools.")
+                .font(.body)
                 .foregroundStyle(Theme.textSecondary)
-                .multilineTextAlignment(.center)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private var featuresGrid: some View {
-        VStack(spacing: 0) {
-            ForEach(Array(features.enumerated()), id: \.offset) { index, feature in
+    private var previewCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "eye.fill")
+                    .font(.caption2)
+                    .foregroundStyle(Theme.accent)
+                Text("PREVIEW")
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(Theme.accent)
+                    .tracking(0.5)
+            }
+
+            Text("Business Plan Template")
+                .font(.title3.bold())
+                .foregroundStyle(Theme.textPrimary)
+
+            Text("Step-by-step launch outline, messaging strategy, and PDF export for your matched business.")
+                .font(.subheadline)
+                .foregroundStyle(Theme.textSecondary)
+                .lineSpacing(3)
+
+            HStack(spacing: 16) {
+                HStack(spacing: 4) {
+                    Image(systemName: "doc.text")
+                        .font(.caption2)
+                    Text("7 sections")
+                        .font(.caption2.weight(.medium))
+                }
+                .foregroundStyle(Theme.textTertiary)
+
+                HStack(spacing: 4) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.caption2)
+                    Text("PDF ready")
+                        .font(.caption2.weight(.medium))
+                }
+                .foregroundStyle(Theme.textTertiary)
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            LinearGradient(
+                colors: [Theme.accent.opacity(0.06), Theme.cardBackground],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .clipShape(.rect(cornerRadius: 18))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(Theme.accent.opacity(0.15), lineWidth: 1)
+        )
+    }
+
+    private var benefitsList: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(benefits.enumerated()), id: \.offset) { index, benefit in
                 HStack(spacing: 14) {
-                    Image(systemName: feature.1)
+                    Image(systemName: benefit.0)
                         .font(.body)
                         .foregroundStyle(Theme.accent)
                         .frame(width: 28)
-                        .accessibilityHidden(true)
 
-                    Text(feature.0)
+                    Text(benefit.1)
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(Theme.textPrimary)
 
@@ -144,14 +179,11 @@ struct PaywallView: View {
                     Image(systemName: "checkmark")
                         .font(.caption.weight(.bold))
                         .foregroundStyle(Theme.accent)
-                        .accessibilityHidden(true)
                 }
-                .accessibilityElement(children: .combine)
-                .accessibilityLabel("Included: \(feature.0)")
                 .padding(.vertical, 14)
                 .padding(.horizontal, 16)
 
-                if index < features.count - 1 {
+                if index < benefits.count - 1 {
                     Divider()
                         .background(Theme.cardBackgroundLight)
                         .padding(.horizontal, 16)
@@ -250,7 +282,6 @@ struct PaywallView: View {
                     .font(.caption)
                     .foregroundStyle(Theme.textTertiary)
             }
-            .accessibilityLabel("Restore previous purchases")
 
             if let error = store.error {
                 Text(error)
@@ -303,7 +334,7 @@ struct PaywallView: View {
                         .foregroundStyle(Theme.accentBlue)
                 }
 
-                Text("·")
+                Text("\u{00B7}")
                     .font(.caption2)
                     .foregroundStyle(Theme.textTertiary)
 
@@ -315,7 +346,7 @@ struct PaywallView: View {
                         .foregroundStyle(Theme.accentBlue)
                 }
 
-                Text("·")
+                Text("\u{00B7}")
                     .font(.caption2)
                     .foregroundStyle(Theme.textTertiary)
 
@@ -330,5 +361,4 @@ struct PaywallView: View {
             .padding(.top, 4)
         }
     }
-
 }

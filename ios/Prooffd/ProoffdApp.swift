@@ -41,7 +41,7 @@ struct ProoffdApp: App {
         case "quiz":
             appState.retakeQuiz()
         case "today":
-            appState.selectedTab = 1
+            appState.selectedTab = 0
         default:
             break
         }
@@ -89,22 +89,10 @@ struct RootView: View {
                 .zIndex(100)
             }
 
-            if appState.dailyRewards.showRewardPopup, appState.dailyRewards.canClaim {
-                DailyRewardPopup(
-                    reward: appState.dailyRewards.todayReward,
-                    currentDay: appState.dailyRewards.currentDay
-                ) {
-                    appState.claimDailyReward()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        appState.dailyRewards.dismissReward()
-                    }
-                }
-                .transition(.opacity)
-                .zIndex(99)
-            }
+
         }
         .animation(.spring(duration: 0.4), value: appState.celebratingBadge != nil)
-        .animation(.spring(duration: 0.4), value: appState.dailyRewards.showRewardPopup)
+
         .sensoryFeedback(.success, trigger: appState.celebratingBadge != nil)
     }
 }

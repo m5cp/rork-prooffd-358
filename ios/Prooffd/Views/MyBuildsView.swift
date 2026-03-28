@@ -9,6 +9,8 @@ struct MyBuildsView: View {
     @State private var celebrationBuildId: String?
     @State private var showAchievements: Bool = false
     @State private var showProgressShare: Bool = false
+    @State private var showStepCelebration: Bool = false
+    @State private var celebratedStepTitle: String = ""
 
     var body: some View {
         NavigationStack {
@@ -63,6 +65,26 @@ struct MyBuildsView: View {
                     ShareCardPresenterSheet(content: .progress(from: build))
                 }
             }
+            .overlay {
+                if showStepCelebration {
+                    StepCompletionOverlay(
+                        title: "Step Complete!",
+                        subtitle: "You finished \"\(celebratedStepTitle)\". Keep the momentum going!",
+                        onShare: {
+                            showStepCelebration = false
+                            showProgressShare = true
+                            appState.markResultShared()
+                        },
+                        onDismiss: {
+                            withAnimation(.spring(duration: 0.3)) {
+                                showStepCelebration = false
+                            }
+                        }
+                    )
+                    .transition(.opacity)
+                }
+            }
+            .animation(.spring(duration: 0.4), value: showStepCelebration)
         }
     }
 
@@ -210,6 +232,8 @@ struct MyBuildsView: View {
                 withAnimation(.spring(duration: 0.4, bounce: 0.2)) {
                     appState.toggleBuildStep(buildId: today.build.id, stepId: today.step.id)
                     celebrationBuildId = today.build.id
+                    celebratedStepTitle = today.step.title
+                    showStepCelebration = true
                 }
                 checkForRatingPrompt()
             } label: {
