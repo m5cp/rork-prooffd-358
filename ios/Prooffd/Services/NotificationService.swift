@@ -78,10 +78,10 @@ class NotificationService {
     private init() {}
 
     func enableNotifications() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+        notificationsEnabled = true
+        requestSystemPermissionIfNeeded { granted in
             Task { @MainActor in
                 if granted {
-                    self.notificationsEnabled = true
                     self.scheduleGentleReminders()
                 } else {
                     self.notificationsEnabled = false
@@ -92,14 +92,8 @@ class NotificationService {
 
     func requestPermissionIfFirstLaunch() {
         guard !UserDefaults.standard.bool(forKey: "notificationsInitialized") else { return }
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-            Task { @MainActor in
-                self.notificationsEnabled = granted
-                if granted {
-                    self.scheduleGentleReminders()
-                }
-            }
-        }
+        UserDefaults.standard.set(true, forKey: "notificationsInitialized")
+        UserDefaults.standard.set(true, forKey: "notificationsEnabled")
     }
 
     func disableNotifications() {
@@ -107,8 +101,32 @@ class NotificationService {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
     }
 
+    private func requestSystemPermissionIfNeeded(completion: @escaping (Bool) -> Void) {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            switch settings.authorizationStatus {
+            case .authorized, .provisional:
+                completion(true)
+            case .notDetermined:
+                UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+                    completion(granted)
+                }
+            default:
+                completion(false)
+            }
+        }
+    }
+
     func scheduleGentleReminders() {
         guard notificationsEnabled else { return }
+        requestSystemPermissionIfNeeded { granted in
+            guard granted else { return }
+            Task { @MainActor in
+                self.performScheduleGentleReminders()
+            }
+        }
+    }
+
+    private func performScheduleGentleReminders() {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
 
         var currentUsed = usedIndices
@@ -168,10 +186,11 @@ class NotificationService {
     }
 
     func refreshRemindersIfNeeded() {
+        requestPermissionIfFirstLaunch()
         guard notificationsEnabled else { return }
         let lastSchedule = UserDefaults.standard.double(forKey: lastScheduleDateKey)
         let daysSince = (Date().timeIntervalSince1970 - lastSchedule) / 86400
-        if daysSince >= 7 {
+        if daysSince >= 7 || lastSchedule == 0 {
             scheduleGentleReminders()
         }
     }
