@@ -188,10 +188,16 @@ class NotificationService {
     func refreshRemindersIfNeeded() {
         requestPermissionIfFirstLaunch()
         guard notificationsEnabled else { return }
-        let lastSchedule = UserDefaults.standard.double(forKey: lastScheduleDateKey)
-        let daysSince = (Date().timeIntervalSince1970 - lastSchedule) / 86400
-        if daysSince >= 7 || lastSchedule == 0 {
-            scheduleGentleReminders()
+
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            guard settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional else { return }
+            Task { @MainActor in
+                let lastSchedule = UserDefaults.standard.double(forKey: self.lastScheduleDateKey)
+                let daysSince = (Date().timeIntervalSince1970 - lastSchedule) / 86400
+                if daysSince >= 7 || lastSchedule == 0 {
+                    self.performScheduleGentleReminders()
+                }
+            }
         }
     }
 
