@@ -14,9 +14,21 @@ enum MatchingEngine {
             var score: Double = 0
             var maxScore: Double = 0
 
-            maxScore += 25
+            maxScore += 20
             if profile.selectedCategories.contains(path.category) {
-                score += 25
+                score += 20
+            }
+
+            maxScore += 15
+            if !profile.workEnvironments.isEmpty {
+                let pathEnvs = path.inferredWorkEnvironments
+                let matchCount = profile.workEnvironments.filter { pathEnvs.contains($0) }.count
+                if matchCount > 0 {
+                    let ratio = Double(matchCount) / Double(profile.workEnvironments.count)
+                    score += 15 * ratio
+                }
+            } else {
+                score += 15
             }
 
             maxScore += 15

@@ -246,12 +246,13 @@ struct QuizView: View {
                 switch step {
                 case 0: nameStep
                 case 1: categoryStep
-                case 2: budgetStep
-                case 3: hoursStep
-                case 4: workPreferenceStep
-                case 5: workStyleStep
-                case 6: techComfortStep
-                case 7: incomeTimelineStep
+                case 2: workEnvironmentStep
+                case 3: budgetStep
+                case 4: hoursStep
+                case 5: workPreferenceStep
+                case 6: workStyleStep
+                case 7: techComfortStep
+                case 8: incomeTimelineStep
                 default: EmptyView()
                 }
             }
@@ -312,6 +313,50 @@ struct QuizView: View {
 
             if !viewModel.profile.selectedCategories.isEmpty {
                 Text("\(viewModel.profile.selectedCategories.count) selected")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Theme.accent)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+        }
+    }
+
+    private var workEnvironmentStep: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            quizHeader(title: "Where do you want to work?", subtitle: "Select all that apply.")
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
+                ForEach(WorkEnvironment.allCases) { env in
+                    let isSelected = viewModel.profile.workEnvironments.contains(env)
+                    Button {
+                        withAnimation(.spring(duration: 0.25)) {
+                            viewModel.toggleEnvironment(env)
+                        }
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: env.icon)
+                                .font(.body)
+                                .foregroundStyle(isSelected ? .white : Theme.accent)
+                            Text(env.rawValue)
+                                .font(.subheadline.weight(.medium))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                        }
+                        .foregroundStyle(isSelected ? .white : Theme.textSecondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 14)
+                        .padding(.horizontal, 14)
+                        .background(isSelected ? Theme.accentBlue : Theme.cardBackground)
+                        .clipShape(.rect(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(isSelected ? Theme.accentBlue : Theme.cardBackground, lineWidth: 1.5)
+                        )
+                    }
+                    .sensoryFeedback(.selection, trigger: isSelected)
+                }
+            }
+
+            if !viewModel.profile.workEnvironments.isEmpty {
+                Text("\(viewModel.profile.workEnvironments.count) selected")
                     .font(.caption.weight(.medium))
                     .foregroundStyle(Theme.accent)
                     .frame(maxWidth: .infinity, alignment: .center)

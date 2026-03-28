@@ -39,6 +39,53 @@ nonisolated struct BusinessPath: Identifiable, Codable, Sendable {
     var zone: AIZone { AIZone.from(score: aiProofRating) }
     var aiSafeLabel: String { zone.label }
 
+    var inferredWorkEnvironments: [WorkEnvironment] {
+        var envs: [WorkEnvironment] = []
+        if isDigital && soloFriendly { envs.append(.homeBased) }
+        if isDigital { envs.append(.officeDesk) }
+        if requiresCar { envs.append(.onTheRoad) }
+        if requiresPhysicalWork && !isDigital {
+            let catStr = category.rawValue.lowercased()
+            if catStr.contains("outdoor") || catStr.contains("landscape") {
+                envs.append(.outdoors)
+            }
+            if catStr.contains("home") || catStr.contains("property") {
+                envs.append(.clientLocation)
+            }
+            if catStr.contains("skilled") || catStr.contains("auto") {
+                envs.append(.warehouse)
+            }
+            if catStr.contains("event") {
+                envs.append(.clientLocation)
+            }
+        }
+        if category == .foodBeverage {
+            envs.append(.clientLocation)
+            if !isDigital { envs.append(.homeBased) }
+        }
+        if category == .petServices {
+            envs.append(.clientLocation)
+            envs.append(.outdoors)
+        }
+        if category == .personalCare {
+            envs.append(.clientLocation)
+        }
+        if category == .productCraft {
+            envs.append(.homeBased)
+        }
+        if category == .eventsEntertainment {
+            envs.append(.clientLocation)
+        }
+        if category == .skilledTrades {
+            envs.append(.constructionSite)
+            envs.append(.clientLocation)
+        }
+        if envs.isEmpty {
+            envs.append(.clientLocation)
+        }
+        return Array(Set(envs))
+    }
+
     let whyItWorksNow: String
     let entryPath: String
     let difficultyLevel: String
