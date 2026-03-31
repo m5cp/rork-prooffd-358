@@ -49,27 +49,15 @@ struct ResultsRevealView: View {
                 }
 
                 if showBadge {
-                    HStack(spacing: 10) {
-                        Image(systemName: "rosette")
-                            .font(.title3)
-                            .foregroundStyle(Color(hex: "FBBF24"))
-                            .accessibilityHidden(true)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Path Finder")
-                                .font(.subheadline.weight(.bold))
-                                .foregroundStyle(Theme.textPrimary)
-                            Text("+25 bonus points")
-                                .font(.caption)
-                                .foregroundStyle(Color(hex: "FBBF24"))
-                        }
+                    HStack(spacing: 8) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.body)
+                            .foregroundStyle(Theme.accent)
+                        Text("Your matches are ready")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.textSecondary)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 12)
-                    .background(Color(hex: "FBBF24").opacity(0.1))
-                    .clipShape(.capsule)
-                    .transition(reduceMotion ? .opacity : .scale(scale: 0.6).combined(with: .opacity))
-                    .accessibilityElement(children: .combine)
-                    .accessibilityLabel("Badge earned: Path Finder, plus 25 bonus points")
+                    .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .bottom)))
                 }
 
                 if showTopMatch, let top = topMatch {

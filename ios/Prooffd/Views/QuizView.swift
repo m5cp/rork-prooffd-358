@@ -44,22 +44,6 @@ struct QuizView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
 
-                if viewModel.pointsEarned > 0 {
-                    HStack(spacing: 4) {
-                        Image(systemName: "star.fill")
-                            .font(.caption2)
-                            .foregroundStyle(.yellow)
-                        Text("+\(viewModel.pointsEarned) pts")
-                            .font(.caption2.weight(.bold))
-                            .foregroundStyle(.yellow)
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(Color.yellow.opacity(0.12))
-                    .clipShape(.capsule)
-                    .padding(.top, 8)
-                    .animation(.spring(duration: 0.3), value: viewModel.pointsEarned)
-                }
 
                 TabView(selection: $viewModel.currentStep) {
                     ForEach(0..<viewModel.totalSteps, id: \.self) { step in

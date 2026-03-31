@@ -198,9 +198,6 @@ struct UnifiedExploreView: View {
                     mode: .recommended
                 )
 
-                whatIfButton
-                    .padding(.horizontal, 16)
-
                 if !store.isPremium {
                     upgradePrompt
                         .padding(.horizontal, 16)

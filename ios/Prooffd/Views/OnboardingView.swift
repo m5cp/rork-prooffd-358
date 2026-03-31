@@ -9,23 +9,13 @@ struct OnboardingView: View {
 
     private let pages: [OnboardingPage] = [
         OnboardingPage(
-            headline: "You don't need\nthe perfect idea",
-            subtitle: "Most successful businesses started with someone just like you — unsure but willing to try.",
-            icon: "lightbulb.fill"
+            headline: "Find the right path\nfor you",
+            subtitle: "Answer a few quick questions and get matched with businesses and careers tailored to your skills, budget, and goals.",
+            icon: "sparkles"
         ),
         OnboardingPage(
-            headline: "Most people\nstay stuck here",
-            subtitle: "Overthinking, over-researching, waiting for the \"right time.\" That cycle ends today.",
-            icon: "figure.stand"
-        ),
-        OnboardingPage(
-            headline: "That's not how\nthis works",
-            subtitle: "You don't need a degree, a loan, or a business plan. You need the right match for YOU.",
-            icon: "arrow.triangle.turn.up.right.diamond.fill"
-        ),
-        OnboardingPage(
-            headline: "We'll guide you\nstep by step",
-            subtitle: "Answer a few questions, get matched, then follow a clear plan to start earning.",
+            headline: "Then build it,\nstep by step",
+            subtitle: "Get a clear action plan, track your progress, and start earning — no degree or big investment required.",
             icon: "checkmark.seal.fill"
         )
     ]

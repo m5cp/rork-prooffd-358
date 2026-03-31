@@ -12,16 +12,13 @@ struct ProfileTabView: View {
     @State private var showAvatarPicker: Bool = false
     @State private var showNameEdit: Bool = false
     @State private var editingName: String = ""
-    @Environment(\.horizontalSizeClass) private var sizeClass
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
-                    heroSection
-                    streakCard
-                    achievementsGrid
-                    quickActions
+                VStack(spacing: 20) {
+                    profileHeader
+                    statsRow
                     settingsSection
                     Color.clear.frame(height: 40)
                 }
@@ -76,354 +73,111 @@ struct ProfileTabView: View {
         }
     }
 
-    // MARK: - Hero Section
-
-    private var heroSection: some View {
-        let level = appState.currentLevel
-        let levelColor = Color(hex: level.color)
-        let progress = level.progressToNext(points: appState.momentum.totalPoints)
-
-        return VStack(spacing: 0) {
-            VStack(spacing: 24) {
-                HStack(spacing: 16) {
-                    Button {
-                        showAvatarPicker = true
-                    } label: {
-                        ZStack(alignment: .bottomTrailing) {
-                            AvatarView(avatar: appState.userProfile.avatar, size: 72)
-                                .overlay {
-                                    Circle()
-                                        .stroke(
-                                            LinearGradient(
-                                                colors: [levelColor.opacity(0.8), levelColor.opacity(0.3)],
-                                                startPoint: .topLeading,
-                                                endPoint: .bottomTrailing
-                                            ),
-                                            lineWidth: 3
-                                        )
-                                        .frame(width: 78, height: 78)
-                                }
-                            Image(systemName: "pencil.circle.fill")
-                                .font(.system(size: 20))
-                                .foregroundStyle(.white)
-                                .background(Circle().fill(levelColor).frame(width: 18, height: 18))
-                        }
-                    }
-                    .accessibilityLabel("Change avatar")
-                    .accessibilityHint("Opens avatar picker")
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        Button {
-                            editingName = appState.userProfile.firstName
-                            showNameEdit = true
-                        } label: {
-                            HStack(spacing: 6) {
-                                Text(appState.userProfile.firstName.isEmpty ? "User" : appState.userProfile.firstName)
-                                    .font(.title2.weight(.bold))
-                                    .foregroundStyle(Theme.textPrimary)
-                                Image(systemName: "pencil")
-                                    .font(.caption2)
-                                    .foregroundStyle(Theme.textTertiary)
-                                    .accessibilityHidden(true)
-                            }
-                        }
-                        .accessibilityLabel("Edit name: \(appState.userProfile.firstName.isEmpty ? "User" : appState.userProfile.firstName)")
-                        .accessibilityHint("Double tap to change your display name")
-
-                        HStack(spacing: 8) {
-                            HStack(spacing: 5) {
-                                Image(systemName: level.icon)
-                                    .font(.caption.weight(.semibold))
-                                Text("Level \(level.rank)")
-                                    .font(.subheadline.weight(.bold))
-                            }
-                            .foregroundStyle(levelColor)
-
-                            Text(level.title)
-                                .font(.subheadline.weight(.medium))
-                                .foregroundStyle(Theme.textSecondary)
-                        }
-
-                        if store.isPremium {
-                            HStack(spacing: 4) {
-                                Image(systemName: "crown.fill")
-                                    .font(.system(size: 10))
-                                    .foregroundStyle(.yellow)
-                                Text("Pro")
-                                    .font(.caption.weight(.bold))
-                                    .foregroundStyle(Theme.accent)
-                            }
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(Theme.accent.opacity(0.1))
-                            .clipShape(.capsule)
-                        }
-                    }
-
-                    Spacer()
+    private var profileHeader: some View {
+        HStack(spacing: 16) {
+            Button {
+                showAvatarPicker = true
+            } label: {
+                ZStack(alignment: .bottomTrailing) {
+                    AvatarView(avatar: appState.userProfile.avatar, size: 64)
+                    Image(systemName: "pencil.circle.fill")
+                        .font(.system(size: 18))
+                        .foregroundStyle(.white, Theme.accent)
                 }
-
-                VStack(spacing: 10) {
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            Capsule()
-                                .fill(levelColor.opacity(0.12))
-                                .frame(height: 10)
-                            Capsule()
-                                .fill(
-                                    LinearGradient(
-                                        colors: [levelColor, levelColor.opacity(0.7)],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
-                                .frame(width: max(geo.size.width * progress, 6), height: 10)
-                        }
-                    }
-                    .frame(height: 10)
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Level progress")
-                    .accessibilityValue("\(Int(progress * 100)) percent to next level")
-
-                    HStack {
-                        Text("\(appState.momentum.totalPoints) pts")
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(levelColor)
-                        Spacer()
-                        if let next = UserLevel.nextLevel(after: level) {
-                            Text("\(next.minPoints - appState.momentum.totalPoints) to \(next.title)")
-                                .font(.caption)
-                                .foregroundStyle(Theme.textTertiary)
-                        } else {
-                            Text("Max level")
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(levelColor)
-                        }
-                    }
-                }
-
-                Text(progressMessage)
-                    .font(.callout)
-                    .foregroundStyle(Theme.textSecondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(24)
-        }
-        .background(
-            ZStack {
-                Theme.cardBackground
-                LinearGradient(
-                    colors: [levelColor.opacity(0.08), .clear],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            }
-        )
-        .clipShape(.rect(cornerRadius: 24))
-        .overlay(
-            RoundedRectangle(cornerRadius: 24)
-                .stroke(levelColor.opacity(0.12), lineWidth: 1)
-        )
-        .shadow(color: levelColor.opacity(0.08), radius: 16, y: 6)
-    }
-
-    private var progressMessage: String {
-        let points = appState.momentum.totalPoints
-        switch points {
-        case 0..<10: return "Take the first step \u{2014} every journey starts somewhere."
-        case 10..<50: return "You're off to a great start. Keep exploring!"
-        case 50..<150: return "You're building real momentum. Keep it up!"
-        case 150..<350: return "Impressive progress \u{2014} you're ahead of most."
-        case 350..<700: return "You're in the top tier. Launch mode activated."
-        default: return "You've mastered the path. Unstoppable."
-        }
-    }
-
-    // MARK: - Streak
-
-    private var streakCard: some View {
-        let isActive = appState.streakTracker.currentStreak > 0
-
-        return HStack(spacing: 16) {
-            ZStack {
-                Circle()
-                    .fill(isActive ? Color.orange.opacity(0.12) : Theme.cardBackgroundLight)
-                    .frame(width: 52, height: 52)
-                Image(systemName: "flame.fill")
-                    .font(.title2)
-                    .foregroundStyle(isActive ? .orange : Theme.textTertiary)
-                    .symbolEffect(.pulse, options: .repeating.speed(0.5), isActive: appState.streakTracker.currentStreak >= 7)
-            }
-            .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 8) {
-                    Text(isActive ? "\(appState.streakTracker.currentStreak)" : "0")
-                        .font(.title2.weight(.bold))
-                        .foregroundStyle(isActive ? .orange : Theme.textTertiary)
-                        .contentTransition(.numericText())
-                    Text(appState.streakTracker.currentStreak == 1 ? "day" : "days")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(Theme.textSecondary)
-                }
-                Text(appState.streakTracker.streakMessage)
-                    .font(.caption)
-                    .foregroundStyle(Theme.textTertiary)
-                    .lineLimit(1)
-            }
-
-            Spacer()
-
-            if appState.streakTracker.streakBufferAvailable && appState.streakTracker.currentStreak >= 2 {
-                VStack(spacing: 2) {
-                    Image(systemName: "shield.fill")
-                        .font(.caption)
-                    Text("Protected")
-                        .font(.system(size: 9, weight: .semibold))
-                }
-                .foregroundStyle(Theme.accent)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(Theme.accent.opacity(0.08))
-                .clipShape(.rect(cornerRadius: 10))
-                .accessibilityLabel("Streak protected for one day")
-            }
-        }
-        .padding(18)
-        .background(Theme.cardBackground)
-        .clipShape(.rect(cornerRadius: 18))
-        .overlay(
-            RoundedRectangle(cornerRadius: 18)
-                .stroke(isActive ? Color.orange.opacity(0.1) : Theme.border.opacity(0.3), lineWidth: 0.5)
-        )
-        .cardShadow()
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Streak: \(appState.streakTracker.currentStreak) \(appState.streakTracker.currentStreak == 1 ? "day" : "days")\(appState.streakTracker.streakBufferAvailable && appState.streakTracker.currentStreak >= 2 ? ", streak protected" : "")")
-    }
-
-    // MARK: - Achievements
-
-    private var achievementsGrid: some View {
-        let earnedBadges = MomentumBadge.all.filter { appState.momentum.hasBadge($0.id) }
-        let earnedAchievements = AchievementDatabase.all.filter { appState.isAchievementUnlocked($0.id) }
-        let totalEarned = earnedBadges.count + earnedAchievements.count
-        let totalAvailable = MomentumBadge.all.count + AchievementDatabase.all.count
-
-        return VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Text("Achievements")
-                    .font(.title3.weight(.bold))
-                    .foregroundStyle(Theme.textPrimary)
-                Spacer()
                 Button {
-                    showAchievements = true
+                    editingName = appState.userProfile.firstName
+                    showNameEdit = true
                 } label: {
-                    HStack(spacing: 4) {
-                        Text("\(totalEarned)/\(totalAvailable)")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(Theme.textSecondary)
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 10, weight: .semibold))
+                    HStack(spacing: 6) {
+                        Text(appState.userProfile.firstName.isEmpty ? "User" : appState.userProfile.firstName)
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(Theme.textPrimary)
+                        Image(systemName: "pencil")
+                            .font(.caption2)
                             .foregroundStyle(Theme.textTertiary)
                     }
                 }
-            }
 
-            if totalEarned == 0 {
-                VStack(spacing: 10) {
-                    Image(systemName: "trophy")
-                        .font(.largeTitle)
-                        .foregroundStyle(Theme.textTertiary.opacity(0.5))
-                    Text("Complete actions to unlock badges")
-                        .font(.subheadline)
-                        .foregroundStyle(Theme.textTertiary)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 32)
-                .background(Theme.cardBackground)
-                .clipShape(.rect(cornerRadius: 16))
-                .cardShadow()
-            } else {
-                let columns = [
-                    GridItem(.flexible(), spacing: 12),
-                    GridItem(.flexible(), spacing: 12),
-                    GridItem(.flexible(), spacing: 12)
-                ]
-
-                LazyVGrid(columns: columns, spacing: 12) {
-                    ForEach(earnedBadges) { badge in
-                        badgeCell(icon: badge.icon, title: badge.title, color: Color(hex: badge.color))
+                if store.isPremium {
+                    HStack(spacing: 4) {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.yellow)
+                        Text("Pro")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(Theme.accent)
                     }
-                    ForEach(earnedAchievements) { achievement in
-                        badgeCell(icon: achievement.icon, title: achievement.title, color: Color(hex: achievement.color))
-                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Theme.accent.opacity(0.1))
+                    .clipShape(.capsule)
                 }
             }
-        }
-    }
 
-    private func badgeCell(icon: String, title: String, color: Color) -> some View {
-        VStack(spacing: 10) {
-            ZStack {
-                Circle()
-                    .fill(color.opacity(0.12))
-                    .frame(width: 48, height: 48)
-                Image(systemName: icon)
-                    .font(.body.weight(.medium))
-                    .foregroundStyle(color)
-            }
-            .accessibilityHidden(true)
-            Text(title)
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(Theme.textPrimary)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
+            Spacer()
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
-        .background(color.opacity(0.04))
-        .clipShape(.rect(cornerRadius: 14))
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(color.opacity(0.12), lineWidth: 0.5)
-        )
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Badge: \(title), earned")
-    }
-
-    // MARK: - Quick Actions
-
-    private var quickActions: some View {
-        VStack(spacing: 0) {
-            actionRow(icon: "square.and.arrow.up.fill", color: Theme.accentBlue, title: "Share My Path") {
-                showMyPathShare = true
-            }
-        }
+        .padding(20)
         .background(Theme.cardBackground)
-        .clipShape(.rect(cornerRadius: 16))
+        .clipShape(.rect(cornerRadius: 18))
         .cardShadow()
     }
 
-    private func actionRow(icon: String, color: Color, title: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 12) {
-                Image(systemName: icon)
-                    .foregroundStyle(color)
-                    .frame(width: 22)
-                Text(title)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(Theme.textPrimary)
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.caption2)
-                    .foregroundStyle(Theme.textTertiary)
+    private var statsRow: some View {
+        HStack(spacing: 12) {
+            statCell(
+                value: "\(appState.streakTracker.currentStreak)",
+                label: "Streak",
+                icon: "flame.fill",
+                color: appState.streakTracker.currentStreak > 0 ? .orange : Theme.textTertiary
+            )
+
+            statCell(
+                value: "\(appState.builds.count)",
+                label: "Builds",
+                icon: "list.bullet.clipboard",
+                color: Theme.accent
+            )
+
+            Button {
+                showAchievements = true
+            } label: {
+                let totalEarned = MomentumBadge.all.filter { appState.momentum.hasBadge($0.id) }.count + AchievementDatabase.all.filter { appState.isAchievementUnlocked($0.id) }.count
+                statCellContent(
+                    value: "\(totalEarned)",
+                    label: "Badges",
+                    icon: "trophy.fill",
+                    color: Color(hex: "FBBF24")
+                )
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .buttonStyle(.plain)
         }
     }
 
-    // MARK: - Settings
+    private func statCell(value: String, label: String, icon: String, color: Color) -> some View {
+        statCellContent(value: value, label: label, icon: icon, color: color)
+    }
+
+    private func statCellContent(value: String, label: String, icon: String, color: Color) -> some View {
+        VStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.body)
+                .foregroundStyle(color)
+            Text(value)
+                .font(.title3.weight(.bold))
+                .foregroundStyle(Theme.textPrimary)
+            Text(label)
+                .font(.caption2)
+                .foregroundStyle(Theme.textTertiary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+        .cardShadow()
+    }
 
     private var settingsSection: some View {
         VStack(spacing: 0) {
@@ -439,7 +193,7 @@ struct ProfileTabView: View {
                             Text("Upgrade to Pro")
                                 .font(.subheadline.weight(.semibold))
                                 .foregroundStyle(Theme.textPrimary)
-                            Text("Unlock all templates, scripts & exports")
+                            Text("Templates, scripts & exports")
                                 .font(.caption)
                                 .foregroundStyle(Theme.textSecondary)
                         }
@@ -454,6 +208,11 @@ struct ProfileTabView: View {
                 settingsDivider
             }
 
+            settingsLink(icon: "square.and.arrow.up.fill", color: Theme.accentBlue, title: "Share My Path") {
+                showMyPathShare = true
+            }
+            settingsDivider
+
             themeRow
             settingsDivider
 
@@ -461,8 +220,7 @@ struct ProfileTabView: View {
                 Image(systemName: "bell.fill")
                     .foregroundStyle(Theme.accent)
                     .frame(width: 22)
-                    .accessibilityHidden(true)
-                Toggle("Gentle Reminders", isOn: Binding(
+                Toggle("Reminders", isOn: Binding(
                     get: { NotificationService.shared.notificationsEnabled },
                     set: { newValue in
                         if newValue {
@@ -477,10 +235,6 @@ struct ProfileTabView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel("Gentle Reminders")
-            .accessibilityValue(NotificationService.shared.notificationsEnabled ? "On" : "Off")
-            .accessibilityHint("Double tap to toggle notifications")
 
             settingsDivider
 

@@ -419,16 +419,12 @@ class AppState {
 
     func recordAppOpen() {
         streakTracker.recordAppOpen()
-        momentum.awardPoints(2, reason: .dailyUse)
         dailyMicroAction.resetIfNewDay()
         AnalyticsTracker.shared.trackAppOpen()
         checkAchievements()
         checkMomentumBadges()
         NotificationService.shared.recordActivity()
         NotificationService.shared.scheduleStreakReminder(currentStreak: streakTracker.currentStreak)
-        if dailyRewards.canClaim {
-            dailyRewards.showRewardPopup = true
-        }
     }
 
     func completeDailyMicroAction() {

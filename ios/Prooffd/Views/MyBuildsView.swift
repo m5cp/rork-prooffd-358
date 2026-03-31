@@ -240,7 +240,7 @@ struct MyBuildsView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.circle.fill")
                         .accessibilityHidden(true)
-                    Text("Mark Complete  +10 pts")
+                    Text("Mark Complete")
                 }
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.white)

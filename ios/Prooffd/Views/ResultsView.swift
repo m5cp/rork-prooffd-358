@@ -7,37 +7,26 @@ struct ResultsView: View {
 
     var body: some View {
         @Bindable var state = appState
-        ZStack {
-            TabView(selection: $state.selectedTab) {
-                UnifiedExploreView()
-                    .tabItem {
-                        Image(systemName: "safari")
-                        Text("Explore")
-                    }
-                    .tag(0)
+        TabView(selection: $state.selectedTab) {
+            UnifiedExploreView()
+                .tabItem {
+                    Label("Explore", systemImage: "compass")
+                }
+                .tag(0)
 
-                MyBuildsView()
-                    .tabItem {
-                        Image(systemName: "hammer.fill")
-                        Text("My Builds")
-                    }
-                    .tag(1)
+            MyBuildsView()
+                .tabItem {
+                    Label("Builds", systemImage: "list.bullet.clipboard")
+                }
+                .tag(1)
 
-                ProfileTabView()
-                    .tabItem {
-                        Image(systemName: "person.fill")
-                        Text("Profile")
-                    }
-                    .tag(2)
-            }
-            .tint(Theme.accent)
-
-            if appState.showWelcomeBack {
-                WelcomeBackView()
-                    .transition(.opacity.combined(with: .move(edge: .bottom)))
-            }
+            ProfileTabView()
+                .tabItem {
+                    Label("Profile", systemImage: "person.crop.circle")
+                }
+                .tag(2)
         }
-        .animation(.spring(duration: 0.5), value: appState.showWelcomeBack)
+        .tint(Theme.accent)
         .onAppear {
             appState.recordAppOpen()
         }
