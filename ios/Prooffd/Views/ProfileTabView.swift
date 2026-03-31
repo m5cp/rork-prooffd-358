@@ -339,26 +339,17 @@ struct ProfileTabView: View {
 
             if showProfileDetails {
                 VStack(spacing: 0) {
-                    if let budget = appState.userProfile.budget {
-                        profileDetailRow(label: "Budget", value: budget.rawValue)
-                    }
-                    if let hours = appState.userProfile.hoursPerDay {
-                        profileDetailRow(label: "Hours/Day", value: hours.rawValue)
-                    }
-                    if let pref = appState.userProfile.workPreference {
-                        profileDetailRow(label: "Work Type", value: pref.rawValue)
-                    }
-                    if let style = appState.userProfile.workStyle {
-                        profileDetailRow(label: "Work Style", value: style.rawValue)
-                    }
-                    if let tech = appState.userProfile.techComfort {
-                        profileDetailRow(label: "Tech Comfort", value: tech.rawValue)
-                    }
-                    if let exp = appState.userProfile.experienceLevel {
-                        profileDetailRow(label: "Experience", value: exp.rawValue)
-                    }
                     if !appState.userProfile.selectedCategories.isEmpty {
                         profileDetailRow(label: "Interests", value: appState.userProfile.selectedCategories.map(\.rawValue).joined(separator: ", "))
+                    }
+                    if !appState.userProfile.workEnvironments.isEmpty {
+                        profileDetailRow(label: "Work Environment", value: appState.userProfile.workEnvironments.map(\.rawValue).joined(separator: ", "))
+                    }
+                    if !appState.userProfile.workConditions.isEmpty {
+                        profileDetailRow(label: "Conditions OK", value: appState.userProfile.workConditions.map(\.rawValue).joined(separator: ", "))
+                    }
+                    if !appState.userProfile.situationTags.isEmpty {
+                        profileDetailRow(label: "Situation", value: appState.userProfile.situationTags.map(\.rawValue).joined(separator: ", "))
                     }
                 }
                 .padding(.horizontal, 16)

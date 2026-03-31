@@ -28,13 +28,6 @@ struct WhatIfView: View {
                             }
                         }
 
-                        tweakSection(title: "Hours/Day", icon: "clock.fill") {
-                            tweakPicker(options: HoursPerDay.allCases, selected: tempProfile.hoursPerDay) {
-                                tempProfile.hoursPerDay = $0
-                                recalculate()
-                            }
-                        }
-
                         tweakSection(title: "Work Type", icon: "briefcase.fill") {
                             tweakPicker(options: WorkPreference.allCases, selected: tempProfile.workPreference) {
                                 tempProfile.workPreference = $0
@@ -52,13 +45,6 @@ struct WhatIfView: View {
                         tweakSection(title: "Tech Comfort", icon: "desktopcomputer") {
                             tweakPicker(options: TechComfort.allCases, selected: tempProfile.techComfort) {
                                 tempProfile.techComfort = $0
-                                recalculate()
-                            }
-                        }
-
-                        tweakSection(title: "Selling Comfort", icon: "tag.fill") {
-                            tweakPicker(options: SellingComfort.allCases, selected: tempProfile.sellingComfort) {
-                                tempProfile.sellingComfort = $0
                                 recalculate()
                             }
                         }
@@ -290,13 +276,13 @@ struct WhatIfView: View {
 
     private func profilesDiffer(_ a: UserProfile, _ b: UserProfile) -> Bool {
         a.budget != b.budget ||
-        a.hoursPerDay != b.hoursPerDay ||
         a.workPreference != b.workPreference ||
         a.workStyle != b.workStyle ||
         a.techComfort != b.techComfort ||
-        a.sellingComfort != b.sellingComfort ||
-        a.needsFastCash != b.needsFastCash ||
-        a.hasCar != b.hasCar
+        a.selectedCategories != b.selectedCategories ||
+        a.workEnvironments != b.workEnvironments ||
+        a.workConditions != b.workConditions ||
+        a.situationTags != b.situationTags
     }
 
     private func applyChanges() {

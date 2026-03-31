@@ -2,7 +2,7 @@ import Foundation
 
 enum MatchingEngine {
     nonisolated static func match(profile: UserProfile, paths: [BusinessPath]) -> [MatchResult] {
-        let hasAnswers = !profile.selectedCategories.isEmpty || profile.budget != nil || profile.workPreference != nil
+        let hasAnswers = !profile.selectedCategories.isEmpty || profile.budget != nil || profile.workPreference != nil || !profile.situationTags.isEmpty
 
         if !hasAnswers {
             return browseAll(paths: paths)

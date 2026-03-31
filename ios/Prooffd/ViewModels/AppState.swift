@@ -443,53 +443,10 @@ class AppState {
 
     var profileReadinessScore: Int {
         var score = 0
-        if userProfile.budget != nil {
-            switch userProfile.budget! {
-            case .zero: score += 2
-            case .under100: score += 4
-            case .under500: score += 6
-            case .under1000: score += 8
-            case .over1000: score += 10
-            }
-        }
-        if let hours = userProfile.hoursPerDay {
-            switch hours {
-            case .lessThan1: score += 2
-            case .oneToTwo: score += 5
-            case .threeToFour: score += 8
-            case .fivePlus: score += 10
-            }
-        }
-        if let tech = userProfile.techComfort {
-            switch tech {
-            case .notComfortable: score += 2
-            case .basic: score += 4
-            case .moderate: score += 6
-            case .verySavvy: score += 8
-            }
-        }
-        if let exp = userProfile.experienceLevel {
-            switch exp {
-            case .beginner: score += 2
-            case .some: score += 4
-            case .skilled: score += 6
-            }
-        }
-        if let selling = userProfile.sellingComfort {
-            switch selling {
-            case .notComfortable: score += 1
-            case .somewhat: score += 3
-            case .veryComfortable: score += 4
-            }
-        }
-        if userProfile.hasCar == true { score += 2 }
-        if !userProfile.selectedCategories.isEmpty { score += 3 }
-        if !userProfile.workConditions.isEmpty { score += 2 }
-        if userProfile.workPreference != nil { score += 1 }
-        if userProfile.workStyle != nil { score += 1 }
-        if !userProfile.workEnvironments.isEmpty { score += 2 }
-        if userProfile.incomeTimeline != nil { score += 1 }
-        if !userProfile.educationWillingnesses.isEmpty { score += 1 }
+        if !userProfile.selectedCategories.isEmpty { score += 12 }
+        if !userProfile.workEnvironments.isEmpty { score += 12 }
+        if !userProfile.workConditions.isEmpty { score += 12 }
+        if !userProfile.situationTags.isEmpty { score += 14 }
         return min(score, 50)
     }
 
@@ -537,8 +494,8 @@ class AppState {
         if builds.isEmpty {
             tips.append("Start a build to add to your readiness score")
         }
-        if let tech = userProfile.techComfort, tech.level < 2 {
-            tips.append("Improving tech skills unlocks more digital business paths")
+        if userProfile.situationTags.isEmpty {
+            tips.append("Add situation details to improve match accuracy")
         }
         if streakTracker.currentStreak < 3 {
             tips.append("Build a 3-day streak for +3 readiness points")

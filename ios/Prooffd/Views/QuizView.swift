@@ -57,6 +57,7 @@ struct QuizView: View {
                 VStack(spacing: 12) {
                     Button {
                         if viewModel.currentStep == viewModel.totalSteps - 1 {
+                            viewModel.applyDerivedFields()
                             onComplete(viewModel.profile)
                         } else {
                             viewModel.next()
@@ -75,6 +76,7 @@ struct QuizView: View {
 
                     if viewModel.canShowEarlyResults {
                         Button {
+                            viewModel.applyDerivedFields()
                             onEarlyComplete(viewModel.profile)
                         } label: {
                             Text("Go to Dashboard Now")
@@ -156,6 +158,7 @@ struct QuizView: View {
 
                     Button {
                         viewModel.showCheckpoint = false
+                        viewModel.applyDerivedFields()
                         onEarlyComplete(viewModel.profile)
                     } label: {
                         Text("Go to Dashboard Now")
@@ -230,12 +233,8 @@ struct QuizView: View {
                 switch step {
                 case 0: categoryStep
                 case 1: workEnvironmentStep
-                case 2: budgetStep
-                case 3: hoursStep
-                case 4: workPreferenceStep
-                case 5: workStyleStep
-                case 6: techComfortStep
-                case 7: incomeTimelineStep
+                case 2: workConditionsStep
+                case 3: situationStep
                 default: EmptyView()
                 }
             }
@@ -333,56 +332,90 @@ struct QuizView: View {
         }
     }
 
-    private var budgetStep: some View {
+    private var workConditionsStep: some View {
         VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "What's your startup budget?", subtitle: "How much can you invest to get started?")
-            optionList(BudgetRange.allCases, selected: viewModel.profile.budget) {
-                viewModel.profile.budget = $0
+            quizHeader(title: "What conditions are you okay with?", subtitle: "Select all that apply.")
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
+                ForEach(WorkCondition.allCases) { condition in
+                    let isSelected = viewModel.profile.workConditions.contains(condition)
+                    Button {
+                        withAnimation(.spring(duration: 0.25)) {
+                            viewModel.toggleCondition(condition)
+                        }
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: condition.icon)
+                                .font(.body)
+                                .foregroundStyle(isSelected ? .white : Theme.accent)
+                            Text(condition.rawValue)
+                                .font(.subheadline.weight(.medium))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                        }
+                        .foregroundStyle(isSelected ? .white : Theme.textSecondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 14)
+                        .padding(.horizontal, 14)
+                        .background(isSelected ? Theme.accentBlue : Theme.cardBackground)
+                        .clipShape(.rect(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(isSelected ? Theme.accentBlue : Theme.cardBackground, lineWidth: 1.5)
+                        )
+                    }
+                    .sensoryFeedback(.selection, trigger: isSelected)
+                }
+            }
+
+            if !viewModel.profile.workConditions.isEmpty {
+                Text("\(viewModel.profile.workConditions.count) selected")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Theme.accent)
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
         }
     }
 
-    private var hoursStep: some View {
+    private var situationStep: some View {
         VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "Hours per day?", subtitle: "How much time can you dedicate daily?")
-            optionList(HoursPerDay.allCases, selected: viewModel.profile.hoursPerDay) {
-                viewModel.profile.hoursPerDay = $0
+            quizHeader(title: "What describes your situation?", subtitle: "Select all that apply.")
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
+                ForEach(SituationTag.allCases) { tag in
+                    let isSelected = viewModel.profile.situationTags.contains(tag)
+                    Button {
+                        withAnimation(.spring(duration: 0.25)) {
+                            viewModel.toggleSituationTag(tag)
+                        }
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: tag.icon)
+                                .font(.body)
+                                .foregroundStyle(isSelected ? .white : Theme.accent)
+                            Text(tag.rawValue)
+                                .font(.subheadline.weight(.medium))
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.75)
+                        }
+                        .foregroundStyle(isSelected ? .white : Theme.textSecondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 14)
+                        .padding(.horizontal, 14)
+                        .background(isSelected ? Theme.accentBlue : Theme.cardBackground)
+                        .clipShape(.rect(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(isSelected ? Theme.accentBlue : Theme.cardBackground, lineWidth: 1.5)
+                        )
+                    }
+                    .sensoryFeedback(.selection, trigger: isSelected)
+                }
             }
-        }
-    }
 
-    private var workPreferenceStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "Work preference?", subtitle: "Do you prefer physical or digital work?")
-            optionList(WorkPreference.allCases, selected: viewModel.profile.workPreference) {
-                viewModel.profile.workPreference = $0
-            }
-        }
-    }
-
-    private var workStyleStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "Work style?", subtitle: "Do you prefer working alone or with others?")
-            optionList(WorkStyle.allCases, selected: viewModel.profile.workStyle) {
-                viewModel.profile.workStyle = $0
-            }
-        }
-    }
-
-    private var techComfortStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "Tech comfort level?", subtitle: "How comfortable are you with technology?")
-            optionList(TechComfort.allCases, selected: viewModel.profile.techComfort) {
-                viewModel.profile.techComfort = $0
-            }
-        }
-    }
-
-    private var incomeTimelineStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "How soon do you need income?", subtitle: "This helps us match you with realistic timelines.")
-            optionList(IncomeTimeline.allCases, selected: viewModel.profile.incomeTimeline) {
-                viewModel.profile.incomeTimeline = $0
+            if !viewModel.profile.situationTags.isEmpty {
+                Text("\(viewModel.profile.situationTags.count) selected")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Theme.accent)
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
         }
     }
@@ -397,52 +430,5 @@ struct QuizView: View {
                 .font(.subheadline)
                 .foregroundStyle(Theme.textSecondary)
         }
-    }
-
-    private func optionList<T: Identifiable & RawRepresentable>(
-        _ options: [T],
-        selected: T?,
-        onSelect: @escaping (T) -> Void
-    ) -> some View where T.RawValue == String {
-        VStack(spacing: 10) {
-            ForEach(options) { option in
-                let isSelected = selected?.rawValue == option.rawValue
-                Button {
-                    withAnimation(.spring(duration: 0.25)) {
-                        onSelect(option)
-                    }
-                } label: {
-                    Text(option.rawValue)
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(isSelected ? .white : Theme.textSecondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding()
-                        .background(isSelected ? Theme.accentBlue : Theme.cardBackground)
-                        .clipShape(.rect(cornerRadius: 12))
-                }
-                .sensoryFeedback(.selection, trigger: isSelected)
-            }
-        }
-    }
-
-    private func boolButton(_ title: String, icon: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
-        Button {
-            withAnimation(.spring(duration: 0.25)) {
-                action()
-            }
-        } label: {
-            VStack(spacing: 10) {
-                Image(systemName: icon)
-                    .font(.title2)
-                Text(title)
-                    .font(.body.weight(.medium))
-            }
-            .foregroundStyle(isSelected ? .white : Theme.textSecondary)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 24)
-            .background(isSelected ? Theme.accentBlue : Theme.cardBackground)
-            .clipShape(.rect(cornerRadius: 12))
-        }
-        .sensoryFeedback(.selection, trigger: isSelected)
     }
 }

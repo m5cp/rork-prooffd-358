@@ -148,120 +148,39 @@ struct ReadinessDetailView: View {
 
             VStack(spacing: 0) {
                 profileCheckRow(
-                    label: "Budget",
-                    earned: budgetPoints,
-                    max: 10,
-                    done: appState.userProfile.budget != nil,
-                    icon: "dollarsign.circle.fill",
-                    color: Theme.accent
-                )
-                checkDivider
-                profileCheckRow(
-                    label: "Hours per day",
-                    earned: hoursPoints,
-                    max: 10,
-                    done: appState.userProfile.hoursPerDay != nil,
-                    icon: "clock.fill",
-                    color: Theme.accentBlue
-                )
-                checkDivider
-                profileCheckRow(
-                    label: "Tech comfort",
-                    earned: techPoints,
-                    max: 8,
-                    done: appState.userProfile.techComfort != nil,
-                    icon: "desktopcomputer",
-                    color: Color(hex: "818CF8")
-                )
-                checkDivider
-                profileCheckRow(
-                    label: "Experience level",
-                    earned: experiencePoints,
-                    max: 6,
-                    done: appState.userProfile.experienceLevel != nil,
-                    icon: "star.fill",
-                    color: Color(hex: "FBBF24")
-                )
-                checkDivider
-                profileCheckRow(
-                    label: "Selling comfort",
-                    earned: sellingPoints,
-                    max: 4,
-                    done: appState.userProfile.sellingComfort != nil,
-                    icon: "tag.fill",
-                    color: .orange
-                )
-                checkDivider
-                profileCheckRow(
-                    label: "Has car/transport",
-                    earned: appState.userProfile.hasCar == true ? 2 : 0,
-                    max: 2,
-                    done: appState.userProfile.hasCar != nil,
-                    icon: "car.fill",
-                    color: Theme.accentBlue
-                )
-                checkDivider
-                profileCheckRow(
                     label: "Interest categories",
-                    earned: appState.userProfile.selectedCategories.isEmpty ? 0 : 3,
-                    max: 3,
+                    earned: appState.userProfile.selectedCategories.isEmpty ? 0 : 12,
+                    max: 12,
                     done: !appState.userProfile.selectedCategories.isEmpty,
                     icon: "square.grid.2x2.fill",
-                    color: Color(hex: "818CF8")
-                )
-                checkDivider
-                profileCheckRow(
-                    label: "Work conditions",
-                    earned: appState.userProfile.workConditions.isEmpty ? 0 : 2,
-                    max: 2,
-                    done: !appState.userProfile.workConditions.isEmpty,
-                    icon: "wrench.and.screwdriver.fill",
-                    color: .orange
-                )
-                checkDivider
-                profileCheckRow(
-                    label: "Work preference",
-                    earned: appState.userProfile.workPreference != nil ? 1 : 0,
-                    max: 1,
-                    done: appState.userProfile.workPreference != nil,
-                    icon: "briefcase.fill",
                     color: Theme.accent
-                )
-                checkDivider
-                profileCheckRow(
-                    label: "Work style",
-                    earned: appState.userProfile.workStyle != nil ? 1 : 0,
-                    max: 1,
-                    done: appState.userProfile.workStyle != nil,
-                    icon: "person.2.fill",
-                    color: Theme.accentBlue
                 )
                 checkDivider
                 profileCheckRow(
                     label: "Work environment",
-                    earned: appState.userProfile.workEnvironments.isEmpty ? 0 : 2,
-                    max: 2,
+                    earned: appState.userProfile.workEnvironments.isEmpty ? 0 : 12,
+                    max: 12,
                     done: !appState.userProfile.workEnvironments.isEmpty,
                     icon: "building.2.fill",
+                    color: Theme.accentBlue
+                )
+                checkDivider
+                profileCheckRow(
+                    label: "Work conditions",
+                    earned: appState.userProfile.workConditions.isEmpty ? 0 : 12,
+                    max: 12,
+                    done: !appState.userProfile.workConditions.isEmpty,
+                    icon: "wrench.and.screwdriver.fill",
                     color: Color(hex: "818CF8")
                 )
                 checkDivider
                 profileCheckRow(
-                    label: "Income timeline",
-                    earned: appState.userProfile.incomeTimeline != nil ? 1 : 0,
-                    max: 1,
-                    done: appState.userProfile.incomeTimeline != nil,
-                    icon: "clock.arrow.circlepath",
+                    label: "Situation tags",
+                    earned: appState.userProfile.situationTags.isEmpty ? 0 : 14,
+                    max: 14,
+                    done: !appState.userProfile.situationTags.isEmpty,
+                    icon: "tag.fill",
                     color: .orange
-                )
-                checkDivider
-                profileCheckRow(
-                    label: "Education willingness",
-                    earned: !appState.userProfile.educationWillingnesses.isEmpty ? 1 : 0,
-                    max: 1,
-                    done: !appState.userProfile.educationWillingnesses.isEmpty,
-                    icon: "graduationcap.fill",
-                    color: Theme.accent
                 )
             }
             .background(Theme.cardBackgroundLight)
@@ -449,55 +368,6 @@ struct ReadinessDetailView: View {
 
     private var hasEditedPlan: Bool {
         appState.builds.contains { !$0.businessName.isEmpty || !$0.pricingNotes.isEmpty || !$0.strategyNotes.isEmpty || !$0.serviceNotes.isEmpty }
-    }
-
-    private var budgetPoints: Int {
-        guard let budget = appState.userProfile.budget else { return 0 }
-        switch budget {
-        case .zero: return 2
-        case .under100: return 4
-        case .under500: return 6
-        case .under1000: return 8
-        case .over1000: return 10
-        }
-    }
-
-    private var hoursPoints: Int {
-        guard let hours = appState.userProfile.hoursPerDay else { return 0 }
-        switch hours {
-        case .lessThan1: return 2
-        case .oneToTwo: return 5
-        case .threeToFour: return 8
-        case .fivePlus: return 10
-        }
-    }
-
-    private var techPoints: Int {
-        guard let tech = appState.userProfile.techComfort else { return 0 }
-        switch tech {
-        case .notComfortable: return 2
-        case .basic: return 4
-        case .moderate: return 6
-        case .verySavvy: return 8
-        }
-    }
-
-    private var experiencePoints: Int {
-        guard let exp = appState.userProfile.experienceLevel else { return 0 }
-        switch exp {
-        case .beginner: return 2
-        case .some: return 4
-        case .skilled: return 6
-        }
-    }
-
-    private var sellingPoints: Int {
-        guard let selling = appState.userProfile.sellingComfort else { return 0 }
-        switch selling {
-        case .notComfortable: return 1
-        case .somewhat: return 3
-        case .veryComfortable: return 4
-        }
     }
 
     private var levelColor: Color {

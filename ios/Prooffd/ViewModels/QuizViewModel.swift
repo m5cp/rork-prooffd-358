@@ -9,7 +9,7 @@ class QuizViewModel {
     var hasShownCheckpoint: Bool = false
     var checkpointMatches: [MatchResult] = []
 
-    let totalSteps: Int = 8
+    let totalSteps: Int = 4
 
     var progress: Double {
         if currentStep == 0 { return 0.05 }
@@ -22,8 +22,7 @@ class QuizViewModel {
 
     var motivationMessage: String? {
         switch currentStep {
-        case 3: return "Great start — keep going!"
-        case 6: return "Almost done — just a couple more"
+        case 2: return "Almost done — just 2 more!"
         default: return nil
         }
     }
@@ -32,36 +31,28 @@ class QuizViewModel {
         switch currentStep {
         case 0: return !profile.selectedCategories.isEmpty
         case 1: return !profile.workEnvironments.isEmpty
-        case 2: return profile.budget != nil
-        case 3: return profile.hoursPerDay != nil
-        case 4: return profile.workPreference != nil
-        case 5: return profile.workStyle != nil
-        case 6: return profile.techComfort != nil
-        case 7: return profile.incomeTimeline != nil
+        case 2: return !profile.workConditions.isEmpty
+        case 3: return !profile.situationTags.isEmpty
         default: return false
         }
     }
 
     var canShowEarlyResults: Bool {
-        currentStep >= 4 && !profile.selectedCategories.isEmpty && profile.budget != nil
+        currentStep >= 2 && !profile.selectedCategories.isEmpty && !profile.workEnvironments.isEmpty
     }
 
     var pointsEarned: Int {
         var pts = 0
-        if !profile.selectedCategories.isEmpty { pts += 10 }
-        if !profile.workEnvironments.isEmpty { pts += 10 }
-        if profile.budget != nil { pts += 10 }
-        if profile.hoursPerDay != nil { pts += 10 }
-        if profile.workPreference != nil { pts += 10 }
-        if profile.workStyle != nil { pts += 10 }
-        if profile.techComfort != nil { pts += 10 }
-        if profile.incomeTimeline != nil { pts += 10 }
+        if !profile.selectedCategories.isEmpty { pts += 20 }
+        if !profile.workEnvironments.isEmpty { pts += 20 }
+        if !profile.workConditions.isEmpty { pts += 20 }
+        if !profile.situationTags.isEmpty { pts += 20 }
         return pts
     }
 
     func next() {
         guard canAdvance, currentStep < totalSteps - 1 else { return }
-        if currentStep == 3 && !hasShownCheckpoint {
+        if currentStep == 1 && !hasShownCheckpoint {
             hasShownCheckpoint = true
             generateCheckpointMatches()
             showCheckpoint = true
@@ -113,11 +104,62 @@ class QuizViewModel {
         }
     }
 
+    func toggleSituationTag(_ tag: SituationTag) {
+        if profile.situationTags.contains(tag) {
+            profile.situationTags.removeAll { $0 == tag }
+        } else {
+            profile.situationTags.append(tag)
+        }
+    }
+
     func toggleEducation(_ edu: EducationWillingness) {
         if profile.educationWillingnesses.contains(edu) {
             profile.educationWillingnesses.removeAll { $0 == edu }
         } else {
             profile.educationWillingnesses.append(edu)
+        }
+    }
+
+    func applyDerivedFields() {
+        let tags = profile.situationTags
+        if tags.contains(.lowBudget) {
+            profile.budget = .zero
+        } else if tags.contains(.canInvest) {
+            profile.budget = .under1000
+        }
+        if tags.contains(.needMoneyNow) {
+            profile.incomeTimeline = .asap
+        } else if tags.contains(.flexibleTimeline) {
+            profile.incomeTimeline = .noRush
+        }
+        if tags.contains(.fewHours) {
+            profile.hoursPerDay = .oneToTwo
+        } else if tags.contains(.fullTime) {
+            profile.hoursPerDay = .fivePlus
+        }
+        if tags.contains(.prefersPhysical) && !tags.contains(.prefersDigital) {
+            profile.workPreference = .physical
+        } else if tags.contains(.prefersDigital) && !tags.contains(.prefersPhysical) {
+            profile.workPreference = .digital
+        } else if tags.contains(.prefersPhysical) && tags.contains(.prefersDigital) {
+            profile.workPreference = .either
+        }
+        if tags.contains(.workAlone) && !tags.contains(.workWithPeople) {
+            profile.workStyle = .solo
+        } else if tags.contains(.workWithPeople) && !tags.contains(.workAlone) {
+            profile.workStyle = .withPeople
+        } else if tags.contains(.workAlone) && tags.contains(.workWithPeople) {
+            profile.workStyle = .either
+        }
+        if tags.contains(.techSavvy) {
+            profile.techComfort = .verySavvy
+        } else if tags.contains(.lowTech) {
+            profile.techComfort = .basic
+        }
+        if tags.contains(.comfortableSelling) {
+            profile.sellingComfort = .veryComfortable
+        } else if tags.contains(.noSelling) {
+            profile.sellingComfort = .notComfortable
         }
     }
 

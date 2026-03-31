@@ -53,36 +53,16 @@ struct SettingsView: View {
                         profileRow(icon: "square.grid.2x2.fill", label: "Interests", value: appState.userProfile.selectedCategories.map(\.rawValue).joined(separator: ", "))
                     }
 
-                    if let budget = appState.userProfile.budget {
-                        profileRow(icon: "dollarsign.circle.fill", label: "Budget", value: budget.rawValue)
-                    }
-
-                    if let hours = appState.userProfile.hoursPerDay {
-                        profileRow(icon: "clock.fill", label: "Hours/Day", value: "\(hours.rawValue) hrs")
-                    }
-
-                    if let pref = appState.userProfile.workPreference {
-                        profileRow(icon: "briefcase.fill", label: "Work Type", value: pref.rawValue)
-                    }
-
-                    if let style = appState.userProfile.workStyle {
-                        profileRow(icon: "person.2.fill", label: "Work Style", value: style.rawValue)
+                    if !appState.userProfile.workEnvironments.isEmpty {
+                        profileRow(icon: "building.2.fill", label: "Work Environment", value: appState.userProfile.workEnvironments.map(\.rawValue).joined(separator: ", "))
                     }
 
                     if !appState.userProfile.workConditions.isEmpty {
                         profileRow(icon: "exclamationmark.triangle.fill", label: "Conditions OK", value: appState.userProfile.workConditions.map(\.rawValue).joined(separator: ", "))
                     }
 
-                    if let tech = appState.userProfile.techComfort {
-                        profileRow(icon: "desktopcomputer", label: "Tech Comfort", value: tech.rawValue)
-                    }
-
-                    if let exp = appState.userProfile.experienceLevel {
-                        profileRow(icon: "star.fill", label: "Experience", value: exp.rawValue)
-                    }
-
-                    if let interaction = appState.userProfile.customerInteraction {
-                        profileRow(icon: "bubble.left.and.bubble.right.fill", label: "Customer Interaction", value: interaction.rawValue)
+                    if !appState.userProfile.situationTags.isEmpty {
+                        profileRow(icon: "tag.fill", label: "Situation", value: appState.userProfile.situationTags.map(\.rawValue).joined(separator: ", "))
                     }
 
                     if let hasCar = appState.userProfile.hasCar {
