@@ -228,15 +228,14 @@ struct QuizView: View {
                 }
 
                 switch step {
-                case 0: nameStep
-                case 1: categoryStep
-                case 2: workEnvironmentStep
-                case 3: budgetStep
-                case 4: hoursStep
-                case 5: workPreferenceStep
-                case 6: workStyleStep
-                case 7: techComfortStep
-                case 8: incomeTimelineStep
+                case 0: categoryStep
+                case 1: workEnvironmentStep
+                case 2: budgetStep
+                case 3: hoursStep
+                case 4: workPreferenceStep
+                case 5: workStyleStep
+                case 6: techComfortStep
+                case 7: incomeTimelineStep
                 default: EmptyView()
                 }
             }
@@ -245,20 +244,6 @@ struct QuizView: View {
             .padding(.bottom, 80)
         }
         .scrollIndicators(.hidden)
-    }
-
-    private var nameStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "What's your first name?", subtitle: "We'll use this to personalize your experience.")
-            TextField("", text: $viewModel.profile.firstName, prompt: Text("Your name").foregroundStyle(Theme.textTertiary))
-                .font(.title2)
-                .foregroundStyle(Theme.textPrimary)
-                .padding()
-                .background(Theme.cardBackground)
-                .clipShape(.rect(cornerRadius: 12))
-                .autocorrectionDisabled()
-                .onSubmit { viewModel.next() }
-        }
     }
 
     private var categoryStep: some View {
