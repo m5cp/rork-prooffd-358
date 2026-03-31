@@ -9,7 +9,7 @@ class QuizViewModel {
     var hasShownCheckpoint: Bool = false
     var checkpointMatches: [MatchResult] = []
 
-    let totalSteps: Int = 4
+    let totalSteps: Int = 8
 
     var progress: Double {
         if currentStep == 0 { return 0.05 }
@@ -22,7 +22,8 @@ class QuizViewModel {
 
     var motivationMessage: String? {
         switch currentStep {
-        case 2: return "Almost done — just 2 more!"
+        case 4: return "Halfway there — keep going!"
+        case 6: return "Almost done — just 2 more!"
         default: return nil
         }
     }
@@ -32,27 +33,35 @@ class QuizViewModel {
         case 0: return !profile.selectedCategories.isEmpty
         case 1: return !profile.workEnvironments.isEmpty
         case 2: return !profile.workConditions.isEmpty
-        case 3: return !profile.situationTags.isEmpty
+        case 3: return profile.budget != nil
+        case 4: return profile.hoursPerDay != nil
+        case 5: return profile.experienceLevel != nil
+        case 6: return !profile.educationWillingnesses.isEmpty
+        case 7: return !profile.situationTags.isEmpty
         default: return false
         }
     }
 
     var canShowEarlyResults: Bool {
-        currentStep >= 2 && !profile.selectedCategories.isEmpty && !profile.workEnvironments.isEmpty
+        currentStep >= 4 && !profile.selectedCategories.isEmpty && !profile.workEnvironments.isEmpty
     }
 
     var pointsEarned: Int {
         var pts = 0
-        if !profile.selectedCategories.isEmpty { pts += 20 }
-        if !profile.workEnvironments.isEmpty { pts += 20 }
-        if !profile.workConditions.isEmpty { pts += 20 }
-        if !profile.situationTags.isEmpty { pts += 20 }
+        if !profile.selectedCategories.isEmpty { pts += 10 }
+        if !profile.workEnvironments.isEmpty { pts += 10 }
+        if !profile.workConditions.isEmpty { pts += 10 }
+        if profile.budget != nil { pts += 10 }
+        if profile.hoursPerDay != nil { pts += 10 }
+        if profile.experienceLevel != nil { pts += 10 }
+        if !profile.educationWillingnesses.isEmpty { pts += 10 }
+        if !profile.situationTags.isEmpty { pts += 10 }
         return pts
     }
 
     func next() {
         guard canAdvance, currentStep < totalSteps - 1 else { return }
-        if currentStep == 1 && !hasShownCheckpoint {
+        if currentStep == 3 && !hasShownCheckpoint {
             hasShownCheckpoint = true
             generateCheckpointMatches()
             showCheckpoint = true
@@ -78,6 +87,18 @@ class QuizViewModel {
         withAnimation(.spring(duration: 0.4, bounce: 0.1)) {
             currentStep -= 1
         }
+    }
+
+    func selectBudget(_ budget: BudgetRange) {
+        profile.budget = budget
+    }
+
+    func selectHours(_ hours: HoursPerDay) {
+        profile.hoursPerDay = hours
+    }
+
+    func selectExperience(_ exp: ExperienceLevel) {
+        profile.experienceLevel = exp
     }
 
     func toggleCategory(_ category: BusinessCategory) {
@@ -122,20 +143,10 @@ class QuizViewModel {
 
     func applyDerivedFields() {
         let tags = profile.situationTags
-        if tags.contains(.lowBudget) {
-            profile.budget = .zero
-        } else if tags.contains(.canInvest) {
-            profile.budget = .under1000
-        }
         if tags.contains(.needMoneyNow) {
             profile.incomeTimeline = .asap
         } else if tags.contains(.flexibleTimeline) {
             profile.incomeTimeline = .noRush
-        }
-        if tags.contains(.fewHours) {
-            profile.hoursPerDay = .oneToTwo
-        } else if tags.contains(.fullTime) {
-            profile.hoursPerDay = .fivePlus
         }
         if tags.contains(.prefersPhysical) && !tags.contains(.prefersDigital) {
             profile.workPreference = .physical

@@ -11,7 +11,7 @@ struct ResultsRevealView: View {
     @State private var showShareSheet: Bool = false
 
     private var strongMatches: [MatchResult] {
-        appState.matchResults.filter { $0.scorePercentage >= 85 }
+        appState.matchResults.filter { $0.scorePercentage >= 70 }
     }
 
     private var targetCount: Int {
@@ -47,7 +47,7 @@ struct ResultsRevealView: View {
                         .foregroundStyle(Theme.accent)
                         .contentTransition(.numericText(countsDown: false))
 
-                    Text("strong matches (85%+)")
+                    Text("strong matches (70%+)")
                         .font(.subheadline)
                         .foregroundStyle(Theme.textSecondary)
                 }
@@ -169,7 +169,7 @@ struct ResultsRevealView: View {
             return
         }
 
-        let steps = min(targetCount, 30)
+        let steps = min(max(targetCount, 1), 30)
         let duration = 1.5
         let stepDelay = duration / Double(steps)
 

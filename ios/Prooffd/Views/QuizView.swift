@@ -234,7 +234,11 @@ struct QuizView: View {
                 case 0: categoryStep
                 case 1: workEnvironmentStep
                 case 2: workConditionsStep
-                case 3: situationStep
+                case 3: budgetStep
+                case 4: hoursStep
+                case 5: experienceStep
+                case 6: educationStep
+                case 7: situationStep
                 default: EmptyView()
                 }
             }
@@ -369,6 +373,206 @@ struct QuizView: View {
 
             if !viewModel.profile.workConditions.isEmpty {
                 Text("\(viewModel.profile.workConditions.count) selected")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Theme.accent)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+        }
+    }
+
+    private var budgetStep: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            quizHeader(title: "How much can you invest to start?", subtitle: "Pick the option closest to your situation.")
+            VStack(spacing: 12) {
+                ForEach(BudgetRange.allCases) { budget in
+                    let isSelected = viewModel.profile.budget == budget
+                    Button {
+                        withAnimation(.spring(duration: 0.25)) {
+                            viewModel.selectBudget(budget)
+                        }
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: budgetIcon(budget))
+                                .font(.body)
+                                .foregroundStyle(isSelected ? .white : Theme.accent)
+                            Text(budget.rawValue)
+                                .font(.subheadline.weight(.medium))
+                            Spacer()
+                            if isSelected {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.body)
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                        .foregroundStyle(isSelected ? .white : Theme.textSecondary)
+                        .padding(.vertical, 14)
+                        .padding(.horizontal, 14)
+                        .background(isSelected ? Theme.accentBlue : Theme.cardBackground)
+                        .clipShape(.rect(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(isSelected ? Theme.accentBlue : Theme.cardBackground, lineWidth: 1.5)
+                        )
+                    }
+                    .sensoryFeedback(.selection, trigger: isSelected)
+                }
+            }
+        }
+    }
+
+    private func budgetIcon(_ budget: BudgetRange) -> String {
+        switch budget {
+        case .zero: return "dollarsign.circle"
+        case .under100: return "banknote"
+        case .under500: return "banknote.fill"
+        case .under1000: return "creditcard.fill"
+        case .over1000: return "building.columns.fill"
+        }
+    }
+
+    private var hoursStep: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            quizHeader(title: "How many hours per day can you dedicate?", subtitle: "Be realistic — you can always adjust later.")
+            VStack(spacing: 12) {
+                ForEach(HoursPerDay.allCases) { hours in
+                    let isSelected = viewModel.profile.hoursPerDay == hours
+                    Button {
+                        withAnimation(.spring(duration: 0.25)) {
+                            viewModel.selectHours(hours)
+                        }
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: hoursIcon(hours))
+                                .font(.body)
+                                .foregroundStyle(isSelected ? .white : Theme.accent)
+                            Text(hours.rawValue + " hours")
+                                .font(.subheadline.weight(.medium))
+                            Spacer()
+                            if isSelected {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.body)
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                        .foregroundStyle(isSelected ? .white : Theme.textSecondary)
+                        .padding(.vertical, 14)
+                        .padding(.horizontal, 14)
+                        .background(isSelected ? Theme.accentBlue : Theme.cardBackground)
+                        .clipShape(.rect(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(isSelected ? Theme.accentBlue : Theme.cardBackground, lineWidth: 1.5)
+                        )
+                    }
+                    .sensoryFeedback(.selection, trigger: isSelected)
+                }
+            }
+        }
+    }
+
+    private func hoursIcon(_ hours: HoursPerDay) -> String {
+        switch hours {
+        case .lessThan1: return "clock"
+        case .oneToTwo: return "clock.badge"
+        case .threeToFour: return "clock.fill"
+        case .fivePlus: return "deskclock.fill"
+        }
+    }
+
+    private var experienceStep: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            quizHeader(title: "What's your experience level?", subtitle: "No wrong answer — this helps find the right fit.")
+            VStack(spacing: 12) {
+                ForEach(ExperienceLevel.allCases) { exp in
+                    let isSelected = viewModel.profile.experienceLevel == exp
+                    Button {
+                        withAnimation(.spring(duration: 0.25)) {
+                            viewModel.selectExperience(exp)
+                        }
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: experienceIcon(exp))
+                                .font(.body)
+                                .foregroundStyle(isSelected ? .white : Theme.accent)
+                            Text(exp.rawValue)
+                                .font(.subheadline.weight(.medium))
+                            Spacer()
+                            if isSelected {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.body)
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                        .foregroundStyle(isSelected ? .white : Theme.textSecondary)
+                        .padding(.vertical, 14)
+                        .padding(.horizontal, 14)
+                        .background(isSelected ? Theme.accentBlue : Theme.cardBackground)
+                        .clipShape(.rect(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(isSelected ? Theme.accentBlue : Theme.cardBackground, lineWidth: 1.5)
+                        )
+                    }
+                    .sensoryFeedback(.selection, trigger: isSelected)
+                }
+            }
+        }
+    }
+
+    private func experienceIcon(_ exp: ExperienceLevel) -> String {
+        switch exp {
+        case .beginner: return "sparkle"
+        case .some: return "star.leadinghalf.filled"
+        case .skilled: return "star.fill"
+        }
+    }
+
+    private var educationStep: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            quizHeader(title: "What education are you open to?", subtitle: "Select all that apply.")
+            VStack(spacing: 12) {
+                ForEach(EducationWillingness.allCases) { edu in
+                    let isSelected = viewModel.profile.educationWillingnesses.contains(edu)
+                    Button {
+                        withAnimation(.spring(duration: 0.25)) {
+                            viewModel.toggleEducation(edu)
+                        }
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: edu.icon)
+                                .font(.body)
+                                .foregroundStyle(isSelected ? .white : Theme.accent)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(edu.rawValue)
+                                    .font(.subheadline.weight(.medium))
+                                Text(edu.subtitle)
+                                    .font(.caption2)
+                                    .lineLimit(2)
+                                    .opacity(0.7)
+                            }
+                            Spacer()
+                            if isSelected {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.body)
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                        .foregroundStyle(isSelected ? .white : Theme.textSecondary)
+                        .padding(.vertical, 14)
+                        .padding(.horizontal, 14)
+                        .background(isSelected ? Theme.accentBlue : Theme.cardBackground)
+                        .clipShape(.rect(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(isSelected ? Theme.accentBlue : Theme.cardBackground, lineWidth: 1.5)
+                        )
+                    }
+                    .sensoryFeedback(.selection, trigger: isSelected)
+                }
+            }
+
+            if !viewModel.profile.educationWillingnesses.isEmpty {
+                Text("\(viewModel.profile.educationWillingnesses.count) selected")
                     .font(.caption.weight(.medium))
                     .foregroundStyle(Theme.accent)
                     .frame(maxWidth: .infinity, alignment: .center)
