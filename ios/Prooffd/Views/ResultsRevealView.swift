@@ -10,12 +10,16 @@ struct ResultsRevealView: View {
     @State private var confettiTrigger: Int = 0
     @State private var showShareSheet: Bool = false
 
+    private var strongMatches: [MatchResult] {
+        appState.matchResults.filter { $0.scorePercentage >= 85 }
+    }
+
     private var targetCount: Int {
-        appState.matchResults.count
+        strongMatches.count
     }
 
     private var topMatch: MatchResult? {
-        appState.matchResults.first
+        strongMatches.first
     }
 
     var body: some View {
@@ -43,7 +47,7 @@ struct ResultsRevealView: View {
                         .foregroundStyle(Theme.accent)
                         .contentTransition(.numericText(countsDown: false))
 
-                    Text("business matches found")
+                    Text("strong matches (85%+)")
                         .font(.subheadline)
                         .foregroundStyle(Theme.textSecondary)
                 }
