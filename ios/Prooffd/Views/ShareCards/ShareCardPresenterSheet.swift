@@ -15,11 +15,9 @@ struct ShareCardPresenterSheet: View {
             VStack(spacing: 0) {
                 ScrollView {
                     VStack(spacing: 20) {
-                        formatPicker
-                            .padding(.top, 8)
-
                         cardPreview
                             .padding(.horizontal, 20)
+                            .padding(.top, 8)
 
                         stylePicker
                             .padding(.horizontal, 20)
