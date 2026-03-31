@@ -446,7 +446,8 @@ class AppState {
         if !userProfile.selectedCategories.isEmpty { score += 12 }
         if !userProfile.workEnvironments.isEmpty { score += 12 }
         if !userProfile.workConditions.isEmpty { score += 12 }
-        if !userProfile.situationTags.isEmpty { score += 14 }
+        if userProfile.budget != nil { score += 7 }
+        if userProfile.hoursPerDay != nil { score += 7 }
         return min(score, 50)
     }
 
@@ -494,9 +495,7 @@ class AppState {
         if builds.isEmpty {
             tips.append("Start a build to add to your readiness score")
         }
-        if userProfile.situationTags.isEmpty {
-            tips.append("Add situation details to improve match accuracy")
-        }
+
         if streakTracker.currentStreak < 3 {
             tips.append("Build a 3-day streak for +3 readiness points")
         }

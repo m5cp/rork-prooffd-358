@@ -9,7 +9,7 @@ class QuizViewModel {
     var hasShownCheckpoint: Bool = false
     var checkpointMatches: [MatchResult] = []
 
-    let totalSteps: Int = 8
+    let totalSteps: Int = 7
 
     var progress: Double {
         if currentStep == 0 { return 0.05 }
@@ -22,8 +22,8 @@ class QuizViewModel {
 
     var motivationMessage: String? {
         switch currentStep {
-        case 4: return "Halfway there — keep going!"
-        case 6: return "Almost done — just 2 more!"
+        case 3: return "Halfway there — keep going!"
+        case 5: return "Almost done — just 2 more!"
         default: return nil
         }
     }
@@ -37,7 +37,6 @@ class QuizViewModel {
         case 4: return profile.hoursPerDay != nil
         case 5: return profile.experienceLevel != nil
         case 6: return !profile.educationWillingnesses.isEmpty
-        case 7: return !profile.situationTags.isEmpty
         default: return false
         }
     }
@@ -55,7 +54,7 @@ class QuizViewModel {
         if profile.hoursPerDay != nil { pts += 10 }
         if profile.experienceLevel != nil { pts += 10 }
         if !profile.educationWillingnesses.isEmpty { pts += 10 }
-        if !profile.situationTags.isEmpty { pts += 10 }
+
         return pts
     }
 
@@ -125,14 +124,6 @@ class QuizViewModel {
         }
     }
 
-    func toggleSituationTag(_ tag: SituationTag) {
-        if profile.situationTags.contains(tag) {
-            profile.situationTags.removeAll { $0 == tag }
-        } else {
-            profile.situationTags.append(tag)
-        }
-    }
-
     func toggleEducation(_ edu: EducationWillingness) {
         if profile.educationWillingnesses.contains(edu) {
             profile.educationWillingnesses.removeAll { $0 == edu }
@@ -142,35 +133,25 @@ class QuizViewModel {
     }
 
     func applyDerivedFields() {
-        let tags = profile.situationTags
-        if tags.contains(.needMoneyNow) {
-            profile.incomeTimeline = .asap
-        } else if tags.contains(.flexibleTimeline) {
-            profile.incomeTimeline = .noRush
-        }
-        if tags.contains(.prefersPhysical) && !tags.contains(.prefersDigital) {
+        let envs = profile.workEnvironments
+        let conditions = profile.workConditions
+        let physicalEnvs: [WorkEnvironment] = [.outdoors, .warehouse, .constructionSite]
+        let digitalEnvs: [WorkEnvironment] = [.officeDesk, .homeBased]
+        let hasPhysical = envs.contains(where: { physicalEnvs.contains($0) })
+        let hasDigital = envs.contains(where: { digitalEnvs.contains($0) })
+        if hasPhysical && !hasDigital {
             profile.workPreference = .physical
-        } else if tags.contains(.prefersDigital) && !tags.contains(.prefersPhysical) {
+        } else if hasDigital && !hasPhysical {
             profile.workPreference = .digital
-        } else if tags.contains(.prefersPhysical) && tags.contains(.prefersDigital) {
+        } else if hasPhysical && hasDigital {
             profile.workPreference = .either
         }
-        if tags.contains(.workAlone) && !tags.contains(.workWithPeople) {
-            profile.workStyle = .solo
-        } else if tags.contains(.workWithPeople) && !tags.contains(.workAlone) {
-            profile.workStyle = .withPeople
-        } else if tags.contains(.workAlone) && tags.contains(.workWithPeople) {
-            profile.workStyle = .either
-        }
-        if tags.contains(.techSavvy) {
+        if conditions.contains(.officeDesk) && !conditions.contains(where: { [.gettingDirty, .heavyLifting, .sweaty, .heights].contains($0) }) {
             profile.techComfort = .verySavvy
-        } else if tags.contains(.lowTech) {
+        } else if !conditions.contains(.officeDesk) && conditions.contains(where: { [.gettingDirty, .heavyLifting, .sweaty].contains($0) }) {
             profile.techComfort = .basic
-        }
-        if tags.contains(.comfortableSelling) {
-            profile.sellingComfort = .veryComfortable
-        } else if tags.contains(.noSelling) {
-            profile.sellingComfort = .notComfortable
+        } else {
+            profile.techComfort = .moderate
         }
     }
 

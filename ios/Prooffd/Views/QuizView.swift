@@ -238,7 +238,6 @@ struct QuizView: View {
                 case 4: hoursStep
                 case 5: experienceStep
                 case 6: educationStep
-                case 7: situationStep
                 default: EmptyView()
                 }
             }
@@ -573,50 +572,6 @@ struct QuizView: View {
 
             if !viewModel.profile.educationWillingnesses.isEmpty {
                 Text("\(viewModel.profile.educationWillingnesses.count) selected")
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(Theme.accent)
-                    .frame(maxWidth: .infinity, alignment: .center)
-            }
-        }
-    }
-
-    private var situationStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            quizHeader(title: "What describes your situation?", subtitle: "Select all that apply.")
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
-                ForEach(SituationTag.allCases) { tag in
-                    let isSelected = viewModel.profile.situationTags.contains(tag)
-                    Button {
-                        withAnimation(.spring(duration: 0.25)) {
-                            viewModel.toggleSituationTag(tag)
-                        }
-                    } label: {
-                        HStack(spacing: 10) {
-                            Image(systemName: tag.icon)
-                                .font(.body)
-                                .foregroundStyle(isSelected ? .white : Theme.accent)
-                            Text(tag.rawValue)
-                                .font(.subheadline.weight(.medium))
-                                .lineLimit(2)
-                                .minimumScaleFactor(0.75)
-                        }
-                        .foregroundStyle(isSelected ? .white : Theme.textSecondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.vertical, 14)
-                        .padding(.horizontal, 14)
-                        .background(isSelected ? Theme.accentBlue : Theme.cardBackground)
-                        .clipShape(.rect(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(isSelected ? Theme.accentBlue : Theme.cardBackground, lineWidth: 1.5)
-                        )
-                    }
-                    .sensoryFeedback(.selection, trigger: isSelected)
-                }
-            }
-
-            if !viewModel.profile.situationTags.isEmpty {
-                Text("\(viewModel.profile.situationTags.count) selected")
                     .font(.caption.weight(.medium))
                     .foregroundStyle(Theme.accent)
                     .frame(maxWidth: .infinity, alignment: .center)

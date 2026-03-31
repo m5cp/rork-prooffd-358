@@ -175,11 +175,20 @@ struct ReadinessDetailView: View {
                 )
                 checkDivider
                 profileCheckRow(
-                    label: "Situation tags",
-                    earned: appState.userProfile.situationTags.isEmpty ? 0 : 14,
-                    max: 14,
-                    done: !appState.userProfile.situationTags.isEmpty,
-                    icon: "tag.fill",
+                    label: "Budget set",
+                    earned: appState.userProfile.budget != nil ? 7 : 0,
+                    max: 7,
+                    done: appState.userProfile.budget != nil,
+                    icon: "dollarsign.circle.fill",
+                    color: .orange
+                )
+                checkDivider
+                profileCheckRow(
+                    label: "Hours set",
+                    earned: appState.userProfile.hoursPerDay != nil ? 7 : 0,
+                    max: 7,
+                    done: appState.userProfile.hoursPerDay != nil,
+                    icon: "clock.fill",
                     color: .orange
                 )
             }

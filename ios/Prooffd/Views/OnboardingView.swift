@@ -10,7 +10,7 @@ struct OnboardingView: View {
     private let pages: [OnboardingPage] = [
         OnboardingPage(
             headline: "Find the right path\nfor you",
-            subtitle: "Take a one-time 8-question profile assessment and get matched to jobs you can start — tailored to your skills, budget, and goals.",
+            subtitle: "Take a one-time 7-question profile assessment and get matched to jobs you can start — tailored to your skills, budget, and goals.",
             icon: "sparkles"
         ),
         OnboardingPage(
