@@ -34,7 +34,14 @@ enum EducationPathDatabase {
                 "Obtain your state license",
                 "Build clientele or join a firm"
             ],
-            linkedJobIds: ["handyman", "appliance-repair"]
+            linkedJobIds: ["handyman", "appliance-repair"],
+            requiresLicense: true,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["high_income", "hands_on", "entrepreneurial"]
         ),
         EducationPath(
             id: "plumber", title: "Licensed Plumber", icon: "wrench.and.screwdriver.fill",
@@ -55,7 +62,14 @@ enum EducationPathDatabase {
                 "Get licensed in your state",
                 "Start taking independent jobs or open a business"
             ],
-            linkedJobIds: ["handyman", "sprinkler-irrigation"]
+            linkedJobIds: ["handyman", "sprinkler-irrigation"],
+            requiresLicense: true,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["high_income", "hands_on", "entrepreneurial"]
         ),
         EducationPath(
             id: "hvac", title: "HVAC Technician", icon: "thermometer.snowflake",
@@ -75,7 +89,14 @@ enum EducationPathDatabase {
                 "Pursue additional certifications (NATE)",
                 "Consider starting your own HVAC business"
             ],
-            linkedJobIds: ["appliance-repair"]
+            linkedJobIds: ["appliance-repair"],
+            requiresLicense: true,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["high_income", "hands_on", "entrepreneurial"]
         ),
         EducationPath(
             id: "welder", title: "Certified Welder", icon: "flame.fill",
@@ -94,7 +115,14 @@ enum EducationPathDatabase {
                 "Apply for welding positions or contract work",
                 "Specialize in high-paying niches (pipeline, underwater)"
             ],
-            linkedJobIds: ["welding"]
+            linkedJobIds: ["welding"],
+            requiresLicense: true,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["high_income", "hands_on"]
         ),
         EducationPath(
             id: "solar_installer", title: "Solar Panel Installer", icon: "sun.max.fill",
@@ -113,7 +141,14 @@ enum EducationPathDatabase {
                 "Pursue NABCEP certification for advancement",
                 "Consider starting a solar installation company"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["hands_on", "high_income", "entrepreneurial"]
         ),
         EducationPath(
             id: "carpenter", title: "Carpenter", icon: "hammer.fill",
@@ -133,7 +168,14 @@ enum EducationPathDatabase {
                 "Specialize in framing, finish, or cabinet work",
                 "Start taking independent projects or open a shop"
             ],
-            linkedJobIds: ["handyman", "furniture-restoration"]
+            linkedJobIds: ["handyman", "furniture-restoration"],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .skilledTrade,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["hands_on", "entrepreneurial"]
         ),
         EducationPath(
             id: "auto_mechanic", title: "Auto Mechanic / Technician", icon: "car.fill",
@@ -153,7 +195,14 @@ enum EducationPathDatabase {
                 "Build a reputation for quality work",
                 "Consider opening your own repair shop"
             ],
-            linkedJobIds: ["auto-detailing"]
+            linkedJobIds: ["auto-detailing"],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .skilledTrade,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["hands_on", "entrepreneurial"]
         ),
         EducationPath(
             id: "diesel_mechanic", title: "Diesel Mechanic", icon: "engine.combustion.fill",
@@ -173,7 +222,14 @@ enum EducationPathDatabase {
                 "Specialize in heavy equipment or marine diesel",
                 "Consider mobile diesel repair service"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["high_income", "hands_on"]
         ),
         EducationPath(
             id: "cnc_machinist", title: "CNC Machinist", icon: "gearshape.2.fill",
@@ -193,7 +249,14 @@ enum EducationPathDatabase {
                 "Apply to manufacturing or aerospace companies",
                 "Advance to CNC programmer or shop supervisor"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["hands_on", "high_income"]
         ),
         EducationPath(
             id: "heavy_equipment_operator", title: "Heavy Equipment Operator", icon: "arrow.up.and.down.and.arrow.left.and.right",
@@ -213,7 +276,14 @@ enum EducationPathDatabase {
                 "Apply with construction or mining companies",
                 "Specialize in crane operation for higher pay"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .high,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["hands_on", "high_income"]
         ),
         EducationPath(
             id: "elevator_installer", title: "Elevator Installer & Repairer", icon: "arrow.up.arrow.down",
@@ -233,7 +303,14 @@ enum EducationPathDatabase {
                 "Work as a journeyman for an elevator company",
                 "Specialize in modernization or maintenance"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .high,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["high_income", "hands_on"]
         ),
         EducationPath(
             id: "locksmith", title: "Locksmith", icon: "key.fill",
@@ -252,7 +329,14 @@ enum EducationPathDatabase {
                 "Build relationships with property managers and real estate agents",
                 "Offer emergency and after-hours services for premium rates"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .skilledTrade,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["hands_on", "entrepreneurial"]
         ),
         EducationPath(
             id: "ironworker", title: "Ironworker / Structural Welder", icon: "building.2.fill",
@@ -271,7 +355,14 @@ enum EducationPathDatabase {
                 "Pass welding certifications for structural work",
                 "Advance to foreman or start a steel erection company"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .high,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["hands_on", "high_income"]
         ),
         EducationPath(
             id: "mason", title: "Bricklayer / Mason", icon: "square.stack.3d.up.fill",
@@ -290,7 +381,14 @@ enum EducationPathDatabase {
                 "Build a portfolio of completed projects",
                 "Specialize in restoration, stone, or decorative masonry"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .skilledTrade,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["hands_on", "entrepreneurial"]
         ),
         EducationPath(
             id: "aircraft_mechanic", title: "Aircraft Mechanic (A&P)", icon: "airplane",
@@ -311,7 +409,14 @@ enum EducationPathDatabase {
                 "Get hired at an airline, MRO, or charter company",
                 "Specialize in avionics, engines, or composites"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["hands_on", "high_income"]
         ),
     ]
 
@@ -333,7 +438,14 @@ enum EducationPathDatabase {
                 "Complete required supervised driving hours",
                 "Choose your route type: local, regional, or OTR"
             ],
-            linkedJobIds: ["courier-delivery"]
+            linkedJobIds: ["courier-delivery"],
+            requiresLicense: true,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["high_income", "hands_on"]
         ),
         EducationPath(
             id: "personal_trainer", title: "Certified Personal Trainer", icon: "figure.strengthtraining.traditional",
@@ -353,7 +465,14 @@ enum EducationPathDatabase {
                 "Start training clients at a gym or independently",
                 "Build an online presence for client acquisition"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .standard,
+            isFastStart: true,
+            isScalable: true,
+            alignedInterests: ["people_facing", "entrepreneurial", "hands_on"]
         ),
         EducationPath(
             id: "lean_six_sigma", title: "Lean Six Sigma", icon: "chart.line.downtrend.xyaxis",
@@ -374,7 +493,14 @@ enum EducationPathDatabase {
                 "Pursue Black Belt for advanced roles",
                 "Consider consulting or training others"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["high_income"]
         ),
         EducationPath(
             id: "scrum_master", title: "Certified Scrum Master", icon: "arrow.triangle.2.circlepath",
@@ -394,7 +520,14 @@ enum EducationPathDatabase {
                 "Apply for Scrum Master or agile coach roles",
                 "Pursue advanced certifications (SAFe, A-CSM)"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .high,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["remote", "high_income"]
         ),
         EducationPath(
             id: "drone_pilot", title: "Commercial Drone Pilot", icon: "airplane.circle.fill",
@@ -415,7 +548,14 @@ enum EducationPathDatabase {
                 "Build a portfolio of aerial work",
                 "Market to real estate, construction, or agriculture clients"
             ],
-            linkedJobIds: ["drone-photography"]
+            linkedJobIds: ["drone-photography"],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["creative", "entrepreneurial", "high_income"]
         ),
         EducationPath(
             id: "home_inspector", title: "Home Inspector", icon: "house.and.flag.fill",
@@ -435,7 +575,14 @@ enum EducationPathDatabase {
                 "Build relationships with real estate agents",
                 "Invest in inspection tools and report software"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["hands_on", "entrepreneurial"]
         ),
         EducationPath(
             id: "notary_signing_agent", title: "Notary / Loan Signing Agent", icon: "signature",
@@ -455,7 +602,14 @@ enum EducationPathDatabase {
                 "Sign up with signing services and title companies",
                 "Build a reputation for accuracy and professionalism"
             ],
-            linkedJobIds: ["notary"]
+            linkedJobIds: ["notary"],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .standard,
+            isFastStart: true,
+            isScalable: true,
+            alignedInterests: ["fast_start", "low_cost", "entrepreneurial"]
         ),
         EducationPath(
             id: "osha_safety", title: "OSHA Safety Specialist", icon: "exclamationmark.triangle.fill",
@@ -475,7 +629,14 @@ enum EducationPathDatabase {
                 "Apply for safety coordinator or specialist roles",
                 "Advance to CSP for management positions"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["hands_on", "high_income"]
         ),
         EducationPath(
             id: "real_estate_appraiser", title: "Real Estate Appraiser", icon: "building.columns.fill",
@@ -495,7 +656,14 @@ enum EducationPathDatabase {
                 "Build relationships with lenders and attorneys",
                 "Pursue certified residential or general appraiser license"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["entrepreneurial", "high_income"]
         ),
         EducationPath(
             id: "comptia_aplus", title: "CompTIA A+", icon: "desktopcomputer",
@@ -516,7 +684,14 @@ enum EducationPathDatabase {
                 "Apply for help desk or IT support positions",
                 "Pursue Network+ or Security+ for advancement"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["remote", "low_cost"]
         ),
         EducationPath(
             id: "comptia_security_plus", title: "CompTIA Security+", icon: "lock.shield.fill",
@@ -537,7 +712,14 @@ enum EducationPathDatabase {
                 "Apply for SOC analyst or security roles",
                 "Pursue CySA+ or CISSP for advancement"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["remote", "high_income"]
         ),
         EducationPath(
             id: "aws_cloud_practitioner", title: "AWS Certified Cloud Practitioner", icon: "cloud.fill",
@@ -558,7 +740,14 @@ enum EducationPathDatabase {
                 "Pass the CLF-C02 certification exam",
                 "Pursue Solutions Architect Associate for advancement"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["remote", "high_income"]
         ),
         EducationPath(
             id: "google_it_support", title: "Google IT Support Professional Certificate", icon: "laptopcomputer",
@@ -579,7 +768,14 @@ enum EducationPathDatabase {
                 "Earn the certificate and add to your resume",
                 "Apply for IT help desk and support roles"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["remote", "low_cost"]
         ),
         EducationPath(
             id: "ccna", title: "CCNA (Cisco Certified Network Associate)", icon: "network",
@@ -600,7 +796,14 @@ enum EducationPathDatabase {
                 "Apply for network administrator or engineer roles",
                 "Pursue CCNP for senior networking positions"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["remote", "high_income"]
         ),
         EducationPath(
             id: "cissp", title: "CISSP (Certified Information Systems Security Professional)", icon: "shield.checkered",
@@ -621,7 +824,14 @@ enum EducationPathDatabase {
                 "Get endorsed by an existing CISSP holder",
                 "Maintain certification with continuing education"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["remote", "high_income"]
         ),
         EducationPath(
             id: "pmp", title: "PMP (Project Management Professional)", icon: "list.clipboard.fill",
@@ -642,7 +852,14 @@ enum EducationPathDatabase {
                 "Pass the PMP certification exam",
                 "Maintain with 60 PDUs every 3 years"
             ],
-            linkedJobIds: ["event-planning"]
+            linkedJobIds: ["event-planning"],
+            requiresLicense: false,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["remote", "high_income"]
         ),
         EducationPath(
             id: "capm", title: "CAPM (Certified Associate in Project Management)", icon: "list.bullet.clipboard.fill",
@@ -663,7 +880,14 @@ enum EducationPathDatabase {
                 "Apply for project coordinator or junior PM roles",
                 "Gain experience and pursue PMP certification"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["remote", "high_income"]
         ),
         EducationPath(
             id: "shrm_cp", title: "SHRM-CP (Human Resource Management)", icon: "person.3.fill",
@@ -684,7 +908,14 @@ enum EducationPathDatabase {
                 "Pass the SHRM-CP certification exam",
                 "Maintain with 60 PDCs every 3 years"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["people_facing", "high_income"]
         ),
         EducationPath(
             id: "six_sigma", title: "Six Sigma Green/Black Belt", icon: "chart.line.downtrend.xyaxis",
@@ -705,7 +936,14 @@ enum EducationPathDatabase {
                 "Pursue Black Belt for leadership and consulting roles",
                 "Apply to operations, quality, or consulting positions"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["high_income"]
         ),
         EducationPath(
             id: "google_data_analytics", title: "Google Data Analytics Certificate", icon: "chart.bar.fill",
@@ -726,7 +964,14 @@ enum EducationPathDatabase {
                 "Complete a capstone case study project",
                 "Apply for junior data analyst positions"
             ],
-            linkedJobIds: ["bookkeeping"]
+            linkedJobIds: ["bookkeeping"],
+            requiresLicense: false,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["remote", "high_income"]
         ),
         EducationPath(
             id: "microsoft_office_specialist", title: "Microsoft Office Specialist (MOS)", icon: "doc.richtext.fill",
@@ -747,7 +992,14 @@ enum EducationPathDatabase {
                 "Add to resume for administrative or business roles",
                 "Pursue Expert-level MOS for advanced recognition"
             ],
-            linkedJobIds: ["bookkeeping"]
+            linkedJobIds: ["bookkeeping"],
+            requiresLicense: false,
+            incomeLevel: .low,
+            demandLevel: .low,
+            categoryTier: .standard,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["low_cost", "fast_start"]
         ),
     ]
 
@@ -770,7 +1022,14 @@ enum EducationPathDatabase {
                 "Obtain your state license",
                 "Apply to dental practices"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["people_facing", "high_income"]
         ),
         EducationPath(
             id: "massage_therapist", title: "Licensed Massage Therapist", icon: "hand.raised.fill",
@@ -789,7 +1048,14 @@ enum EducationPathDatabase {
                 "Build clientele at a spa, clinic, or independently",
                 "Specialize in sports, medical, or deep tissue massage"
             ],
-            linkedJobIds: ["mobile-massage"]
+            linkedJobIds: ["mobile-massage"],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["people_facing", "entrepreneurial", "hands_on"]
         ),
         EducationPath(
             id: "cna", title: "Certified Nursing Assistant", icon: "heart.fill",
@@ -808,7 +1074,14 @@ enum EducationPathDatabase {
                 "Gain experience and consider LPN or RN advancement",
                 "Explore specializations (ICU, pediatrics, etc.)"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["people_facing", "fast_start"]
         ),
         EducationPath(
             id: "emt", title: "EMT / Paramedic", icon: "cross.case.fill",
@@ -827,7 +1100,14 @@ enum EducationPathDatabase {
                 "Consider paramedic training for advancement",
                 "Explore fire department or flight medic careers"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["people_facing", "hands_on"]
         ),
         EducationPath(
             id: "phlebotomist", title: "Phlebotomy Technician", icon: "drop.fill",
@@ -846,7 +1126,14 @@ enum EducationPathDatabase {
                 "Apply to hospitals, labs, and clinics",
                 "Consider advancing to medical lab technician"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["people_facing", "fast_start"]
         ),
         EducationPath(
             id: "surgical_tech", title: "Surgical Technologist", icon: "staroflife.fill",
@@ -867,7 +1154,14 @@ enum EducationPathDatabase {
                 "Apply to hospitals and surgical centers",
                 "Specialize in cardiac, orthopedic, or neurosurgery"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["people_facing", "high_income"]
         ),
         EducationPath(
             id: "respiratory_therapist", title: "Respiratory Therapist", icon: "lungs.fill",
@@ -887,7 +1181,14 @@ enum EducationPathDatabase {
                 "Obtain your state license",
                 "Specialize in neonatal, critical care, or sleep therapy"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["people_facing", "high_income"]
         ),
         EducationPath(
             id: "medical_assistant", title: "Medical Assistant", icon: "stethoscope",
@@ -906,7 +1207,14 @@ enum EducationPathDatabase {
                 "Apply to physician offices, clinics, or hospitals",
                 "Consider advancing to nursing or health administration"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["people_facing", "fast_start"]
         ),
         EducationPath(
             id: "pharmacy_tech", title: "Pharmacy Technician", icon: "pills.fill",
@@ -925,7 +1233,14 @@ enum EducationPathDatabase {
                 "Get hired at a retail pharmacy or hospital",
                 "Specialize in compounding, IV, or oncology pharmacy"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["people_facing", "fast_start"]
         ),
         EducationPath(
             id: "vet_tech", title: "Veterinary Technician", icon: "pawprint.fill",
@@ -945,7 +1260,14 @@ enum EducationPathDatabase {
                 "Get state credentialed (varies by state)",
                 "Specialize in emergency, dental, or exotic animal care"
             ],
-            linkedJobIds: ["pet-sitting"]
+            linkedJobIds: ["pet-sitting"],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["people_facing"]
         ),
         EducationPath(
             id: "cpc_medical_coder", title: "CPC (Certified Professional Coder)", icon: "doc.text.fill",
@@ -966,7 +1288,14 @@ enum EducationPathDatabase {
                 "Pass the CPC certification exam",
                 "Apply for coding positions at hospitals, clinics, or remotely"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["remote", "people_facing"]
         ),
         EducationPath(
             id: "cma_medical_assistant", title: "CMA (Certified Medical Assistant)", icon: "stethoscope",
@@ -987,7 +1316,14 @@ enum EducationPathDatabase {
                 "Pass the CMA (AAMA) certification exam",
                 "Apply to physician offices, clinics, or urgent care centers"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["people_facing", "fast_start"]
         ),
         EducationPath(
             id: "cpht_pharmacy_tech", title: "CPhT (Certified Pharmacy Technician)", icon: "pills.fill",
@@ -1008,7 +1344,14 @@ enum EducationPathDatabase {
                 "Register with your state board of pharmacy",
                 "Get hired at a retail pharmacy or hospital"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["people_facing", "fast_start"]
         ),
         EducationPath(
             id: "cpt_phlebotomy", title: "Phlebotomy Technician (CPT)", icon: "drop.fill",
@@ -1029,7 +1372,14 @@ enum EducationPathDatabase {
                 "Pass the national certification exam (CPT)",
                 "Apply to hospitals, labs, clinics, and blood banks"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["people_facing", "fast_start"]
         ),
         EducationPath(
             id: "ekg_technician", title: "EKG Technician (CET)", icon: "waveform.path.ecg",
@@ -1050,7 +1400,14 @@ enum EducationPathDatabase {
                 "Pass the CET certification exam",
                 "Apply to hospitals, cardiology offices, and clinics"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["people_facing", "fast_start"]
         ),
     ]
 
@@ -1073,7 +1430,14 @@ enum EducationPathDatabase {
                 "Apply for SOC Analyst or junior security roles",
                 "Pursue advanced certs (CySA+, CISSP) for growth"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["remote", "high_income"]
         ),
         EducationPath(
             id: "web_developer", title: "Web Developer", icon: "globe",
@@ -1092,7 +1456,14 @@ enum EducationPathDatabase {
                 "Apply for junior developer positions",
                 "Continue learning and specializing"
             ],
-            linkedJobIds: ["web-design"]
+            linkedJobIds: ["web-design"],
+            requiresLicense: false,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["remote", "high_income", "creative", "entrepreneurial"]
         ),
         EducationPath(
             id: "it_support", title: "IT Support Specialist", icon: "desktopcomputer",
@@ -1112,7 +1483,14 @@ enum EducationPathDatabase {
                 "Apply for help desk or IT support roles",
                 "Pursue Network+ or Security+ for advancement"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["remote", "fast_start", "low_cost"]
         ),
         EducationPath(
             id: "data_analyst", title: "Data Analyst", icon: "chart.bar.fill",
@@ -1131,7 +1509,14 @@ enum EducationPathDatabase {
                 "Build a portfolio of analysis projects",
                 "Apply for junior analyst positions"
             ],
-            linkedJobIds: ["bookkeeping"]
+            linkedJobIds: ["bookkeeping"],
+            requiresLicense: false,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["remote", "high_income"]
         ),
         EducationPath(
             id: "cloud_computing", title: "Cloud Computing (AWS/Azure)", icon: "cloud.fill",
@@ -1152,7 +1537,14 @@ enum EducationPathDatabase {
                 "Pursue Solutions Architect or DevOps certifications",
                 "Apply for cloud engineer or DevOps roles"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["remote", "high_income"]
         ),
         EducationPath(
             id: "network_admin", title: "Network Administrator", icon: "network",
@@ -1172,7 +1564,14 @@ enum EducationPathDatabase {
                 "Pursue CCNA for advanced networking roles",
                 "Specialize in security, wireless, or data center networking"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .high,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["remote", "high_income"]
         ),
     ]
 
@@ -1195,7 +1594,14 @@ enum EducationPathDatabase {
                 "Close your first transaction",
                 "Develop a referral network for consistent deals"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["people_facing", "entrepreneurial", "high_income"]
         ),
         EducationPath(
             id: "insurance_agent", title: "Insurance Agent", icon: "shield.fill",
@@ -1215,7 +1621,14 @@ enum EducationPathDatabase {
                 "Build a client base through networking",
                 "Focus on renewals for residual income"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .high,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["people_facing", "entrepreneurial", "high_income"]
         ),
         EducationPath(
             id: "project_manager", title: "Project Manager (PMP)", icon: "list.clipboard.fill",
@@ -1235,7 +1648,14 @@ enum EducationPathDatabase {
                 "Build a track record of delivered projects",
                 "Pursue PMP certification for senior roles"
             ],
-            linkedJobIds: ["event-planning"]
+            linkedJobIds: ["event-planning"],
+            requiresLicense: false,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["remote", "high_income"]
         ),
         EducationPath(
             id: "bookkeeper_cert", title: "Bookkeeper / Accounting Cert", icon: "dollarsign.square.fill",
@@ -1255,7 +1675,14 @@ enum EducationPathDatabase {
                 "Find clients through local businesses and online platforms",
                 "Consider specializing in an industry (restaurants, contractors, etc.)"
             ],
-            linkedJobIds: ["bookkeeping"]
+            linkedJobIds: ["bookkeeping"],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["remote", "low_cost", "fast_start"]
         ),
         EducationPath(
             id: "paralegal", title: "Paralegal / Legal Assistant", icon: "books.vertical.fill",
@@ -1275,7 +1702,14 @@ enum EducationPathDatabase {
                 "Earn a paralegal certificate or degree",
                 "Apply to law firms, corporate legal departments, or government agencies"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["people_facing", "high_income"]
         ),
         EducationPath(
             id: "medical_billing", title: "Medical Billing & Coding", icon: "doc.text.fill",
@@ -1295,7 +1729,14 @@ enum EducationPathDatabase {
                 "Apply for coding positions at hospitals, clinics, or remote companies",
                 "Specialize in a coding area (surgery, radiology, cardiology)"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: true,
+            isScalable: false,
+            alignedInterests: ["remote", "low_cost", "fast_start"]
         ),
     ]
 
@@ -1317,7 +1758,14 @@ enum EducationPathDatabase {
                 "Create a professional portfolio website",
                 "Apply for junior UX designer positions"
             ],
-            linkedJobIds: ["graphic-design", "web-design"]
+            linkedJobIds: ["graphic-design", "web-design"],
+            requiresLicense: false,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["creative", "remote", "high_income"]
         ),
         EducationPath(
             id: "culinary_arts", title: "Culinary Arts / Chef", icon: "fork.knife",
@@ -1338,7 +1786,14 @@ enum EducationPathDatabase {
                 "Work in professional kitchens to build experience",
                 "Specialize in pastry, ethnic cuisine, or catering"
             ],
-            linkedJobIds: ["meal-prep", "personal-chef"]
+            linkedJobIds: ["meal-prep", "personal-chef"],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .standard,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["creative", "people_facing", "entrepreneurial"]
         ),
         EducationPath(
             id: "cosmetology", title: "Cosmetology / Barber", icon: "scissors",
@@ -1358,7 +1813,14 @@ enum EducationPathDatabase {
                 "Build a clientele at a salon or barbershop",
                 "Consider booth rental or opening your own shop"
             ],
-            linkedJobIds: []
+            linkedJobIds: [],
+            requiresLicense: true,
+            incomeLevel: .medium,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["creative", "people_facing", "entrepreneurial"]
         ),
         EducationPath(
             id: "graphic_design_cert", title: "Graphic Design Certificate", icon: "pencil.and.ruler.fill",
@@ -1378,7 +1840,14 @@ enum EducationPathDatabase {
                 "Start freelancing on platforms like Fiverr or Upwork",
                 "Pursue full-time design roles or build a freelance business"
             ],
-            linkedJobIds: ["graphic-design"]
+            linkedJobIds: ["graphic-design"],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .standard,
+            isFastStart: true,
+            isScalable: true,
+            alignedInterests: ["creative", "remote", "entrepreneurial"]
         ),
         EducationPath(
             id: "audio_engineering", title: "Audio / Sound Engineering", icon: "waveform",
@@ -1398,7 +1867,14 @@ enum EducationPathDatabase {
                 "Intern or apprentice at a recording studio",
                 "Freelance or get hired at a studio, venue, or production company"
             ],
-            linkedJobIds: ["podcast-production"]
+            linkedJobIds: ["podcast-production"],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .low,
+            categoryTier: .standard,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["creative"]
         ),
         EducationPath(
             id: "interior_design", title: "Interior Design", icon: "sofa.fill",
@@ -1418,7 +1894,14 @@ enum EducationPathDatabase {
                 "Pursue NCIDQ certification if required in your state",
                 "Start your own practice or specialize (residential, commercial, staging)"
             ],
-            linkedJobIds: ["home-staging"]
+            linkedJobIds: ["home-staging"],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["creative", "people_facing", "entrepreneurial"]
         ),
         EducationPath(
             id: "photography_cert", title: "Photography", icon: "camera.fill",
@@ -1438,7 +1921,14 @@ enum EducationPathDatabase {
                 "Choose a niche (weddings, portraits, real estate, product)",
                 "Market your services and build a booking pipeline"
             ],
-            linkedJobIds: ["drone-photography", "event-photography"]
+            linkedJobIds: ["drone-photography", "event-photography"],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .low,
+            categoryTier: .standard,
+            isFastStart: true,
+            isScalable: true,
+            alignedInterests: ["creative", "people_facing", "entrepreneurial"]
         ),
         EducationPath(
             id: "video_production", title: "Video Production", icon: "video.fill",
@@ -1459,7 +1949,14 @@ enum EducationPathDatabase {
                 "Develop a niche (corporate, wedding, social media, documentary)",
                 "Scale into a production company or specialize further"
             ],
-            linkedJobIds: ["video-editing"]
+            linkedJobIds: ["video-editing"],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .standard,
+            isFastStart: false,
+            isScalable: true,
+            alignedInterests: ["creative", "entrepreneurial"]
         ),
         EducationPath(
             id: "floral_design", title: "Floral Design", icon: "leaf.fill",
@@ -1478,7 +1975,14 @@ enum EducationPathDatabase {
                 "Build a portfolio of your best work",
                 "Start freelancing for weddings and events"
             ],
-            linkedJobIds: ["event-planning"]
+            linkedJobIds: ["event-planning"],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .medium,
+            categoryTier: .standard,
+            isFastStart: true,
+            isScalable: true,
+            alignedInterests: ["creative", "entrepreneurial", "people_facing"]
         ),
     ]
 
@@ -1507,7 +2011,14 @@ enum EducationPathDatabase {
                 "Complete your MOS/rating job training school",
                 "Serve your contract and earn certifications, experience, and GI Bill benefits"
             ],
-            linkedJobIds: ["handyman", "courier-delivery", "appliance-repair"]
+            linkedJobIds: ["handyman", "courier-delivery", "appliance-repair"],
+            requiresLicense: false,
+            incomeLevel: .medium,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["hands_on", "people_facing"]
         ),
         EducationPath(
             id: "military_officer", title: "Military — Officer", icon: "star.circle.fill",
@@ -1533,7 +2044,14 @@ enum EducationPathDatabase {
                 "Attend your branch-specific officer training course",
                 "Lead teams and gain leadership credentials valued across all industries"
             ],
-            linkedJobIds: ["event-planning"]
+            linkedJobIds: ["event-planning"],
+            requiresLicense: false,
+            incomeLevel: .high,
+            demandLevel: .high,
+            categoryTier: .highValue,
+            isFastStart: false,
+            isScalable: false,
+            alignedInterests: ["high_income", "people_facing"]
         ),
     ]
 }

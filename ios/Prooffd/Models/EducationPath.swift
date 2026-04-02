@@ -22,6 +22,13 @@ nonisolated struct EducationPath: Identifiable, Codable, Sendable {
     let basicSteps: [String]
     let proSteps: [String]
     let linkedJobIds: [String]
+    var requiresLicense: Bool
+    var incomeLevel: IncomeLevel
+    var demandLevel: DemandLevel
+    var categoryTier: CategoryTier
+    var isFastStart: Bool
+    var isScalable: Bool
+    var alignedInterests: [String]
 
     var zone: AIZone { AIZone.from(score: aiSafeScore) }
     var aiSafeLabel: String { zone.label }
@@ -47,7 +54,14 @@ nonisolated struct EducationPath: Identifiable, Codable, Sendable {
         militaryPath: String = "",
         basicSteps: [String],
         proSteps: [String] = [],
-        linkedJobIds: [String] = []
+        linkedJobIds: [String] = [],
+        requiresLicense: Bool = false,
+        incomeLevel: IncomeLevel = .medium,
+        demandLevel: DemandLevel = .medium,
+        categoryTier: CategoryTier = .standard,
+        isFastStart: Bool = false,
+        isScalable: Bool = false,
+        alignedInterests: [String] = []
     ) {
         self.id = id
         self.title = title
@@ -70,6 +84,13 @@ nonisolated struct EducationPath: Identifiable, Codable, Sendable {
         self.basicSteps = basicSteps
         self.proSteps = proSteps.isEmpty ? Self.generateProSteps(title: title) : proSteps
         self.linkedJobIds = linkedJobIds
+        self.requiresLicense = requiresLicense
+        self.incomeLevel = incomeLevel
+        self.demandLevel = demandLevel
+        self.categoryTier = categoryTier
+        self.isFastStart = isFastStart
+        self.isScalable = isScalable
+        self.alignedInterests = alignedInterests
     }
 
     private static func generateProSteps(title: String) -> [String] {
