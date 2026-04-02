@@ -105,6 +105,12 @@ nonisolated struct BusinessPath: Identifiable, Codable, Sendable {
     let startupCostMax: Int
     let llcInfo: LLCInfo
     let degreeRequirement: String
+    let requiresLicense: Bool
+    let incomeLevel: IncomeLevel
+    let demandLevel: DemandLevel
+    let categoryTier: CategoryTier
+    let isFastStart: Bool
+    let isScalable: Bool
 
     init(
         id: String,
@@ -159,7 +165,13 @@ nonisolated struct BusinessPath: Identifiable, Codable, Sendable {
         startupCostMin: Int = 0,
         startupCostMax: Int = 0,
         llcInfo: LLCInfo = .optional,
-        degreeRequirement: String = ""
+        degreeRequirement: String = "",
+        requiresLicense: Bool = false,
+        incomeLevel: IncomeLevel = .medium,
+        demandLevel: DemandLevel = .medium,
+        categoryTier: CategoryTier = .standard,
+        isFastStart: Bool = false,
+        isScalable: Bool = false
     ) {
         self.id = id
         self.name = name
@@ -214,6 +226,12 @@ nonisolated struct BusinessPath: Identifiable, Codable, Sendable {
         self.startupCostMax = startupCostMax > 0 ? startupCostMax : minBudget * 3
         self.llcInfo = llcInfo
         self.degreeRequirement = degreeRequirement.isEmpty ? Self.generateDegreeRequirement(educationRequired: educationRequired, category: category) : degreeRequirement
+        self.requiresLicense = requiresLicense
+        self.incomeLevel = incomeLevel
+        self.demandLevel = demandLevel
+        self.categoryTier = categoryTier
+        self.isFastStart = isFastStart
+        self.isScalable = isScalable
     }
 
     private static func generateWhyItWorksNow(name: String, category: BusinessCategory) -> String {

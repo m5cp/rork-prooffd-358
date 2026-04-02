@@ -152,7 +152,19 @@ enum MatchingEngine {
                 else { score += 1 }
             }
 
-            let percentage = maxScore > 0 ? Int((score / maxScore) * 100) : 0
+            let userMatchScore = maxScore > 0 ? (score / maxScore) * 100 : 0
+
+            let finalScore = CareerScoringEngine.shared.adjustedFinalScore(
+                userMatchScore: userMatchScore,
+                requiresLicense: path.requiresLicense,
+                incomeLevel: path.incomeLevel,
+                demandLevel: path.demandLevel,
+                categoryTier: path.categoryTier,
+                isFastStart: path.isFastStart,
+                isScalable: path.isScalable
+            )
+
+            let percentage = Int(finalScore)
 
             if percentage >= 20 {
                 results.append(MatchResult(
