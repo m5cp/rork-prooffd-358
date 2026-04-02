@@ -261,5 +261,11 @@ nonisolated enum Phase5ScoringData {
         "erosion-control": ScoringUpdate(requiresLicense: false, incomeLevel: .medium, demandLevel: .low, categoryTier: .skilledTrade, isFastStart: false, isScalable: true, alignedInterests: ["hands_on", "entrepreneurial"]),
         "brush-clearing": ScoringUpdate(requiresLicense: false, incomeLevel: .low, demandLevel: .medium, categoryTier: .standard, isFastStart: true, isScalable: false, alignedInterests: ["hands_on", "fast_start"]),
         "christmas-tree-removal": ScoringUpdate(requiresLicense: false, incomeLevel: .low, demandLevel: .low, categoryTier: .sideHustle, isFastStart: true, isScalable: false, alignedInterests: ["hands_on", "fast_start"]),
+
+        // ========================
+        // PHASE 2 UPDATES
+        // ========================
+        "web-design": ScoringUpdate(requiresLicense: false, incomeLevel: .high, demandLevel: .high, categoryTier: .highValue, isFastStart: true, isScalable: true, alignedInterests: ["high_income", "creative", "remote", "entrepreneurial"]),
+        "bookkeeping": ScoringUpdate(requiresLicense: false, incomeLevel: .medium, demandLevel: .high, categoryTier: .highValue, isFastStart: true, isScalable: true, alignedInterests: ["remote", "entrepreneurial", "low_cost"]),
     ]
 }

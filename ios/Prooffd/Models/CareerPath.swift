@@ -415,7 +415,7 @@ enum EducationPathDatabase {
             demandLevel: .high,
             categoryTier: .highValue,
             isFastStart: false,
-            isScalable: false,
+            isScalable: true,
             alignedInterests: ["hands_on", "high_income"]
         ),
     ]
