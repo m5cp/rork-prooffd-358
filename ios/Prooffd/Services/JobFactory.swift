@@ -43,7 +43,8 @@ enum JobFactory {
         demandLevel: DemandLevel = .medium,
         categoryTier: CategoryTier = .standard,
         isFastStart: Bool = false,
-        isScalable: Bool = false
+        isScalable: Bool = false,
+        alignedInterests: [String] = []
     ) -> BusinessPath {
         let outreach = "Hi [Name], I offer professional \(name.lowercased()) services in your area. I'd love to help — would you like a free estimate?"
         let social = "\(name) services available now! Professional quality, affordable rates. DM for a quote! #\(name.replacingOccurrences(of: " ", with: "")) #LocalBusiness"
@@ -84,7 +85,8 @@ enum JobFactory {
             demandLevel: demandLevel,
             categoryTier: categoryTier,
             isFastStart: isFastStart,
-            isScalable: isScalable
+            isScalable: isScalable,
+            alignedInterests: alignedInterests
         )
     }
 }

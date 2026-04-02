@@ -154,8 +154,20 @@ enum MatchingEngine {
 
             let userMatchScore = maxScore > 0 ? (score / maxScore) * 100 : 0
 
+            let userInterests = Self.deriveInterests(from: profile)
+
+            var interestBonus: Double = 0
+            for interest in path.alignedInterests {
+                if userInterests.contains(interest) {
+                    interestBonus += 3
+                }
+            }
+            interestBonus = min(interestBonus, 12)
+
+            let boostedUserMatchScore = min(99, userMatchScore + interestBonus)
+
             let finalScore = CareerScoringEngine.shared.adjustedFinalScore(
-                userMatchScore: userMatchScore,
+                userMatchScore: boostedUserMatchScore,
                 requiresLicense: path.requiresLicense,
                 incomeLevel: path.incomeLevel,
                 demandLevel: path.demandLevel,
@@ -182,6 +194,37 @@ enum MatchingEngine {
     nonisolated static func quickMatch(profile: UserProfile, paths: [BusinessPath], limit: Int = 2) -> [MatchResult] {
         let results = match(profile: profile, paths: paths)
         return Array(results.prefix(limit))
+    }
+
+    private nonisolated static func deriveInterests(from profile: UserProfile) -> Set<String> {
+        var interests: Set<String> = []
+
+        if profile.workPreference == .physical || profile.situationTags.contains(.prefersPhysical) {
+            interests.insert("hands_on")
+        }
+        if profile.workPreference == .digital || profile.situationTags.contains(.prefersDigital) {
+            interests.insert("remote")
+        }
+        if profile.selectedCategories.contains(.digitalCreative) || profile.selectedCategories.contains(.productCraft) {
+            interests.insert("creative")
+        }
+        if profile.workStyle == .solo || profile.situationTags.contains(.workAlone) {
+            interests.insert("entrepreneurial")
+        }
+        if profile.needsFastCash == true || profile.situationTags.contains(.needMoneyNow) {
+            interests.insert("fast_start")
+        }
+        if profile.budget == .zero || profile.budget == .under100 || profile.situationTags.contains(.lowBudget) {
+            interests.insert("low_cost")
+        }
+        if profile.workStyle == .withPeople || profile.customerInteraction == .lots || profile.situationTags.contains(.workWithPeople) {
+            interests.insert("people_facing")
+        }
+        if profile.budget == .over1000 || profile.situationTags.contains(.canInvest) || profile.incomeTimeline == .noRush {
+            interests.insert("high_income")
+        }
+
+        return interests
     }
 
     private nonisolated static func browseAll(paths: [BusinessPath]) -> [MatchResult] {

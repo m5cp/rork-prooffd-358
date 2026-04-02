@@ -111,6 +111,7 @@ nonisolated struct BusinessPath: Identifiable, Codable, Sendable {
     let categoryTier: CategoryTier
     let isFastStart: Bool
     let isScalable: Bool
+    let alignedInterests: [String]
 
     init(
         id: String,
@@ -171,7 +172,8 @@ nonisolated struct BusinessPath: Identifiable, Codable, Sendable {
         demandLevel: DemandLevel = .medium,
         categoryTier: CategoryTier = .standard,
         isFastStart: Bool = false,
-        isScalable: Bool = false
+        isScalable: Bool = false,
+        alignedInterests: [String] = []
     ) {
         self.id = id
         self.name = name
@@ -232,6 +234,7 @@ nonisolated struct BusinessPath: Identifiable, Codable, Sendable {
         self.categoryTier = categoryTier
         self.isFastStart = isFastStart
         self.isScalable = isScalable
+        self.alignedInterests = alignedInterests
     }
 
     private static func generateWhyItWorksNow(name: String, category: BusinessCategory) -> String {
