@@ -37,7 +37,13 @@ enum JobFactory {
         risks: [String] = [],
         todaySteps: [String] = [],
         eduLink: String = "",
-        interests: [String] = []
+        interests: [String] = [],
+        requiresLicense: Bool = false,
+        incomeLevel: IncomeLevel = .medium,
+        demandLevel: DemandLevel = .medium,
+        categoryTier: CategoryTier = .standard,
+        isFastStart: Bool = false,
+        isScalable: Bool = false
     ) -> BusinessPath {
         let outreach = "Hi [Name], I offer professional \(name.lowercased()) services in your area. I'd love to help — would you like a free estimate?"
         let social = "\(name) services available now! Professional quality, affordable rates. DM for a quote! #\(name.replacingOccurrences(of: " ", with: "")) #LocalBusiness"
@@ -72,7 +78,13 @@ enum JobFactory {
             scalingTips: scaleTips, riskNotes: risks,
             suggestedServices: services, suggestedBusinessName: bizName,
             todayStepTemplates: todaySteps, linkedEducationPathId: eduLink,
-            interests: interests
+            interests: interests,
+            requiresLicense: requiresLicense,
+            incomeLevel: incomeLevel,
+            demandLevel: demandLevel,
+            categoryTier: categoryTier,
+            isFastStart: isFastStart,
+            isScalable: isScalable
         )
     }
 }
