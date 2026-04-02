@@ -30,6 +30,7 @@ nonisolated enum Phase5ScoringData {
         // ========================
         // HOME / PROPERTY
         // ========================
+        "trash-bin-cleaning": ScoringUpdate(requiresLicense: false, incomeLevel: .low, demandLevel: .low, categoryTier: .sideHustle, isFastStart: true, isScalable: false, alignedInterests: ["fast_start", "low_cost"]),
         "yard-cleanup": ScoringUpdate(requiresLicense: false, incomeLevel: .low, demandLevel: .medium, categoryTier: .standard, isFastStart: true, isScalable: true, alignedInterests: ["hands_on", "fast_start", "entrepreneurial", "low_cost"]),
         "house-cleaning": ScoringUpdate(requiresLicense: false, incomeLevel: .medium, demandLevel: .high, categoryTier: .standard, isFastStart: true, isScalable: true, alignedInterests: ["fast_start", "entrepreneurial", "low_cost"]),
         "gutter-cleaning": ScoringUpdate(requiresLicense: false, incomeLevel: .medium, demandLevel: .medium, categoryTier: .standard, isFastStart: true, isScalable: true, alignedInterests: ["hands_on", "fast_start", "entrepreneurial"]),
@@ -81,6 +82,7 @@ nonisolated enum Phase5ScoringData {
         // ========================
         // PET SERVICES
         // ========================
+        "pet-waste-removal": ScoringUpdate(requiresLicense: false, incomeLevel: .low, demandLevel: .low, categoryTier: .sideHustle, isFastStart: true, isScalable: false, alignedInterests: ["fast_start", "hands_on"]),
         "dog-walking": ScoringUpdate(requiresLicense: false, incomeLevel: .low, demandLevel: .medium, categoryTier: .sideHustle, isFastStart: true, isScalable: false, alignedInterests: ["fast_start", "people_facing"]),
         "pet-sitting": ScoringUpdate(requiresLicense: false, incomeLevel: .low, demandLevel: .medium, categoryTier: .sideHustle, isFastStart: true, isScalable: false, alignedInterests: ["fast_start", "people_facing"]),
         "pet-grooming": ScoringUpdate(requiresLicense: false, incomeLevel: .medium, demandLevel: .medium, categoryTier: .standard, isFastStart: false, isScalable: true, alignedInterests: ["people_facing", "entrepreneurial", "hands_on"]),
@@ -173,6 +175,8 @@ nonisolated enum Phase5ScoringData {
         // ========================
         // EVENTS / ENTERTAINMENT
         // ========================
+        "balloon-decorating": ScoringUpdate(requiresLicense: false, incomeLevel: .low, demandLevel: .low, categoryTier: .sideHustle, isFastStart: true, isScalable: false, alignedInterests: ["creative", "people_facing"]),
+        "face-painting": ScoringUpdate(requiresLicense: false, incomeLevel: .low, demandLevel: .low, categoryTier: .sideHustle, isFastStart: true, isScalable: false, alignedInterests: ["creative", "people_facing"]),
         "dj-services": ScoringUpdate(requiresLicense: false, incomeLevel: .medium, demandLevel: .medium, categoryTier: .standard, isFastStart: false, isScalable: true, alignedInterests: ["creative", "people_facing", "entrepreneurial"]),
         "event-photography": ScoringUpdate(requiresLicense: false, incomeLevel: .medium, demandLevel: .medium, categoryTier: .standard, isFastStart: false, isScalable: true, alignedInterests: ["creative", "people_facing", "entrepreneurial"]),
         "event-planning": ScoringUpdate(requiresLicense: false, incomeLevel: .medium, demandLevel: .medium, categoryTier: .standard, isFastStart: false, isScalable: true, alignedInterests: ["people_facing", "entrepreneurial", "creative"]),
