@@ -105,13 +105,13 @@ nonisolated struct BusinessPath: Identifiable, Codable, Sendable {
     let startupCostMax: Int
     let llcInfo: LLCInfo
     let degreeRequirement: String
-    let requiresLicense: Bool
-    let incomeLevel: IncomeLevel
-    let demandLevel: DemandLevel
-    let categoryTier: CategoryTier
-    let isFastStart: Bool
-    let isScalable: Bool
-    let alignedInterests: [String]
+    var requiresLicense: Bool
+    var incomeLevel: IncomeLevel
+    var demandLevel: DemandLevel
+    var categoryTier: CategoryTier
+    var isFastStart: Bool
+    var isScalable: Bool
+    var alignedInterests: [String]
 
     init(
         id: String,
