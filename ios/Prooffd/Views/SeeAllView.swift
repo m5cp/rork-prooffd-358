@@ -217,64 +217,96 @@ struct SeeAllResultCard: View {
     let onTap: () -> Void
     @Environment(AppState.self) private var appState
 
-    private var catColor: Color {
-        Theme.categoryColor(for: result.businessPath.category)
-    }
+    private var path: BusinessPath { result.businessPath }
+    private var catColor: Color { Theme.categoryColor(for: path.category) }
+    private var isSideHustle: Bool { path.categoryTier == .sideHustle }
 
     var body: some View {
         Button(action: onTap) {
-            HStack(spacing: 14) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(catColor.opacity(0.12))
-                        .frame(width: 48, height: 48)
-                    Image(systemName: result.businessPath.icon)
-                        .font(.body)
-                        .foregroundStyle(catColor)
-                }
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 12) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(isSideHustle ? Theme.cardBackgroundLight : catColor.opacity(0.12))
+                            .frame(width: 48, height: 48)
+                        Image(systemName: path.icon)
+                            .font(.body)
+                            .foregroundStyle(isSideHustle ? Theme.textTertiary : catColor)
+                    }
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(result.businessPath.name)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Theme.textPrimary)
-                        .lineLimit(1)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(path.name)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(isSideHustle ? Theme.textSecondary : Theme.textPrimary)
+                            .lineLimit(1)
 
-                    HStack(spacing: 8) {
-                        HStack(spacing: 3) {
-                            Image(systemName: "shield.checkered")
-                                .font(.system(size: 9))
-                            Text("\(result.businessPath.aiProofRating)")
-                                .font(.caption2.weight(.bold))
-                        }
-                        .foregroundStyle(aiColor)
-
-                        Text(result.businessPath.startupCostRange)
-                            .font(.caption2)
+                        Text(cardSummary)
+                            .font(.caption)
                             .foregroundStyle(Theme.textTertiary)
+                            .lineLimit(1)
+                    }
 
-                        Text(result.businessPath.timeToFirstDollar)
+                    Spacer(minLength: 4)
+
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text("\(result.scorePercentage)%")
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(matchColor)
+                        Text("match")
                             .font(.caption2)
                             .foregroundStyle(Theme.textTertiary)
                     }
                 }
 
-                Spacer(minLength: 4)
-
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("\(result.scorePercentage)%")
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(matchColor)
-                    Text("match")
-                        .font(.caption2)
-                        .foregroundStyle(Theme.textTertiary)
-                }
+                credibilityTags
             }
             .padding(14)
             .background(Theme.cardBackground)
-            .clipShape(.rect(cornerRadius: 14))
+            .clipShape(.rect(cornerRadius: 16))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(isSideHustle ? Theme.border.opacity(0.5) : catColor.opacity(0.12), lineWidth: 0.5)
+            )
             .cardShadow()
+            .opacity(isSideHustle ? 0.85 : 1)
         }
         .buttonStyle(.plain)
+    }
+
+    private var credibilityTags: some View {
+        let tags = CredibilityTagBuilder.tags(for: path)
+        return ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                ForEach(tags, id: \.label) { tag in
+                    HStack(spacing: 4) {
+                        Image(systemName: tag.icon)
+                            .font(.system(size: 9))
+                        Text(tag.label)
+                            .font(.caption2.weight(.medium))
+                    }
+                    .foregroundStyle(isSideHustle ? Theme.textTertiary : tag.color)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(isSideHustle ? Theme.cardBackgroundLight : tag.color.opacity(0.08))
+                    .clipShape(.capsule)
+                }
+            }
+        }
+        .allowsHitTesting(false)
+    }
+
+    private var cardSummary: String {
+        if path.categoryTier == .highValue && path.requiresLicense {
+            return "Licensed trade \u{00B7} \(path.startupCostRange)"
+        } else if path.categoryTier == .highValue {
+            return "High-value path \u{00B7} \(path.startupCostRange)"
+        } else if path.categoryTier == .skilledTrade {
+            return "Skilled trade \u{00B7} \(path.startupCostRange)"
+        } else if path.categoryTier == .sideHustle {
+            return "Side hustle \u{00B7} \(path.startupCostRange)"
+        } else {
+            return "\(path.timeToFirstDollar) \u{00B7} \(path.startupCostRange)"
+        }
     }
 
     private var matchColor: Color {
@@ -282,12 +314,43 @@ struct SeeAllResultCard: View {
         if result.scorePercentage >= 60 { return Theme.accentBlue }
         return Color(hex: "FB923C")
     }
+}
 
-    private var aiColor: Color {
-        let r = result.businessPath.aiProofRating
-        if r >= 80 { return Theme.accent }
-        if r >= 50 { return Color(hex: "FBBF24") }
-        return .orange
+struct CredibilityTag {
+    let label: String
+    let icon: String
+    let color: Color
+}
+
+enum CredibilityTagBuilder {
+    static func tags(for path: BusinessPath) -> [CredibilityTag] {
+        var tags: [CredibilityTag] = []
+
+        if path.requiresLicense {
+            tags.append(CredibilityTag(label: "Licensed", icon: "checkmark.seal.fill", color: Theme.accent))
+        }
+
+        if path.demandLevel == .high {
+            tags.append(CredibilityTag(label: "High Demand", icon: "arrow.up.right", color: Theme.accentBlue))
+        }
+
+        if path.isFastStart {
+            tags.append(CredibilityTag(label: "Fast Start", icon: "bolt.fill", color: Color(hex: "FB923C")))
+        }
+
+        if path.isScalable {
+            tags.append(CredibilityTag(label: "Scalable", icon: "chart.line.uptrend.xyaxis", color: Color(hex: "818CF8")))
+        }
+
+        if path.requiresPhysicalWork {
+            tags.append(CredibilityTag(label: "Hands-On", icon: "hand.raised.fill", color: Color(hex: "FBBF24")))
+        }
+
+        if path.isDigital && path.soloFriendly {
+            tags.append(CredibilityTag(label: "Remote Friendly", icon: "laptopcomputer", color: Color(hex: "22D3EE")))
+        }
+
+        return Array(tags.prefix(4))
     }
 }
 

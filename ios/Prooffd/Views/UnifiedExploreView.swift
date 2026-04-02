@@ -190,13 +190,7 @@ struct UnifiedExploreView: View {
                         .padding(.horizontal, 16)
                 }
 
-                horizontalSection(
-                    title: "Recommended For You",
-                    icon: "star.fill",
-                    iconColor: Theme.accent,
-                    results: Array(recommendedResults.dropFirst().prefix(6)),
-                    mode: .recommended
-                )
+                topOpportunitiesSection
 
                 if !store.isPremium {
                     upgradePrompt
@@ -521,23 +515,25 @@ struct UnifiedExploreView: View {
                         Spacer(minLength: 0)
                     }
 
-                    HStack(spacing: 8) {
-                        HStack(spacing: 4) {
-                            Image(systemName: zone.icon)
-                                .font(.caption2)
-                            Text("AI \(zone.label)")
-                                .font(.caption.weight(.semibold))
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach(CredibilityTagBuilder.tags(for: result.businessPath), id: \.label) { tag in
+                                HStack(spacing: 4) {
+                                    Image(systemName: tag.icon)
+                                        .font(.system(size: 10))
+                                    Text(tag.label)
+                                        .font(.caption.weight(.semibold))
+                                }
+                                .foregroundStyle(tag.color)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(tag.color.opacity(0.1))
+                                .clipShape(.capsule)
+                            }
+                            Spacer()
                         }
-                        .foregroundStyle(zoneColor)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 5)
-                        .background(zoneColor.opacity(0.1))
-                        .clipShape(.capsule)
-
-                        pathTagPill(result.businessPath)
-
-                        Spacer()
                     }
+                    .allowsHitTesting(false)
 
                     Text(perfectForLine(result))
                         .font(.subheadline)
@@ -687,8 +683,42 @@ struct UnifiedExploreView: View {
         }
     }
 
+    private var topOpportunitiesSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 8) {
+                Image(systemName: "sparkle")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.accent)
+                Text("Top Opportunities")
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(Theme.textPrimary)
+                Spacer()
+                Button {
+                    seeAllMode = .recommended
+                } label: {
+                    Text("See All")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Theme.accent)
+                }
+            }
+            .padding(.horizontal, 16)
+
+            LazyVStack(spacing: 10) {
+                ForEach(Array(recommendedResults.dropFirst().prefix(5))) { result in
+                    SeeAllResultCard(result: result) {
+                        selectedResult = result
+                        appState.markPathExplored(result.businessPath.id)
+                    }
+                }
+            }
+            .padding(.horizontal, 16)
+        }
+    }
+
     private func compactCard(_ result: MatchResult) -> some View {
         let catColor = Theme.categoryColor(for: result.businessPath.category)
+        let isSideHustle = result.businessPath.categoryTier == .sideHustle
+        let tags = CredibilityTagBuilder.tags(for: result.businessPath)
         return Button {
             selectedResult = result
             appState.markPathExplored(result.businessPath.id)
@@ -697,11 +727,11 @@ struct UnifiedExploreView: View {
                 HStack(spacing: 10) {
                     ZStack {
                         Circle()
-                            .fill(catColor.opacity(0.15))
+                            .fill(isSideHustle ? Theme.cardBackgroundLight : catColor.opacity(0.15))
                             .frame(width: 40, height: 40)
                         Image(systemName: result.businessPath.icon)
                             .font(.body)
-                            .foregroundStyle(catColor)
+                            .foregroundStyle(isSideHustle ? Theme.textTertiary : catColor)
                     }
                     Spacer()
                     Text("\(result.scorePercentage)%")
@@ -715,29 +745,25 @@ struct UnifiedExploreView: View {
 
                 Text(result.businessPath.name)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Theme.textPrimary)
+                    .foregroundStyle(isSideHustle ? Theme.textSecondary : Theme.textPrimary)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Spacer(minLength: 0)
 
-                VStack(alignment: .leading, spacing: 4) {
+                if let firstTag = tags.first {
                     HStack(spacing: 4) {
-                        Image(systemName: "dollarsign.circle.fill")
-                            .font(.system(size: 9))
-                        Text(result.businessPath.startupCostRange)
-                            .font(.caption2)
+                        Image(systemName: firstTag.icon)
+                            .font(.system(size: 8))
+                        Text(firstTag.label)
+                            .font(.caption2.weight(.medium))
                     }
-                    .foregroundStyle(Theme.textTertiary)
-
-                    HStack(spacing: 4) {
-                        Image(systemName: "shield.checkered")
-                            .font(.system(size: 9))
-                        Text("AI Safe: \(result.businessPath.aiProofRating)")
-                            .font(.caption2)
-                    }
-                    .foregroundStyle(aiScoreColor(result.businessPath.aiProofRating))
+                    .foregroundStyle(isSideHustle ? Theme.textTertiary : firstTag.color)
+                } else {
+                    Text(result.businessPath.startupCostRange)
+                        .font(.caption2)
+                        .foregroundStyle(Theme.textTertiary)
                 }
             }
             .frame(width: 160, height: 170, alignment: .leading)
@@ -746,9 +772,10 @@ struct UnifiedExploreView: View {
             .clipShape(.rect(cornerRadius: 14))
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
-                    .stroke(catColor.opacity(0.1), lineWidth: 0.5)
+                    .stroke(isSideHustle ? Theme.border.opacity(0.5) : catColor.opacity(0.1), lineWidth: 0.5)
             )
             .cardShadow()
+            .opacity(isSideHustle ? 0.85 : 1)
         }
         .buttonStyle(.plain)
     }
