@@ -1336,25 +1336,46 @@ struct PathDetailView: View {
 
     // MARK: - Trade & Certification Track
 
+    private var tradeDetailData: TradeCareerDetailData? {
+        if let data = TradeCareerDatabase.lookup(path.id) { return data }
+        if let edu = linkedEducation, let data = TradeCareerDatabase.lookupByEducationId(edu.id) { return data }
+        return nil
+    }
+
     @ViewBuilder
     private var tradeTrackContent: some View {
         if let edu = linkedEducation {
             tradeTrainingRoadmap(edu)
+        }
+
+        tradeTimeToEntrySection
+        tradeTuitionCostSection
+
+        if let edu = linkedEducation {
             tradeCertRequirements(edu)
+        }
+
+        tradeToolsExamLicensingSection
+        tradePaySection
+        tradeAIResistantSection
+        tradeFirstJobStrategySection
+
+        if let edu = linkedEducation {
             tradeFundingSection(edu)
             tradeFindProgramsSection(edu)
         }
 
         actionPlanSection
 
+        tradeFutureBusinessSection
+
         let setupSteps = SmartCareerBrain.businessSetupSteps(for: path)
         if !setupSteps.isEmpty {
             businessSetupSection(setupSteps)
         }
 
-        whatOthersChargeSection
-
         if store.isPremium {
+            whatOthersChargeSection
             pricingSection
             emailSection
             textMessageSection
@@ -1363,6 +1384,320 @@ struct PathDetailView: View {
             pricingSheetSection
         } else {
             lockedProContentSection
+        }
+    }
+
+    // MARK: - Trade Detail Sections (Phase 3)
+
+    private var tradeTimeToEntrySection: some View {
+        let data = tradeDetailData
+        let edu = linkedEducation
+        let timeValue = data?.timeToEntry ?? edu?.timeToComplete ?? ""
+        let detail = data?.timeToEntryDetail ?? ""
+
+        return Group {
+            if !timeValue.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    sectionHeader("Time to Entry", icon: "clock.badge.checkmark.fill")
+
+                    HStack(spacing: 10) {
+                        Text(timeValue)
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(trackColor)
+                        Spacer()
+                    }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
+                    .background(trackColor.opacity(0.08))
+                    .clipShape(.rect(cornerRadius: 10))
+
+                    if !detail.isEmpty {
+                        Text(detail)
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                            .lineSpacing(4)
+                    }
+                }
+                .padding(16)
+                .background(Theme.cardBackground)
+                .clipShape(.rect(cornerRadius: 14))
+            }
+        }
+    }
+
+    private var tradeTuitionCostSection: some View {
+        let data = tradeDetailData
+        let edu = linkedEducation
+        let cost = data?.tuitionCostRange ?? edu?.costRange ?? ""
+
+        return Group {
+            if !cost.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    sectionHeader("Tuition & Training Cost", icon: "banknote.fill")
+
+                    HStack {
+                        Text("Estimated Range")
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                        Spacer()
+                        Text(cost)
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(Theme.accent)
+                    }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
+                    .background(Theme.accent.opacity(0.08))
+                    .clipShape(.rect(cornerRadius: 10))
+
+                    if let edu {
+                        if !edu.fundingOptions.isEmpty {
+                            Text("Financial assistance may be available — see Funding Options below.")
+                                .font(.caption)
+                                .foregroundStyle(Theme.textTertiary)
+                                .lineSpacing(3)
+                        }
+                    }
+                }
+                .padding(16)
+                .background(Theme.cardBackground)
+                .clipShape(.rect(cornerRadius: 14))
+            }
+        }
+    }
+
+    private var tradeToolsExamLicensingSection: some View {
+        let data = tradeDetailData
+
+        return Group {
+            if let data, (!data.toolsAndExamRequirements.isEmpty || !data.licensingRequirements.isEmpty) {
+                VStack(alignment: .leading, spacing: 12) {
+                    sectionHeader("Tools, Exams & Licensing", icon: "wrench.and.screwdriver.fill")
+
+                    if !data.toolsAndExamRequirements.isEmpty {
+                        Text("Tools & Exam Requirements")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Theme.textPrimary)
+                        ForEach(Array(data.toolsAndExamRequirements.enumerated()), id: \.offset) { _, item in
+                            HStack(alignment: .top, spacing: 10) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(trackColor)
+                                    .padding(.top, 1)
+                                Text(item)
+                                    .font(.subheadline)
+                                    .foregroundStyle(Theme.textSecondary)
+                            }
+                        }
+                    }
+
+                    if !data.licensingRequirements.isEmpty {
+                        if !data.toolsAndExamRequirements.isEmpty {
+                            Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                        }
+                        Text("Licensing Requirements")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Theme.textPrimary)
+                        ForEach(Array(data.licensingRequirements.enumerated()), id: \.offset) { _, item in
+                            HStack(alignment: .top, spacing: 10) {
+                                Image(systemName: "checkmark.seal.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.orange)
+                                    .padding(.top, 1)
+                                Text(item)
+                                    .font(.subheadline)
+                                    .foregroundStyle(Theme.textSecondary)
+                            }
+                        }
+                    }
+
+                    HStack(spacing: 6) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
+                        Text("Requirements vary by state and locality. Always verify with your local licensing authority.")
+                            .font(.caption2)
+                            .foregroundStyle(Theme.textTertiary)
+                            .lineSpacing(2)
+                    }
+                    .padding(.top, 4)
+                }
+                .padding(16)
+                .background(Theme.cardBackground)
+                .clipShape(.rect(cornerRadius: 14))
+            }
+        }
+    }
+
+    private var tradePaySection: some View {
+        let data = tradeDetailData
+        let edu = linkedEducation
+
+        return Group {
+            if data != nil || edu != nil {
+                VStack(alignment: .leading, spacing: 12) {
+                    sectionHeader("Pay & Earning Potential", icon: "dollarsign.circle.fill")
+
+                    if let data {
+                        tradePayRow(label: "Entry-Level", value: data.entryLevelPay, color: Theme.accent)
+                        tradePayRow(label: "Mid-Career", value: data.midCareerPay, color: Theme.accentBlue)
+                        if !data.selfEmploymentUpside.isEmpty {
+                            tradePayRow(label: "Self-Employment", value: data.selfEmploymentUpside, color: Color(hex: "34D399"))
+                        }
+                    } else if let edu {
+                        tradePayRow(label: "Typical Range", value: edu.typicalSalaryRange, color: Theme.accent)
+                    }
+
+                    HStack(spacing: 6) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
+                        Text("Pay varies by location, experience, employer, and specialization. These are general ranges, not guarantees.")
+                            .font(.caption2)
+                            .foregroundStyle(Theme.textTertiary)
+                            .lineSpacing(2)
+                    }
+                    .padding(.top, 4)
+                }
+                .padding(16)
+                .background(Theme.cardBackground)
+                .clipShape(.rect(cornerRadius: 14))
+            }
+        }
+    }
+
+    private func tradePayRow(label: String, value: String, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(label)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(color)
+                .clipShape(.capsule)
+            Text(value)
+                .font(.subheadline)
+                .foregroundStyle(Theme.textSecondary)
+                .lineSpacing(3)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(color.opacity(0.06))
+        .clipShape(.rect(cornerRadius: 10))
+    }
+
+    private var tradeAIResistantSection: some View {
+        let data = tradeDetailData
+
+        return Group {
+            if let data, !data.aiResistantReasons.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "shield.checkered")
+                            .font(.caption)
+                            .foregroundStyle(Theme.accent)
+                        Text("Why This Is AI-Resistant")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.textPrimary)
+                        Spacer()
+                        Text("\(path.aiProofRating)/100")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(aiScoreColor)
+                            .clipShape(.capsule)
+                    }
+
+                    Text("This career scored \(path.aiProofRating)/100 on our AI-Proof scale because:")
+                        .font(.caption)
+                        .foregroundStyle(Theme.textTertiary)
+                        .lineSpacing(3)
+
+                    ForEach(Array(data.aiResistantReasons.enumerated()), id: \.offset) { _, reason in
+                        HStack(alignment: .top, spacing: 10) {
+                            Image(systemName: "checkmark.shield.fill")
+                                .font(.caption2)
+                                .foregroundStyle(Theme.accent)
+                                .padding(.top, 2)
+                            Text(reason)
+                                .font(.subheadline)
+                                .foregroundStyle(Theme.textSecondary)
+                                .lineSpacing(3)
+                        }
+                    }
+                }
+                .padding(16)
+                .background(Theme.cardBackground)
+                .clipShape(.rect(cornerRadius: 14))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Theme.accent.opacity(0.15), lineWidth: 1)
+                )
+            }
+        }
+    }
+
+    private var aiScoreColor: Color {
+        if path.aiProofRating >= 85 { return Color(hex: "34D399") }
+        if path.aiProofRating >= 70 { return Theme.accentBlue }
+        if path.aiProofRating >= 55 { return Color(hex: "FBBF24") }
+        return Color(hex: "F87171")
+    }
+
+    private var tradeFirstJobStrategySection: some View {
+        let data = tradeDetailData
+
+        return Group {
+            if let data, !data.firstJobStrategies.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    sectionHeader("First Job Strategy", icon: "figure.walk.arrival")
+
+                    ForEach(Array(data.firstJobStrategies.enumerated()), id: \.offset) { index, strategy in
+                        HStack(alignment: .top, spacing: 12) {
+                            Text("\(index + 1)")
+                                .font(.caption2.weight(.bold))
+                                .foregroundStyle(.white)
+                                .frame(width: 22, height: 22)
+                                .background(trackColor)
+                                .clipShape(Circle())
+                            Text(strategy)
+                                .font(.subheadline)
+                                .foregroundStyle(Theme.textSecondary)
+                                .lineSpacing(2)
+                        }
+                    }
+                }
+                .padding(16)
+                .background(Theme.cardBackground)
+                .clipShape(.rect(cornerRadius: 14))
+            }
+        }
+    }
+
+    private var tradeFutureBusinessSection: some View {
+        let data = tradeDetailData
+
+        return Group {
+            if let data, !data.futureBusinessOption.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "briefcase.fill")
+                            .font(.caption)
+                            .foregroundStyle(Theme.accent)
+                        Text("Future Business Option")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.textPrimary)
+                    }
+
+                    Text(data.futureBusinessOption)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineSpacing(4)
+                }
+                .padding(16)
+                .background(Theme.cardBackground)
+                .clipShape(.rect(cornerRadius: 14))
+            }
         }
     }
 
