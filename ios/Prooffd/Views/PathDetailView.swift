@@ -11,34 +11,31 @@ struct PathDetailView: View {
 
     private var path: BusinessPath { result.businessPath }
     private var alreadyBuilding: Bool { appState.hasBuild(for: path.id) }
+    private var track: CareerTrack { SmartCareerBrain.careerTrack(for: path) }
+    private var linkedEducation: EducationPath? {
+        guard !path.linkedEducationPathId.isEmpty else { return nil }
+        return EducationPathDatabase.all.first { $0.id == path.linkedEducationPathId }
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
                     heroSection
+                    trackBadge
                     quickStats
                     favHideBar
                     startBuildSection
                     overviewSection
                     degreeRequirementSection
-                    actionPlanSection
-                    pricingSection
 
-                    if store.isPremium {
-                        emailSection
-                        textMessageSection
-                        scriptSection(title: "Sales Intro Script", icon: "person.wave.2.fill", content: path.salesIntroScript)
-                        socialMediaSection
-                        pricingSheetSection
-                    } else {
-                        lockedProContentSection
-                    }
-
-                    whatOthersChargeSection
-
-                    if store.isPremium {
-                        businessPlanSection
+                    switch track {
+                    case .startBusiness:
+                        businessTrackContent
+                    case .tradeAndCertification:
+                        tradeTrackContent
+                    case .degreeBasedCareer:
+                        degreeTrackContent
                     }
 
                     actionButtons
@@ -852,5 +849,550 @@ struct PathDetailView: View {
         if let url = PDFExportService.exportPathPDF(result) {
             PDFExportService.presentShareSheet(items: [url])
         }
+    }
+
+    // MARK: - Track Badge
+
+    private var trackBadge: some View {
+        HStack(spacing: 6) {
+            Image(systemName: track.icon)
+                .font(.caption2)
+            Text(track.rawValue)
+                .font(.caption.weight(.semibold))
+        }
+        .foregroundStyle(trackColor)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(trackColor.opacity(0.1))
+        .clipShape(.capsule)
+    }
+
+    private var trackColor: Color {
+        switch track {
+        case .startBusiness: return Theme.accent
+        case .tradeAndCertification: return Color(hex: "FBBF24")
+        case .degreeBasedCareer: return Theme.accentBlue
+        }
+    }
+
+    // MARK: - Start a Business Track
+
+    @ViewBuilder
+    private var businessTrackContent: some View {
+        actionPlanSection
+        whatOthersChargeSection
+
+        if store.isPremium {
+            pricingSection
+            emailSection
+            textMessageSection
+            scriptSection(title: "Sales Intro Script", icon: "person.wave.2.fill", content: path.salesIntroScript)
+            socialMediaSection
+            pricingSheetSection
+            businessPlanSection
+        } else {
+            lockedProContentSection
+        }
+    }
+
+    // MARK: - Trade & Certification Track
+
+    @ViewBuilder
+    private var tradeTrackContent: some View {
+        if let edu = linkedEducation {
+            tradeTrainingRoadmap(edu)
+            tradeCertRequirements(edu)
+            tradeFundingSection(edu)
+            tradeFindProgramsSection(edu)
+        }
+
+        actionPlanSection
+
+        let setupSteps = SmartCareerBrain.businessSetupSteps(for: path)
+        if !setupSteps.isEmpty {
+            businessSetupSection(setupSteps)
+        }
+
+        whatOthersChargeSection
+
+        if store.isPremium {
+            pricingSection
+            emailSection
+            textMessageSection
+            scriptSection(title: "Sales Intro Script", icon: "person.wave.2.fill", content: path.salesIntroScript)
+            socialMediaSection
+            pricingSheetSection
+        } else {
+            lockedProContentSection
+        }
+    }
+
+    // MARK: - Degree-Based Career Track
+
+    @ViewBuilder
+    private var degreeTrackContent: some View {
+        if let edu = linkedEducation {
+            degreeCareerPathway(edu)
+            degreeProgramDetails(edu)
+            degreeFundingSection(edu)
+            degreeFindProgramsSection(edu)
+        }
+
+        actionPlanSection
+
+        let setupSteps = SmartCareerBrain.businessSetupSteps(for: path)
+        if !setupSteps.isEmpty {
+            businessSetupSection(setupSteps)
+        }
+
+        whatOthersChargeSection
+
+        if store.isPremium {
+            pricingSection
+        } else {
+            lockedProContentSection
+        }
+    }
+
+    // MARK: - Trade Track Sections
+
+    private func tradeTrainingRoadmap(_ edu: EducationPath) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader("Training & Certification Roadmap", icon: "map.fill")
+
+            HStack(spacing: 16) {
+                roadmapStat(icon: "clock.fill", label: "Duration", value: edu.timeToComplete)
+                roadmapStat(icon: "banknote.fill", label: "Cost", value: edu.costRange)
+            }
+
+            if !edu.deliveryType.isEmpty {
+                HStack(spacing: 6) {
+                    Image(systemName: "building.2.fill")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.accent)
+                    Text("Format: \(edu.deliveryType)")
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+            }
+
+            Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+
+            Text(edu.overview)
+                .font(.subheadline)
+                .foregroundStyle(Theme.textSecondary)
+                .lineSpacing(4)
+
+            if !edu.whyItWorksNow.isEmpty {
+                Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.accent)
+                        .padding(.top, 2)
+                    Text(edu.whyItWorksNow)
+                        .font(.caption)
+                        .foregroundStyle(Theme.textTertiary)
+                        .lineSpacing(3)
+                }
+            }
+
+            if !edu.futureDemand.isEmpty {
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "arrow.up.right")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.accentBlue)
+                        .padding(.top, 2)
+                    Text(edu.futureDemand)
+                        .font(.caption)
+                        .foregroundStyle(Theme.textTertiary)
+                        .lineSpacing(3)
+                }
+            }
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+    }
+
+    private func tradeCertRequirements(_ edu: EducationPath) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader("Certification & Licensing", icon: "checkmark.seal.fill")
+
+            if !edu.testRequirements.isEmpty {
+                ForEach(edu.testRequirements, id: \.self) { req in
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.caption)
+                            .foregroundStyle(Theme.accent)
+                            .padding(.top, 1)
+                        Text(req)
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                }
+            }
+
+            if !edu.prerequisites.isEmpty {
+                Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                Text("Prerequisites")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                ForEach(edu.prerequisites, id: \.self) { prereq in
+                    HStack(alignment: .top, spacing: 10) {
+                        Circle()
+                            .fill(Theme.accent)
+                            .frame(width: 5, height: 5)
+                            .padding(.top, 6)
+                        Text(prereq)
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                }
+            }
+
+            if !edu.basicSteps.isEmpty {
+                Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                Text("Steps to Complete")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                ForEach(Array(edu.basicSteps.enumerated()), id: \.offset) { index, step in
+                    HStack(alignment: .top, spacing: 12) {
+                        Text("\(index + 1)")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.white)
+                            .frame(width: 22, height: 22)
+                            .background(Theme.accent)
+                            .clipShape(Circle())
+                        Text(step)
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                            .lineSpacing(2)
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+    }
+
+    private func tradeFundingSection(_ edu: EducationPath) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionHeader("Funding Options", icon: "banknote.fill")
+            ForEach(edu.fundingOptions, id: \.self) { option in
+                HStack(alignment: .top, spacing: 10) {
+                    Circle()
+                        .fill(Theme.accent)
+                        .frame(width: 5, height: 5)
+                        .padding(.top, 6)
+                    Text(option)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+            }
+
+            if !edu.militaryPath.isEmpty {
+                Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "shield.fill")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.accent)
+                        .padding(.top, 2)
+                    Text(edu.militaryPath)
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineSpacing(3)
+                }
+            }
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+    }
+
+    private func tradeFindProgramsSection(_ edu: EducationPath) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionHeader("How to Find Programs", icon: "magnifyingglass")
+            ForEach(edu.howToFindPrograms, id: \.self) { item in
+                HStack(alignment: .top, spacing: 10) {
+                    Circle()
+                        .fill(Theme.accentBlue)
+                        .frame(width: 5, height: 5)
+                        .padding(.top, 6)
+                    Text(item)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+            }
+
+            if !edu.employerSponsoredOptions.isEmpty {
+                Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                Text("Employer-Sponsored Options")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.accent)
+                ForEach(edu.employerSponsoredOptions, id: \.self) { option in
+                    HStack(alignment: .top, spacing: 10) {
+                        Circle()
+                            .fill(Theme.accent)
+                            .frame(width: 5, height: 5)
+                            .padding(.top, 6)
+                        Text(option)
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+    }
+
+    // MARK: - Degree Track Sections
+
+    private func degreeCareerPathway(_ edu: EducationPath) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader("Career Pathway", icon: "arrow.triangle.branch")
+
+            HStack(spacing: 16) {
+                roadmapStat(icon: "dollarsign.circle.fill", label: "Salary", value: edu.typicalSalaryRange)
+                roadmapStat(icon: "clock.fill", label: "Program", value: edu.timeToComplete)
+            }
+
+            HStack(spacing: 16) {
+                roadmapStat(icon: "banknote.fill", label: "Cost", value: edu.costRange)
+                roadmapStat(icon: "shield.checkered", label: "AI-Safe", value: "\(edu.aiSafeScore)/100")
+            }
+
+            Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+
+            Text(edu.overview)
+                .font(.subheadline)
+                .foregroundStyle(Theme.textSecondary)
+                .lineSpacing(4)
+
+            if !edu.whyItWorksNow.isEmpty {
+                Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.accent)
+                        .padding(.top, 2)
+                    Text(edu.whyItWorksNow)
+                        .font(.caption)
+                        .foregroundStyle(Theme.textTertiary)
+                        .lineSpacing(3)
+                }
+            }
+
+            if !edu.futureDemand.isEmpty {
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "arrow.up.right")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.accentBlue)
+                        .padding(.top, 2)
+                    Text(edu.futureDemand)
+                        .font(.caption)
+                        .foregroundStyle(Theme.textTertiary)
+                        .lineSpacing(3)
+                }
+            }
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+    }
+
+    private func degreeProgramDetails(_ edu: EducationPath) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader("Program Requirements", icon: "graduationcap.fill")
+
+            if !edu.deliveryType.isEmpty {
+                HStack(spacing: 6) {
+                    Image(systemName: "building.2.fill")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.accentBlue)
+                    Text("Format: \(edu.deliveryType)")
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+            }
+
+            if !edu.testRequirements.isEmpty {
+                Text("Exams & Certifications")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                ForEach(edu.testRequirements, id: \.self) { req in
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.caption)
+                            .foregroundStyle(Theme.accentBlue)
+                            .padding(.top, 1)
+                        Text(req)
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                }
+            }
+
+            if !edu.prerequisites.isEmpty {
+                Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                Text("Prerequisites")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                ForEach(edu.prerequisites, id: \.self) { prereq in
+                    HStack(alignment: .top, spacing: 10) {
+                        Circle()
+                            .fill(Theme.accentBlue)
+                            .frame(width: 5, height: 5)
+                            .padding(.top, 6)
+                        Text(prereq)
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                }
+            }
+
+            if !edu.basicSteps.isEmpty {
+                Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                Text("Steps to Complete")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                ForEach(Array(edu.basicSteps.enumerated()), id: \.offset) { index, step in
+                    HStack(alignment: .top, spacing: 12) {
+                        Text("\(index + 1)")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.white)
+                            .frame(width: 22, height: 22)
+                            .background(Theme.accentBlue)
+                            .clipShape(Circle())
+                        Text(step)
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                            .lineSpacing(2)
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+    }
+
+    private func degreeFundingSection(_ edu: EducationPath) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionHeader("Funding Options", icon: "banknote.fill")
+            ForEach(edu.fundingOptions, id: \.self) { option in
+                HStack(alignment: .top, spacing: 10) {
+                    Circle()
+                        .fill(Theme.accentBlue)
+                        .frame(width: 5, height: 5)
+                        .padding(.top, 6)
+                    Text(option)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+            }
+
+            if !edu.militaryPath.isEmpty {
+                Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "shield.fill")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.accentBlue)
+                        .padding(.top, 2)
+                    Text(edu.militaryPath)
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineSpacing(3)
+                }
+            }
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+    }
+
+    private func degreeFindProgramsSection(_ edu: EducationPath) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionHeader("How to Find Programs", icon: "magnifyingglass")
+            ForEach(edu.howToFindPrograms, id: \.self) { item in
+                HStack(alignment: .top, spacing: 10) {
+                    Circle()
+                        .fill(Theme.accentBlue)
+                        .frame(width: 5, height: 5)
+                        .padding(.top, 6)
+                    Text(item)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+            }
+
+            if !edu.employerSponsoredOptions.isEmpty {
+                Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                Text("Employer-Sponsored Options")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.accentBlue)
+                ForEach(edu.employerSponsoredOptions, id: \.self) { option in
+                    HStack(alignment: .top, spacing: 10) {
+                        Circle()
+                            .fill(Theme.accentBlue)
+                            .frame(width: 5, height: 5)
+                            .padding(.top, 6)
+                        Text(option)
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+    }
+
+    // MARK: - Shared Helpers
+
+    private func businessSetupSection(_ steps: [String]) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader("Business Setup", icon: "building.2.fill")
+            ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
+                HStack(alignment: .top, spacing: 12) {
+                    Text("\(index + 1)")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 22, height: 22)
+                        .background(Theme.accent)
+                        .clipShape(Circle())
+                    Text(step)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineSpacing(2)
+                }
+            }
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+    }
+
+    private func roadmapStat(icon: String, label: String, value: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.caption2)
+                .foregroundStyle(Theme.accent)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(.caption2)
+                    .foregroundStyle(Theme.textTertiary)
+                Text(value)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

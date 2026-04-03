@@ -15,6 +15,30 @@ nonisolated enum CareerRequirementType: String, Sendable {
     case foodPermitBased
 }
 
+nonisolated enum CareerTrack: String, Sendable, CaseIterable, Identifiable {
+    case startBusiness = "Start a Business"
+    case tradeAndCertification = "Trade School & Certifications"
+    case degreeBasedCareer = "Degree-Based Careers"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .startBusiness: return "briefcase.fill"
+        case .tradeAndCertification: return "wrench.and.screwdriver.fill"
+        case .degreeBasedCareer: return "graduationcap.fill"
+        }
+    }
+
+    var shortLabel: String {
+        switch self {
+        case .startBusiness: return "Business"
+        case .tradeAndCertification: return "Trades & Certs"
+        case .degreeBasedCareer: return "Degree Careers"
+        }
+    }
+}
+
 enum SmartCareerBrain {
     static func classifyPath(_ path: BusinessPath) -> CareerRequirementType {
         let id = path.id.lowercased()
@@ -402,6 +426,52 @@ enum SmartCareerBrain {
             return "Food-related businesses may require health department permits, food handler certifications, and compliance with cottage food laws. Requirements vary by state and locality."
         default:
             return nil
+        }
+    }
+
+    // MARK: - Career Track Classification
+
+    static func careerTrack(for path: BusinessPath) -> CareerTrack {
+        let reqType = classifyPath(path)
+        switch reqType {
+        case .licensedTrade, .apprenticeshipPath, .technologyCertification, .transportationLicensed, .certificationPath:
+            return .tradeAndCertification
+        case .healthcareLicensed, .degreePath:
+            return .degreeBasedCareer
+        case .generalService, .skilledTrade, .creativeFreelance, .digitalService, .foodPermitBased:
+            return .startBusiness
+        }
+    }
+
+    static func careerTrack(forEducation path: EducationPath) -> CareerTrack {
+        switch path.category {
+        case .trade:
+            return .tradeAndCertification
+        case .certification:
+            return .tradeAndCertification
+        case .healthcare:
+            return .degreeBasedCareer
+        case .technology:
+            return .tradeAndCertification
+        case .business:
+            return .tradeAndCertification
+        case .creative:
+            return .startBusiness
+        case .military:
+            return .tradeAndCertification
+        }
+    }
+
+    // MARK: - Track-Specific Detail Title
+
+    static func detailOutputTitle(for path: BusinessPath) -> String {
+        switch careerTrack(for: path) {
+        case .startBusiness:
+            return "Business Plan"
+        case .tradeAndCertification:
+            return "Training & Certification Roadmap"
+        case .degreeBasedCareer:
+            return "Career Pathway"
         }
     }
 }
