@@ -70,11 +70,20 @@ enum SmartCareerBrain {
             "civil-engineer", "mechanical-engineer", "electrical-engineer",
             "accountant-cpa", "architect", "radiologic-technologist",
             "ultrasound-technician", "physician", "veterinarian",
-            "lawyer", "attorney", "optometrist", "chiropractor"
+            "lawyer", "attorney", "optometrist", "chiropractor",
+            "dental-hygienist", "respiratory-therapist", "dietitian",
+            "audiologist", "clinical-lab-scientist",
+            "licensed-professional-counselor", "marriage-family-therapist",
+            "industrial-engineer", "environmental-engineer",
+            "compliance-officer", "regulatory-affairs-specialist",
+            "financial-advisor", "healthcare-administrator",
+            "special-education-teacher", "school-psychologist",
+            "university-professor", "school-administrator",
+            "airline-pilot", "air-traffic-controller", "military-officer"
         ]
         if degreeIds.contains(id) { return true }
         if edu.contains("degree") || edu.contains("bachelor") || edu.contains("master") || edu.contains("doctorate") || edu.contains("doctoral") { return true }
-        let keywords = ["registered nurse", "physical therapist", "occupational therapist", "speech pathologist", "physician assistant", "nurse practitioner", "pharmacist", "dentist", "psychologist", "social worker", "civil engineer", "mechanical engineer", "electrical engineer", "accountant", "architect", "radiologic", "sonograph", "ultrasound tech"]
+        let keywords = ["registered nurse", "physical therapist", "occupational therapist", "speech pathologist", "physician assistant", "nurse practitioner", "pharmacist", "dentist", "psychologist", "social worker", "civil engineer", "mechanical engineer", "electrical engineer", "accountant", "architect", "radiologic", "sonograph", "ultrasound tech", "dental hygienist", "respiratory therapist", "dietitian", "optometrist", "audiologist", "veterinarian", "counselor", "marriage.*therapist", "industrial engineer", "environmental engineer", "compliance officer", "regulatory affairs", "financial advisor", "healthcare admin", "special education", "school psychologist", "professor", "school admin", "airline pilot", "air traffic", "military officer"]
         return keywords.contains { name.contains($0) }
     }
 
