@@ -69,6 +69,7 @@ struct BadgeCelebrationOverlay: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Badge unlocked: \(badge.title). \(badge.description)")
+        .sensoryFeedback(.success, trigger: appear)
         .onAppear {
             if reduceMotion {
                 appear = true

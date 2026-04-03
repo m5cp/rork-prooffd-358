@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		XX298127CFBB2CF3FA631BXX /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = XXDCC169DE7B2F3C1C8B10XX /* RevenueCat */; };
+		XXAEBFC97E85A904A8FB5CXX /* ProoffdWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = XX21AF9FBF5AC701A8F512XX /* ProoffdWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -25,29 +26,54 @@
 			remoteGlobalIDString = 105FC5792E9EAD3100EA8BCF;
 			remoteInfo = Prooffd;
 		};
+		XX6F3C0DF434499E687515XX /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 105FC5722E9EAD3100EA8BCF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = XX16F296E3F6A111E3DCE2XX;
+			remoteInfo = ProoffdWidget;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		XXA12972699DF141884B33XX /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				XXAEBFC97E85A904A8FB5CXX /* ProoffdWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		105FC57A2E9EAD3100EA8BCF /* Prooffd.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Prooffd.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		105FC5892E9EAD3200EA8BCF /* ProoffdTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProoffdTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		105FC5932E9EAD3200EA8BCF /* ProoffdUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProoffdUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		XX21AF9FBF5AC701A8F512XX /* ProoffdWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ProoffdWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		XX6E02ECF10FC4C8EC4A37XX /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = XX16F296E3F6A111E3DCE2XX /* ProoffdWidget */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		105FC57C2E9EAD3100EA8BCF /* Prooffd */ = {
+		XX11A98F94738272EAEF72XX /* ProoffdWidget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Prooffd;
+			path = ProoffdWidget;
 			sourceTree = "<group>";
-		};
-		105FC58C2E9EAD3200EA8BCF /* ProoffdTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = ProoffdTests;
-			sourceTree = "<group>";
-		};
-		105FC5962E9EAD3200EA8BCF /* ProoffdUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = ProoffdUITests;
-			sourceTree = "<group>";
+			exceptions = (
+				XX6E02ECF10FC4C8EC4A37XX /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
+			);
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -74,7 +100,32 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		XX75B8358D2242CEB782C5XX /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		105FC57C2E9EAD3100EA8BCF /* Prooffd */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Prooffd;
+			sourceTree = "<group>";
+		};
+		105FC58C2E9EAD3200EA8BCF /* ProoffdTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ProoffdTests;
+			sourceTree = "<group>";
+		};
+		105FC5962E9EAD3200EA8BCF /* ProoffdUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ProoffdUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXGroup section */
 		105FC5712E9EAD3100EA8BCF = {
@@ -84,6 +135,7 @@
 				105FC58C2E9EAD3200EA8BCF /* ProoffdTests */,
 				105FC5962E9EAD3200EA8BCF /* ProoffdUITests */,
 				105FC57B2E9EAD3100EA8BCF /* Products */,
+				XX11A98F94738272EAEF72XX /* ProoffdWidget */,
 			);
 			sourceTree = "<group>";
 		};
@@ -93,6 +145,7 @@
 				105FC57A2E9EAD3100EA8BCF /* Prooffd.app */,
 				105FC5892E9EAD3200EA8BCF /* ProoffdTests.xctest */,
 				105FC5932E9EAD3200EA8BCF /* ProoffdUITests.xctest */,
+				XX21AF9FBF5AC701A8F512XX /* ProoffdWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -107,10 +160,12 @@
 				105FC5762E9EAD3100EA8BCF /* Sources */,
 				105FC5772E9EAD3100EA8BCF /* Frameworks */,
 				105FC5782E9EAD3100EA8BCF /* Resources */,
+				XXA12972699DF141884B33XX /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				XX32FE34F9A0A942300B47XX /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				105FC57C2E9EAD3100EA8BCF /* Prooffd */,
@@ -169,6 +224,26 @@
 			productReference = 105FC5932E9EAD3200EA8BCF /* ProoffdUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		XX16F296E3F6A111E3DCE2XX /* ProoffdWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = XX221B027F30DD9B919C2AXX /* Build configuration list for PBXNativeTarget "ProoffdWidget" */;
+			buildPhases = (
+				XXE0FD6AFA7551401BFCEBXX /* Sources */,
+				XX75B8358D2242CEB782C5XX /* Frameworks */,
+				XX8DEE49FEB104205DDA8DXX /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ProoffdWidget;
+			productName = ProoffdWidget;
+			productReference = XX21AF9FBF5AC701A8F512XX /* ProoffdWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+			fileSystemSynchronizedGroups = (
+				XX11A98F94738272EAEF72XX /* ProoffdWidget */,
+			);
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -209,6 +284,7 @@
 				105FC5792E9EAD3100EA8BCF /* Prooffd */,
 				105FC5882E9EAD3200EA8BCF /* ProoffdTests */,
 				105FC5922E9EAD3200EA8BCF /* ProoffdUITests */,
+				XX16F296E3F6A111E3DCE2XX /* ProoffdWidget */,
 			);
 			packageReferences = (
 				XX4AC81916604C4344ADC0XX /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
@@ -232,6 +308,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		105FC5912E9EAD3200EA8BCF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		XX8DEE49FEB104205DDA8DXX /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -262,6 +345,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		XXE0FD6AFA7551401BFCEBXX /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -274,6 +364,11 @@
 			isa = PBXTargetDependency;
 			target = 105FC5792E9EAD3100EA8BCF /* Prooffd */;
 			targetProxy = 105FC5942E9EAD3200EA8BCF /* PBXContainerItemProxy */;
+		};
+		XX32FE34F9A0A942300B47XX /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = XX16F296E3F6A111E3DCE2XX /* ProoffdWidget */;
+			targetProxy = XX6F3C0DF434499E687515XX /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -555,6 +650,52 @@
 			};
 			name = Release;
 		};
+		XX3706D1B7E34A6E31C32FXX /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ProoffdWidget/ProoffdWidget.entitlements;
+				PRODUCT_BUNDLE_IDENTIFIER = app.rork.esc9h64rp95qzub2hjc9u.prooffdwidget;
+				PRODUCT_NAME = ProoffdWidget;
+				SWIFT_VERSION = 5.0;
+				SDKROOT = iphoneos;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ProoffdWidget/Info.plist;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 1.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				INFOPLIST_KEY_CFBundleDisplayName = "$(PRODUCT_NAME)";
+			};
+			name = Release;
+		};
+		XXA05F4A8D8FA253B88CC2XX /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ProoffdWidget/ProoffdWidget.entitlements;
+				PRODUCT_BUNDLE_IDENTIFIER = app.rork.esc9h64rp95qzub2hjc9u.prooffdwidget;
+				PRODUCT_NAME = ProoffdWidget;
+				SWIFT_VERSION = 5.0;
+				SDKROOT = iphoneos;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ProoffdWidget/Info.plist;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 1.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				INFOPLIST_KEY_CFBundleDisplayName = "$(PRODUCT_NAME)";
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -590,6 +731,15 @@
 			buildConfigurations = (
 				105FC5A42E9EAD3200EA8BCF /* Debug */,
 				105FC5A52E9EAD3200EA8BCF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		XX221B027F30DD9B919C2AXX /* Build configuration list for PBXNativeTarget "ProoffdWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				XXA05F4A8D8FA253B88CC2XX /* Debug */,
+				XX3706D1B7E34A6E31C32FXX /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

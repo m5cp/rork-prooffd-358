@@ -151,6 +151,7 @@ struct UnifiedExploreView: View {
                             .background(selectedSegment == segment ? Theme.accent : Theme.cardBackground)
                             .clipShape(.capsule)
                     }
+                    .sensoryFeedback(.selection, trigger: selectedSegment)
                 }
             }
             .padding(.horizontal, 16)

@@ -425,6 +425,7 @@ class AppState {
         checkMomentumBadges()
         NotificationService.shared.recordActivity()
         NotificationService.shared.scheduleStreakReminder(currentStreak: streakTracker.currentStreak)
+        syncWidgetData()
     }
 
     func completeDailyMicroAction() {
@@ -432,11 +433,30 @@ class AppState {
         let action = dailyMicroAction.todayAction
         dailyMicroAction.completeAction()
         momentum.awardPoints(action.points, reason: .dailyUse)
+        syncWidgetData()
     }
 
     func claimDailyReward() {
         let reward = dailyRewards.claimReward()
         momentum.awardPoints(reward.points, reason: .dailyUse)
+        syncWidgetData()
+    }
+
+    func syncWidgetData() {
+        let tip = DailyTipDatabase.tipForToday()
+        let action = dailyMicroAction.todayAction
+        SharedDataService.updateWidgetData(
+            streakCount: streakTracker.currentStreak,
+            longestStreak: streakTracker.longestStreak,
+            buildsCount: builds.count,
+            tipTitle: tip.title,
+            tipBody: tip.body,
+            tipCategory: tip.category.rawValue,
+            microActionTitle: action.title,
+            microActionCompleted: dailyMicroAction.completedToday,
+            totalPoints: momentum.totalPoints,
+            levelName: currentLevel.title
+        )
     }
 
     // MARK: - Readiness

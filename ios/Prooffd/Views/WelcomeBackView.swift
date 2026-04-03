@@ -89,6 +89,7 @@ struct WelcomeBackView: View {
                             .background(Theme.accent)
                             .clipShape(.capsule)
                     }
+                    .sensoryFeedback(.impact(flexibility: .soft), trigger: true)
                 }
                 .padding(24)
                 .background(Theme.background)

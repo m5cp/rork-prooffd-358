@@ -51,6 +51,7 @@ struct ResultsRevealView: View {
                         .font(.subheadline)
                         .foregroundStyle(Theme.textSecondary)
                 }
+                .sensoryFeedback(.success, trigger: showBadge)
 
                 if showBadge {
                     HStack(spacing: 8) {

@@ -1,5 +1,6 @@
 import SwiftUI
 import RevenueCat
+import AppIntents
 
 @main
 struct ProoffdApp: App {
@@ -14,6 +15,8 @@ struct ProoffdApp: App {
         if !apiKey.isEmpty {
             Purchases.configure(withAPIKey: apiKey)
         }
+        ProoffdShortcuts.updateAppShortcutParameters()
+        SpotlightService.indexAllPaths()
     }
 
     var body: some Scene {
