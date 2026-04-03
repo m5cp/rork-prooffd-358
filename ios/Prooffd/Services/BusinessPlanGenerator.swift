@@ -365,7 +365,7 @@ enum BusinessPlanGenerator {
                 content: [
                     BusinessPlanLine(text: "[Your Name] — Founder & Lead Operator", style: .placeholder),
                     BusinessPlanLine(text: "Responsible for service delivery, client acquisition, and day-to-day operations.", style: .body),
-                    BusinessPlanLine(text: path.educationRequired == "None" ? "No formal education required. Skills developed through hands-on experience and continuous learning." : "Qualifications: \(path.educationRequired).", style: .body),
+                    BusinessPlanLine(text: SmartCareerBrain.educationText(for: path), style: .body),
                     BusinessPlanLine(text: "Planned Hires: Part-time help as client base exceeds solo capacity. Virtual assistant for scheduling and admin at scale.", style: .bullet)
                 ]
             ),

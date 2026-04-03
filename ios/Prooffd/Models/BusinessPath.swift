@@ -410,22 +410,22 @@ nonisolated enum LLCRequirement: String, Codable, Sendable {
 extension BusinessPath {
     static func generateDegreeRequirement(educationRequired: String, category: BusinessCategory) -> String {
         let edu = educationRequired.lowercased()
-        if edu.contains("none") || edu.contains("no ") {
-            return "No degree required. Learn through practice, online tutorials, and on-the-job experience."
-        }
-        if edu.contains("certification") || edu.contains("cert") {
-            return "Online certification available. No degree required, but certification improves credibility."
-        }
         if edu.contains("apprenticeship") {
-            return "Apprenticeship required. Typically 2–5 years of supervised training. No college degree needed."
+            return "Formal training through a trade school or apprenticeship program is typically required. Hands-on training under experienced professionals is strongly recommended. Certification may be required depending on your state."
         }
         if edu.contains("trade school") {
-            return "Trade school or vocational program. Typically 6 months to 2 years. No 4-year degree needed."
+            return "Trade school or vocational program typically required. Programs range from 6 months to 2 years. No four-year degree needed, but structured training is essential."
         }
-        if edu.contains("license") {
-            return "State licensing required. Complete required coursework and pass licensing exam. No 4-year degree needed."
+        if edu.contains("license") || edu.contains("licence") {
+            return "State or local licensing may be required. Complete required coursework and pass licensing exams. Research your specific state requirements before starting."
         }
-        return "No formal degree required. Skills can be self-taught or learned through short courses."
+        if edu.contains("certification") || edu.contains("cert") {
+            return "Professional certification improves credibility and earning potential. Structured courses and exam preparation are available. No four-year degree typically required."
+        }
+        if edu.contains("none") || edu.contains("no ") {
+            return "No formal degree required. Learn core service standards through practice, short courses, and hands-on experience before taking on clients."
+        }
+        return "No formal degree required. Develop your skills through structured practice, courses, and real-world experience."
     }
 
     static func generateLLCInfo(for category: BusinessCategory, isGig: Bool) -> LLCInfo {

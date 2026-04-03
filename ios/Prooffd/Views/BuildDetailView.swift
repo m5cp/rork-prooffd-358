@@ -65,7 +65,6 @@ struct BuildDetailView: View {
                             planSectionDivider("Details")
 
                             businessPlanEditorSection(build)
-                            llcInfoSection
                             degreeSection
                             unlockTiersSection(build)
                             suggestionsSection(build)
@@ -779,84 +778,31 @@ struct BuildDetailView: View {
         }
     }
 
-    // MARK: - LLC & Degree
-
-    private var llcInfoSection: some View {
-        Group {
-            if let path {
-                VStack(alignment: .leading, spacing: 12) {
-                    sectionHeader("LLC & Business Structure", icon: "building.columns.fill")
-
-                    HStack(spacing: 8) {
-                        let reqColor: Color = path.llcInfo.requirement == .notNeeded ? Theme.accent :
-                            path.llcInfo.requirement == .optional ? Color(hex: "FBBF24") :
-                            path.llcInfo.requirement == .recommended ? .orange : .red.opacity(0.8)
-
-                        Text(path.llcInfo.requirement.rawValue)
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(reqColor)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(reqColor.opacity(0.12))
-                            .clipShape(.capsule)
-                    }
-
-                    Text(path.llcInfo.explanation)
-                        .font(.subheadline)
-                        .foregroundStyle(Theme.textSecondary)
-                        .lineSpacing(4)
-
-                    VStack(spacing: 8) {
-                        HStack {
-                            Text("Without LLC")
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(Theme.textTertiary)
-                            Spacer()
-                            Text(path.llcInfo.costWithoutLLC)
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(Theme.textPrimary)
-                        }
-                        Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
-                        HStack {
-                            Text("With LLC")
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(Theme.textTertiary)
-                            Spacer()
-                            Text(path.llcInfo.costWithLLC)
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(Theme.textPrimary)
-                        }
-                    }
-                    .padding(12)
-                    .background(Theme.cardBackgroundLight)
-                    .clipShape(.rect(cornerRadius: 10))
-
-                    HStack(alignment: .top, spacing: 6) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .font(.caption2)
-                            .foregroundStyle(.orange)
-                        Text("LLC costs and requirements vary by state and city. Check with your state's Secretary of State office and local tax authority for fees, registered agent requirements, and business licensing.")
-                            .font(.caption2)
-                            .foregroundStyle(Theme.textTertiary)
-                            .lineSpacing(2)
-                    }
-                }
-                .padding(16)
-                .background(Theme.cardBackground)
-                .clipShape(.rect(cornerRadius: 14))
-            }
-        }
-    }
+    // MARK: - Education & Training
 
     private var degreeSection: some View {
         Group {
             if let path {
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 12) {
                     sectionHeader("Education & Training", icon: "graduationcap.fill")
-                    Text(path.degreeRequirement)
+
+                    Text(SmartCareerBrain.educationText(for: path))
                         .font(.subheadline)
                         .foregroundStyle(Theme.textSecondary)
                         .lineSpacing(4)
+
+                    if let notice = SmartCareerBrain.regulatoryNotice(for: path) {
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.orange)
+                                .padding(.top, 2)
+                            Text(notice)
+                                .font(.caption2)
+                                .foregroundStyle(Theme.textTertiary)
+                                .lineSpacing(2)
+                        }
+                    }
                 }
                 .padding(16)
                 .background(Theme.cardBackground)
