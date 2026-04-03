@@ -877,13 +877,30 @@ struct PathDetailView: View {
 
     // MARK: - Start a Business Track
 
+    private var startupContent: BusinessStartupContent {
+        BusinessStartupContentBuilder.build(for: path)
+    }
+
     @ViewBuilder
     private var businessTrackContent: some View {
+        whatYouNeedToStartSection
+        startupCostBreakdownSection
+        typicalPricingSection
+
+        let content = startupContent
+        if !content.licensesAndPermits.isEmpty {
+            licensesPermitsSection(content.licensesAndPermits)
+        }
+        if !content.toolsAndEquipment.isEmpty {
+            toolsEquipmentSection(content.toolsAndEquipment)
+        }
+
         actionPlanSection
-        whatOthersChargeSection
+        launchRoadmapDisplaySection
+        marketingAcquisitionSection
+        bookkeepingTaxSection
 
         if store.isPremium {
-            pricingSection
             emailSection
             textMessageSection
             scriptSection(title: "Sales Intro Script", icon: "person.wave.2.fill", content: path.salesIntroScript)
@@ -893,6 +910,428 @@ struct PathDetailView: View {
         } else {
             lockedProContentSection
         }
+    }
+
+    // MARK: - Business Track Sections
+
+    private var whatYouNeedToStartSection: some View {
+        let content = startupContent
+        return VStack(alignment: .leading, spacing: 14) {
+            sectionHeader("What You Need to Start", icon: "checklist")
+
+            Text("Complete these essentials to launch your \(path.name) business.")
+                .font(.caption)
+                .foregroundStyle(Theme.textTertiary)
+                .lineSpacing(3)
+
+            if !content.pathSpecificChecklist.isEmpty {
+                Text("Business-Specific")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.accent)
+                    .padding(.top, 4)
+
+                ForEach(content.pathSpecificChecklist) { item in
+                    checklistRow(item)
+                }
+
+                Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+            }
+
+            Text("Universal Startup Checklist")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Theme.textSecondary)
+                .padding(.top, content.pathSpecificChecklist.isEmpty ? 0 : 4)
+
+            ForEach(content.universalChecklist) { item in
+                checklistRow(item)
+            }
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+    }
+
+    private func checklistRow(_ item: StartupChecklistItem) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: item.icon)
+                .font(.caption)
+                .foregroundStyle(item.isUniversal ? Theme.textTertiary : Theme.accent)
+                .frame(width: 20)
+                .padding(.top, 1)
+            Text(item.title)
+                .font(.subheadline)
+                .foregroundStyle(Theme.textSecondary)
+                .lineSpacing(2)
+        }
+    }
+
+    private var startupCostBreakdownSection: some View {
+        let planData = BusinessPlanDatabase.lookup(path.id)
+
+        return VStack(alignment: .leading, spacing: 12) {
+            sectionHeader("Startup Cost Breakdown", icon: "cart.fill")
+
+            HStack {
+                Text("Total Range")
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.textSecondary)
+                Spacer()
+                Text(path.startupCostRange)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(Theme.accent)
+            }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(Theme.accent.opacity(0.08))
+            .clipShape(.rect(cornerRadius: 10))
+
+            if let data = planData, !data.startupCostItemsEssential.isEmpty {
+                Text("Essential Items")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                    .padding(.top, 4)
+
+                ForEach(Array(data.startupCostItemsEssential.enumerated()), id: \.offset) { _, item in
+                    HStack {
+                        Text(item.0)
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                        Spacer()
+                        Text(item.1)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.accent)
+                    }
+                    Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                }
+            }
+
+            if let data = planData, !data.startupCostItemsOptional.isEmpty {
+                Text("Optional Items")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.textTertiary)
+                    .padding(.top, 4)
+
+                ForEach(Array(data.startupCostItemsOptional.enumerated()), id: \.offset) { _, item in
+                    HStack {
+                        Text(item.0)
+                            .font(.caption)
+                            .foregroundStyle(Theme.textTertiary)
+                        Spacer()
+                        Text(item.1)
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+    }
+
+    private var typicalPricingSection: some View {
+        let tiers = startupContent.pricingTiers
+
+        return VStack(alignment: .leading, spacing: 12) {
+            sectionHeader("Typical Pricing & Revenue", icon: "tag.fill")
+
+            Text("What you can expect to earn at different stages:")
+                .font(.caption)
+                .foregroundStyle(Theme.textTertiary)
+                .lineSpacing(3)
+
+            ForEach(Array(tiers.enumerated()), id: \.offset) { index, tier in
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 8) {
+                        Text(tier.label)
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(tierColor(index: index))
+                            .clipShape(.capsule)
+
+                        Spacer()
+                    }
+
+                    Text(tier.range)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Theme.textPrimary)
+
+                    Text(tier.description)
+                        .font(.caption)
+                        .foregroundStyle(Theme.textTertiary)
+                }
+                .padding(12)
+                .background(tierColor(index: index).opacity(0.06))
+                .clipShape(.rect(cornerRadius: 10))
+            }
+
+            let planData = BusinessPlanDatabase.lookup(path.id)
+            if let data = planData, !data.pricingNotes.isEmpty {
+                Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "info.circle.fill")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.accent)
+                        .padding(.top, 2)
+                    Text(data.pricingNotes)
+                        .font(.caption)
+                        .foregroundStyle(Theme.textTertiary)
+                        .lineSpacing(3)
+                }
+            }
+
+            if let data = planData, !data.upsells.isEmpty {
+                Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                Text("Upsell & Package Ideas")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                ForEach(data.upsells, id: \.self) { upsell in
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.caption2)
+                            .foregroundStyle(Theme.accent)
+                            .padding(.top, 2)
+                        Text(upsell)
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                }
+            }
+
+            HStack(spacing: 6) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.caption2)
+                    .foregroundStyle(.orange)
+                Text("All figures are general ranges, not income guarantees. Varies by location, experience, and market.")
+                    .font(.caption2)
+                    .foregroundStyle(Theme.textTertiary)
+                    .lineSpacing(2)
+            }
+            .padding(.top, 4)
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+    }
+
+    private func tierColor(index: Int) -> Color {
+        switch index {
+        case 0: return Theme.accent
+        case 1: return Theme.accentBlue
+        default: return Color(hex: "34D399")
+        }
+    }
+
+    private func licensesPermitsSection(_ items: [String]) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader("Licenses & Permits", icon: "checkmark.seal.fill")
+            ForEach(items, id: \.self) { item in
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.caption)
+                        .foregroundStyle(Theme.accent)
+                        .padding(.top, 1)
+                    Text(item)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+            }
+            HStack(spacing: 6) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.caption2)
+                    .foregroundStyle(.orange)
+                Text("Requirements vary by state and locality. Always verify with your local government.")
+                    .font(.caption2)
+                    .foregroundStyle(Theme.textTertiary)
+                    .lineSpacing(2)
+            }
+            .padding(.top, 4)
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+    }
+
+    private func toolsEquipmentSection(_ items: [String]) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader("Tools & Equipment", icon: "wrench.and.screwdriver.fill")
+            ForEach(Array(items.prefix(12).enumerated()), id: \.offset) { _, item in
+                HStack(alignment: .top, spacing: 10) {
+                    Circle()
+                        .fill(Theme.accent)
+                        .frame(width: 5, height: 5)
+                        .padding(.top, 6)
+                    Text(item)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+            }
+            if items.count > 12 {
+                Text("+ \(items.count - 12) more items listed in the full business plan")
+                    .font(.caption)
+                    .foregroundStyle(Theme.textTertiary)
+            }
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+    }
+
+    private var launchRoadmapDisplaySection: some View {
+        let planData = BusinessPlanDatabase.lookup(path.id)
+
+        return Group {
+            if let data = planData, !data.launchSteps30Days.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    sectionHeader("30-60-90 Day Launch Plan", icon: "flag.checkered")
+
+                    launchPhase(title: "Days 1–30", steps: data.launchSteps30Days, color: Theme.accent)
+
+                    if !data.launchSteps60Days.isEmpty {
+                        Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                        launchPhase(title: "Days 31–60", steps: data.launchSteps60Days, color: Theme.accentBlue)
+                    }
+
+                    if !data.launchSteps90Days.isEmpty {
+                        Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                        launchPhase(title: "Days 61–90", steps: data.launchSteps90Days, color: Color(hex: "34D399"))
+                    }
+                }
+                .padding(16)
+                .background(Theme.cardBackground)
+                .clipShape(.rect(cornerRadius: 14))
+            }
+        }
+    }
+
+    private func launchPhase(title: String, steps: [String], color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(color)
+            ForEach(Array(steps.enumerated()), id: \.offset) { _, step in
+                HStack(alignment: .top, spacing: 10) {
+                    Circle()
+                        .fill(color)
+                        .frame(width: 5, height: 5)
+                        .padding(.top, 6)
+                    Text(step)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineSpacing(2)
+                }
+            }
+        }
+    }
+
+    private var marketingAcquisitionSection: some View {
+        let content = startupContent
+
+        return VStack(alignment: .leading, spacing: 12) {
+            sectionHeader("Marketing & Customer Acquisition", icon: "megaphone.fill")
+
+            if !content.marketingChannels.isEmpty {
+                Text("Marketing Channels")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                ForEach(content.marketingChannels, id: \.self) { channel in
+                    HStack(alignment: .top, spacing: 10) {
+                        Circle()
+                            .fill(Theme.accent)
+                            .frame(width: 5, height: 5)
+                            .padding(.top, 6)
+                        Text(channel)
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                }
+            }
+
+            let planData = BusinessPlanDatabase.lookup(path.id)
+            if let data = planData, !data.acquisitionStrategies.isEmpty {
+                Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                Text("Customer Acquisition")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                ForEach(data.acquisitionStrategies, id: \.self) { strategy in
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "arrow.right.circle.fill")
+                            .font(.caption2)
+                            .foregroundStyle(Theme.accentBlue)
+                            .padding(.top, 2)
+                        Text(strategy)
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                }
+            }
+
+            if let data = planData, !data.referralStrategies.isEmpty {
+                Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+                Text("Referral Strategies")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                ForEach(data.referralStrategies, id: \.self) { strategy in
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "person.2.fill")
+                            .font(.caption2)
+                            .foregroundStyle(Theme.accent)
+                            .padding(.top, 2)
+                        Text(strategy)
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+    }
+
+    private var bookkeepingTaxSection: some View {
+        let items = startupContent.bookkeepingBasics
+
+        return VStack(alignment: .leading, spacing: 12) {
+            sectionHeader("Bookkeeping, Tax & Business Setup", icon: "chart.bar.doc.horizontal.fill")
+
+            Text("Financial basics every new business owner should set up:")
+                .font(.caption)
+                .foregroundStyle(Theme.textTertiary)
+                .lineSpacing(3)
+
+            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: "checkmark")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(Theme.accent)
+                        .frame(width: 16)
+                        .padding(.top, 2)
+                    Text(item)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineSpacing(2)
+                }
+            }
+
+            Rectangle().fill(Theme.cardBackgroundLight).frame(height: 0.5)
+
+            HStack(alignment: .top, spacing: 8) {
+                Image(systemName: "info.circle.fill")
+                    .font(.caption2)
+                    .foregroundStyle(Theme.accentBlue)
+                    .padding(.top, 2)
+                Text("Consider consulting a tax professional or CPA familiar with small businesses in your state.")
+                    .font(.caption2)
+                    .foregroundStyle(Theme.textTertiary)
+                    .lineSpacing(2)
+            }
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
     }
 
     // MARK: - Trade & Certification Track
