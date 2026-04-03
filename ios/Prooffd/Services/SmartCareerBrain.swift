@@ -434,9 +434,9 @@ enum SmartCareerBrain {
     static func careerTrack(for path: BusinessPath) -> CareerTrack {
         let reqType = classifyPath(path)
         switch reqType {
-        case .licensedTrade, .apprenticeshipPath, .technologyCertification, .transportationLicensed, .certificationPath:
+        case .licensedTrade, .apprenticeshipPath, .technologyCertification, .transportationLicensed, .certificationPath, .healthcareLicensed:
             return .tradeAndCertification
-        case .healthcareLicensed, .degreePath:
+        case .degreePath:
             return .degreeBasedCareer
         case .generalService, .skilledTrade, .creativeFreelance, .digitalService, .foodPermitBased:
             return .startBusiness
@@ -450,7 +450,7 @@ enum SmartCareerBrain {
         case .certification:
             return .tradeAndCertification
         case .healthcare:
-            return .degreeBasedCareer
+            return .tradeAndCertification
         case .technology:
             return .tradeAndCertification
         case .business:
