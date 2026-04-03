@@ -574,7 +574,7 @@ struct BuildDetailView: View {
 
                 HStack(spacing: 8) {
                     detailChip("Customer: \(path.customerType)")
-                    detailChip("Education: \(path.educationRequired)")
+                    detailChip("Education: \(SmartCareerBrain.educationChipText(for: path))")
                 }
             }
         }
@@ -701,11 +701,12 @@ struct BuildDetailView: View {
 
     private var firstCustomerSection: some View {
         Group {
-            if let path, !path.actionPlan.isEmpty {
+            if let path {
+                let smartSteps = SmartCareerBrain.smartActionPlan(for: path)
                 VStack(alignment: .leading, spacing: 12) {
                     sectionHeader("First Customer Plan", icon: "person.badge.plus")
 
-                    ForEach(Array(path.actionPlan.prefix(5).enumerated()), id: \.offset) { index, step in
+                    ForEach(Array(smartSteps.prefix(5).enumerated()), id: \.offset) { index, step in
                         HStack(alignment: .top, spacing: 12) {
                             Text("\(index + 1)")
                                 .font(.caption.weight(.bold))

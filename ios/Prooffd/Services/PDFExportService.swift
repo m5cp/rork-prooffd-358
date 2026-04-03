@@ -180,13 +180,14 @@ struct PathPDFDocument: View {
             pdfField("Time to First Dollar", path.timeToFirstDollar)
             pdfField("Typical Market Rates", path.typicalMarketRates)
             pdfField("Customer Type", path.customerType)
-            pdfField("Education Required", path.educationRequired)
+            pdfField("Education Required", SmartCareerBrain.educationChipText(for: path))
 
             Divider()
 
             Text("Action Plan")
                 .font(.headline)
-            ForEach(Array(path.actionPlan.enumerated()), id: \.offset) { index, step in
+            let smartSteps = SmartCareerBrain.smartActionPlan(for: path)
+            ForEach(Array(smartSteps.enumerated()), id: \.offset) { index, step in
                 Text("\(index + 1). \(step)")
                     .font(.body)
             }

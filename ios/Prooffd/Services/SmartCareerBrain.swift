@@ -322,6 +322,26 @@ enum SmartCareerBrain {
         }
     }
 
+    // MARK: - Education Chip Text
+
+    static func educationChipText(for path: BusinessPath) -> String {
+        let careerType = classifyPath(path)
+        switch careerType {
+        case .licensedTrade: return "Trade school / License required"
+        case .apprenticeshipPath: return "Trade school / Apprenticeship"
+        case .healthcareLicensed: return "Accredited program / Certification"
+        case .transportationLicensed: return "Licensed / Approved training"
+        case .technologyCertification: return "Structured training / Certification"
+        case .certificationPath: return "Certification / Training required"
+        case .foodPermitBased: return "Permits / Food safety training"
+        case .skilledTrade: return "Hands-on training recommended"
+        case .creativeFreelance: return "Portfolio / Skill development"
+        case .digitalService: return "Skill development / Practice"
+        case .generalService: return "Learn service standards"
+        case .degreePath: return "Degree / Formal education"
+        }
+    }
+
     // MARK: - Business Setup Steps
 
     static func businessSetupSteps(for path: BusinessPath) -> [String] {
