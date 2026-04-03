@@ -1703,8 +1703,24 @@ struct PathDetailView: View {
 
     // MARK: - Degree-Based Career Track
 
+    private var degreeDetailData: DegreeCareerDetailData? {
+        if let data = DegreeCareerDatabase.lookup(path.id) { return data }
+        if let edu = linkedEducation, let data = DegreeCareerDatabase.lookupByEducationId(edu.id) { return data }
+        return nil
+    }
+
     @ViewBuilder
     private var degreeTrackContent: some View {
+        degreeDegreeRequiredSection
+        degreeTimelineSection
+        degreePrerequisitesSection
+        degreeLicensingExamSection
+        degreeClinicalSection
+        degreeSalaryRangeSection
+        degreeAIResistantSection
+        degreeDemandStabilitySection
+        degreeBestFitSection
+
         if let edu = linkedEducation {
             degreeCareerPathway(edu)
             degreeProgramDetails(edu)
@@ -1714,14 +1730,8 @@ struct PathDetailView: View {
 
         actionPlanSection
 
-        let setupSteps = SmartCareerBrain.businessSetupSteps(for: path)
-        if !setupSteps.isEmpty {
-            businessSetupSection(setupSteps)
-        }
-
-        whatOthersChargeSection
-
         if store.isPremium {
+            whatOthersChargeSection
             pricingSection
         } else {
             lockedProContentSection
@@ -1921,6 +1931,347 @@ struct PathDetailView: View {
         .padding(16)
         .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 14))
+    }
+
+    // MARK: - Degree Detail Sections (Phase 4)
+
+    private var degreeDegreeRequiredSection: some View {
+        let data = degreeDetailData
+        let edu = linkedEducation
+
+        return Group {
+            if data != nil || edu != nil {
+                VStack(alignment: .leading, spacing: 12) {
+                    sectionHeader("Degree Required", icon: "graduationcap.fill")
+
+                    if let data {
+                        Text(data.degreeRequired)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.textPrimary)
+                            .lineSpacing(3)
+
+                        if !data.degreeDetail.isEmpty {
+                            Text(data.degreeDetail)
+                                .font(.subheadline)
+                                .foregroundStyle(Theme.textSecondary)
+                                .lineSpacing(4)
+                        }
+                    } else if let edu {
+                        Text(edu.deliveryType)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.textPrimary)
+
+                        Text(edu.overview)
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                            .lineSpacing(4)
+                    }
+                }
+                .padding(16)
+                .background(Theme.cardBackground)
+                .clipShape(.rect(cornerRadius: 14))
+            }
+        }
+    }
+
+    private var degreeTimelineSection: some View {
+        let data = degreeDetailData
+        let edu = linkedEducation
+        let timeline = data?.educationTimeline ?? edu?.timeToComplete ?? ""
+        let detail = data?.timelineDetail ?? ""
+
+        return Group {
+            if !timeline.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    sectionHeader("Typical Education Timeline", icon: "calendar.badge.clock")
+
+                    HStack(spacing: 10) {
+                        Text(timeline)
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(Theme.accentBlue)
+                        Spacer()
+                    }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
+                    .background(Theme.accentBlue.opacity(0.08))
+                    .clipShape(.rect(cornerRadius: 10))
+
+                    if !detail.isEmpty {
+                        Text(detail)
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.textSecondary)
+                            .lineSpacing(4)
+                    }
+                }
+                .padding(16)
+                .background(Theme.cardBackground)
+                .clipShape(.rect(cornerRadius: 14))
+            }
+        }
+    }
+
+    private var degreePrerequisitesSection: some View {
+        let data = degreeDetailData
+        let edu = linkedEducation
+        let prereqs = data?.prerequisites ?? edu?.prerequisites ?? []
+
+        return Group {
+            if !prereqs.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    sectionHeader("Prerequisites & Admissions Prep", icon: "list.clipboard.fill")
+
+                    ForEach(Array(prereqs.enumerated()), id: \.offset) { _, prereq in
+                        HStack(alignment: .top, spacing: 10) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.caption)
+                                .foregroundStyle(Theme.accentBlue)
+                                .padding(.top, 1)
+                            Text(prereq)
+                                .font(.subheadline)
+                                .foregroundStyle(Theme.textSecondary)
+                                .lineSpacing(2)
+                        }
+                    }
+                }
+                .padding(16)
+                .background(Theme.cardBackground)
+                .clipShape(.rect(cornerRadius: 14))
+            }
+        }
+    }
+
+    private var degreeLicensingExamSection: some View {
+        let data = degreeDetailData
+        let edu = linkedEducation
+        let exams = data?.licensingExamPath ?? edu?.testRequirements ?? []
+
+        return Group {
+            if !exams.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    sectionHeader("Licensing & Exam Path", icon: "checkmark.seal.fill")
+
+                    ForEach(Array(exams.enumerated()), id: \.offset) { index, exam in
+                        HStack(alignment: .top, spacing: 12) {
+                            Text("\(index + 1)")
+                                .font(.caption2.weight(.bold))
+                                .foregroundStyle(.white)
+                                .frame(width: 22, height: 22)
+                                .background(Theme.accentBlue)
+                                .clipShape(Circle())
+                            Text(exam)
+                                .font(.subheadline)
+                                .foregroundStyle(Theme.textSecondary)
+                                .lineSpacing(2)
+                        }
+                    }
+
+                    HStack(spacing: 6) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
+                        Text("Licensing requirements vary by state. Always verify with your state's licensing board.")
+                            .font(.caption2)
+                            .foregroundStyle(Theme.textTertiary)
+                            .lineSpacing(2)
+                    }
+                    .padding(.top, 4)
+                }
+                .padding(16)
+                .background(Theme.cardBackground)
+                .clipShape(.rect(cornerRadius: 14))
+            }
+        }
+    }
+
+    private var degreeClinicalSection: some View {
+        let data = degreeDetailData
+        let reqs = data?.clinicalRequirements ?? []
+
+        return Group {
+            if !reqs.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    sectionHeader("Clinical / Internship / Supervised Practice", icon: "stethoscope")
+
+                    ForEach(Array(reqs.enumerated()), id: \.offset) { _, req in
+                        HStack(alignment: .top, spacing: 10) {
+                            Image(systemName: "person.badge.clock.fill")
+                                .font(.caption2)
+                                .foregroundStyle(Theme.accentBlue)
+                                .padding(.top, 2)
+                            Text(req)
+                                .font(.subheadline)
+                                .foregroundStyle(Theme.textSecondary)
+                                .lineSpacing(3)
+                        }
+                    }
+                }
+                .padding(16)
+                .background(Theme.cardBackground)
+                .clipShape(.rect(cornerRadius: 14))
+            }
+        }
+    }
+
+    private var degreeSalaryRangeSection: some View {
+        let data = degreeDetailData
+        let edu = linkedEducation
+
+        return Group {
+            if data != nil || edu != nil {
+                VStack(alignment: .leading, spacing: 12) {
+                    sectionHeader("Salary Range", icon: "dollarsign.circle.fill")
+
+                    if let data {
+                        degreePayRow(label: "Early Career", value: data.earlyCareerPay, color: Theme.accent)
+                        degreePayRow(label: "Established Career", value: data.establishedCareerPay, color: Theme.accentBlue)
+                        if !data.longTermUpside.isEmpty {
+                            degreePayRow(label: "Long-Term Upside", value: data.longTermUpside, color: Color(hex: "34D399"))
+                        }
+                    } else if let edu {
+                        degreePayRow(label: "Typical Range", value: edu.typicalSalaryRange, color: Theme.accent)
+                    }
+
+                    HStack(spacing: 6) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
+                        Text("Pay varies by location, employer, specialization, and experience. These are general ranges, not guarantees.")
+                            .font(.caption2)
+                            .foregroundStyle(Theme.textTertiary)
+                            .lineSpacing(2)
+                    }
+                    .padding(.top, 4)
+                }
+                .padding(16)
+                .background(Theme.cardBackground)
+                .clipShape(.rect(cornerRadius: 14))
+            }
+        }
+    }
+
+    private func degreePayRow(label: String, value: String, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(label)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(color)
+                .clipShape(.capsule)
+            Text(value)
+                .font(.subheadline)
+                .foregroundStyle(Theme.textSecondary)
+                .lineSpacing(3)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(color.opacity(0.06))
+        .clipShape(.rect(cornerRadius: 10))
+    }
+
+    private var degreeAIResistantSection: some View {
+        let data = degreeDetailData
+
+        return Group {
+            if let data, !data.aiResistantReasons.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "shield.checkered")
+                            .font(.caption)
+                            .foregroundStyle(Theme.accent)
+                        Text("Why This Is AI-Resistant")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.textPrimary)
+                        Spacer()
+                        Text("\(path.aiProofRating)/100")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(aiScoreColor)
+                            .clipShape(.capsule)
+                    }
+
+                    Text("This career scored \(path.aiProofRating)/100 on our AI-Proof scale because:")
+                        .font(.caption)
+                        .foregroundStyle(Theme.textTertiary)
+                        .lineSpacing(3)
+
+                    ForEach(Array(data.aiResistantReasons.enumerated()), id: \.offset) { _, reason in
+                        HStack(alignment: .top, spacing: 10) {
+                            Image(systemName: "checkmark.shield.fill")
+                                .font(.caption2)
+                                .foregroundStyle(Theme.accent)
+                                .padding(.top, 2)
+                            Text(reason)
+                                .font(.subheadline)
+                                .foregroundStyle(Theme.textSecondary)
+                                .lineSpacing(3)
+                        }
+                    }
+                }
+                .padding(16)
+                .background(Theme.cardBackground)
+                .clipShape(.rect(cornerRadius: 14))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Theme.accent.opacity(0.15), lineWidth: 1)
+                )
+            }
+        }
+    }
+
+    private var degreeDemandStabilitySection: some View {
+        let data = degreeDetailData
+        let edu = linkedEducation
+        let demand = data?.demandStability ?? edu?.futureDemand ?? ""
+
+        return Group {
+            if !demand.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    sectionHeader("Demand & Long-Term Stability", icon: "chart.line.uptrend.xyaxis")
+
+                    Text(demand)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineSpacing(4)
+                }
+                .padding(16)
+                .background(Theme.cardBackground)
+                .clipShape(.rect(cornerRadius: 14))
+            }
+        }
+    }
+
+    private var degreeBestFitSection: some View {
+        let data = degreeDetailData
+
+        return Group {
+            if let data, !data.bestFitSummary.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "person.crop.circle.badge.checkmark")
+                            .font(.caption)
+                            .foregroundStyle(Theme.accentBlue)
+                        Text("Best Fit Summary")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.textPrimary)
+                    }
+
+                    Text(data.bestFitSummary)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineSpacing(4)
+                }
+                .padding(16)
+                .background(Theme.accentBlue.opacity(0.06))
+                .clipShape(.rect(cornerRadius: 14))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Theme.accentBlue.opacity(0.15), lineWidth: 1)
+                )
+            }
+        }
     }
 
     // MARK: - Degree Track Sections

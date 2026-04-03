@@ -45,6 +45,7 @@ enum SmartCareerBrain {
         let name = path.name.lowercased()
         let edu = path.educationRequired.lowercased()
 
+        if matchesDegreePath(id: id, name: name, edu: edu) { return .degreePath }
         if matchesLicensedTrade(id: id, name: name, edu: edu) { return .licensedTrade }
         if matchesHealthcare(id: id, name: name, edu: edu) { return .healthcareLicensed }
         if matchesTransportation(id: id, name: name, edu: edu) { return .transportationLicensed }
@@ -60,6 +61,22 @@ enum SmartCareerBrain {
     }
 
     // MARK: - Classification Matchers
+
+    private static func matchesDegreePath(id: String, name: String, edu: String) -> Bool {
+        let degreeIds = [
+            "registered-nurse", "physical-therapist", "occupational-therapist",
+            "speech-pathologist", "physician-assistant", "nurse-practitioner",
+            "pharmacist", "dentist", "psychologist", "social-worker",
+            "civil-engineer", "mechanical-engineer", "electrical-engineer",
+            "accountant-cpa", "architect", "radiologic-technologist",
+            "ultrasound-technician", "physician", "veterinarian",
+            "lawyer", "attorney", "optometrist", "chiropractor"
+        ]
+        if degreeIds.contains(id) { return true }
+        if edu.contains("degree") || edu.contains("bachelor") || edu.contains("master") || edu.contains("doctorate") || edu.contains("doctoral") { return true }
+        let keywords = ["registered nurse", "physical therapist", "occupational therapist", "speech pathologist", "physician assistant", "nurse practitioner", "pharmacist", "dentist", "psychologist", "social worker", "civil engineer", "mechanical engineer", "electrical engineer", "accountant", "architect", "radiologic", "sonograph", "ultrasound tech"]
+        return keywords.contains { name.contains($0) }
+    }
 
     private static func matchesLicensedTrade(id: String, name: String, edu: String) -> Bool {
         let licensedIds = [
@@ -444,21 +461,14 @@ enum SmartCareerBrain {
     }
 
     static func careerTrack(forEducation path: EducationPath) -> CareerTrack {
+        if DegreeCareerDatabase.lookupByEducationId(path.id) != nil {
+            return .degreeBasedCareer
+        }
         switch path.category {
-        case .trade:
-            return .tradeAndCertification
-        case .certification:
-            return .tradeAndCertification
-        case .healthcare:
-            return .tradeAndCertification
-        case .technology:
-            return .tradeAndCertification
-        case .business:
+        case .trade, .certification, .healthcare, .technology, .business, .military:
             return .tradeAndCertification
         case .creative:
             return .startBusiness
-        case .military:
-            return .tradeAndCertification
         }
     }
 
