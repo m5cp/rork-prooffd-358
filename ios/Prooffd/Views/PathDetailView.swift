@@ -1709,32 +1709,31 @@ struct PathDetailView: View {
         return nil
     }
 
+    private var degreeRecord: DegreeCareerRecord? {
+        DegreeCareerDatabase.record(for: path.id)
+    }
+
     @ViewBuilder
     private var degreeTrackContent: some View {
-        degreeDegreeRequiredSection
-        degreeTimelineSection
-        degreePrerequisitesSection
-        degreeLicensingExamSection
-        degreeClinicalSection
-        degreeSalaryRangeSection
-        degreeAIResistantSection
-        degreeDemandStabilitySection
-        degreeBestFitSection
+        degreeHeaderSummarySection
 
-        if let edu = linkedEducation {
-            degreeCareerPathway(edu)
-            degreeProgramDetails(edu)
-            degreeFundingSection(edu)
-            degreeFindProgramsSection(edu)
-        }
+        if degreeDetailData != nil || linkedEducation != nil {
+            degreeDegreeRequiredSection
+            degreeTimelineSection
+            degreePrerequisitesSection
+            degreeLicensingExamSection
+            degreeSalaryRangeSection
+            degreeAIResistantSection
+            degreeClinicalSection
+            degreeDemandStabilitySection
+            degreeBestFitSection
 
-        actionPlanSection
-
-        if store.isPremium {
-            whatOthersChargeSection
-            pricingSection
+            if let edu = linkedEducation {
+                degreeFundingSection(edu)
+                degreeFindProgramsSection(edu)
+            }
         } else {
-            lockedProContentSection
+            degreeFallbackSection
         }
     }
 
@@ -1929,6 +1928,88 @@ struct PathDetailView: View {
             }
         }
         .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+    }
+
+    // MARK: - Degree Header & Fallback
+
+    private var degreeHeaderSummarySection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            if let record = degreeRecord {
+                HStack(spacing: 8) {
+                    Image(systemName: record.aiProofTier.icon)
+                        .font(.caption)
+                    Text(record.aiProofTier.label)
+                        .font(.caption.weight(.bold))
+                }
+                .foregroundStyle(degreeTierColor(record.aiProofTier))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(degreeTierColor(record.aiProofTier).opacity(0.1))
+                .clipShape(.capsule)
+
+                HStack(spacing: 6) {
+                    Image(systemName: record.category.icon)
+                        .font(.caption2)
+                    Text(record.category.rawValue)
+                        .font(.caption.weight(.medium))
+                }
+                .foregroundStyle(Theme.textSecondary)
+
+                if !record.trainingPath.isEmpty {
+                    Text(record.trainingPath)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineSpacing(4)
+                }
+            } else {
+                HStack(spacing: 6) {
+                    Image(systemName: "graduationcap.fill")
+                        .font(.caption2)
+                    Text("Degree-Based Career")
+                        .font(.caption.weight(.semibold))
+                }
+                .foregroundStyle(Theme.accentBlue)
+            }
+        }
+        .padding(16)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+    }
+
+    private func degreeTierColor(_ tier: AIProofTier) -> Color {
+        switch tier {
+        case .tier1: return Color(hex: "34D399")
+        case .tier2: return Theme.accentBlue
+        case .tier3: return Color(hex: "FBBF24")
+        }
+    }
+
+    private var degreeFallbackSection: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "doc.text.magnifyingglass")
+                .font(.system(size: 32))
+                .foregroundStyle(Theme.accentBlue.opacity(0.5))
+
+            Text("Detailed Education Pathway")
+                .font(.headline)
+                .foregroundStyle(Theme.textPrimary)
+
+            Text("The structured career pathway for this degree-based career is still being completed. Check back soon for full details on degree requirements, licensing, salary, and more.")
+                .font(.subheadline)
+                .foregroundStyle(Theme.textSecondary)
+                .multilineTextAlignment(.center)
+                .lineSpacing(4)
+
+            if let record = degreeRecord {
+                VStack(alignment: .leading, spacing: 10) {
+                    degreePayRow(label: "Early Career", value: record.salaryEarly, color: Theme.accent)
+                    degreePayRow(label: "Experienced", value: record.salaryExperienced, color: Theme.accentBlue)
+                }
+            }
+        }
+        .padding(24)
         .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 14))
     }
