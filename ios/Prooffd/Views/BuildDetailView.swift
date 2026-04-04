@@ -51,32 +51,29 @@ struct BuildDetailView: View {
 
                             stepsSection(build)
                             overviewSection(build)
-                            pricingSection
-                            servicesSection(build)
-                            toolsSection
-                            firstCustomerSection
 
                             if store.isPremium {
+                                pricingSection
+                                servicesSection(build)
+                                toolsSection
+                                firstCustomerSection
+
                                 planSectionDivider("Pro Plan")
                                 proContentSections(build)
                                 fullBusinessPlanSection
-                            }
 
-                            planSectionDivider("Details")
+                                planSectionDivider("Details")
 
-                            businessPlanEditorSection(build)
-                            degreeSection
-                            unlockTiersSection(build)
-                            suggestionsSection(build)
-
-                            if store.isPremium {
+                                businessPlanEditorSection(build)
+                                degreeSection
+                                unlockTiersSection(build)
+                                suggestionsSection(build)
                                 exportButton(build)
+                            } else {
+                                buildProUpgradePrompt
                             }
-                            shareProgressButton(build)
 
-                            if !store.isPremium {
-                                upgradeCard
-                            }
+                            shareProgressButton(build)
 
                             dangerZone
                             Color.clear.frame(height: 40)
@@ -1278,10 +1275,10 @@ struct BuildDetailView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Unlock Marketing & Outreach")
+                    Text("Unlock Full Build Plan")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Theme.textPrimary)
-                    Text("Scripts, templates, business plan & PDF export")
+                    Text("Pricing, tools, marketing, business plan & PDF export")
                         .font(.caption)
                         .foregroundStyle(Theme.textSecondary)
                 }
@@ -1302,6 +1299,23 @@ struct BuildDetailView: View {
             .cardShadow()
         }
         .buttonStyle(.plain)
+    }
+
+    private var buildProUpgradePrompt: some View {
+        ProUpgradePromptView(
+            title: "Unlock Your Complete Build Plan",
+            subtitle: "Get full pricing, tools, marketing, and business plan details.",
+            features: [
+                "Pricing & market rate analysis",
+                "Services you can offer",
+                "Tools, resources & customer sources",
+                "First customer plan",
+                "Marketing & outreach templates",
+                "One-page business plan",
+                "PDF export & editable notes"
+            ],
+            onUpgrade: { showPaywall = true }
+        )
     }
 
     private var dangerZone: some View {

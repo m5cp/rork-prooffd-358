@@ -387,15 +387,15 @@ struct CareerPathDetailSheet: View {
                     favHideBar
                     overviewCard
                     firstStepsCard
-                    aiSafeCard
-                    stepsCard
-                    findProgramsCard
-                    fundingCard
 
                     if store.isPremium {
+                        aiSafeCard
+                        stepsCard
+                        findProgramsCard
+                        fundingCard
                         proStepsCard
                     } else {
-                        proTeaser
+                        careerProUpgradePrompt
                     }
 
                     Color.clear.frame(height: 20)
@@ -767,6 +767,21 @@ struct CareerPathDetailSheet: View {
         .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 14))
         .cardShadow()
+    }
+
+    private var careerProUpgradePrompt: some View {
+        ProUpgradePromptView(
+            title: "Unlock Full Career Details",
+            subtitle: "Get the complete roadmap for this career path.",
+            features: [
+                "Why this career is AI-resistant",
+                "Step-by-step certification path",
+                "How to find accredited programs",
+                "Funding options & financial aid",
+                "Advanced career steps"
+            ],
+            onUpgrade: { showPaywall = true }
+        )
     }
 
     private var proTeaser: some View {

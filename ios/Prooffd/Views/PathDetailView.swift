@@ -883,24 +883,24 @@ struct PathDetailView: View {
 
     @ViewBuilder
     private var businessTrackContent: some View {
-        whatYouNeedToStartSection
-        startupCostBreakdownSection
-        typicalPricingSection
-
-        let content = startupContent
-        if !content.licensesAndPermits.isEmpty {
-            licensesPermitsSection(content.licensesAndPermits)
-        }
-        if !content.toolsAndEquipment.isEmpty {
-            toolsEquipmentSection(content.toolsAndEquipment)
-        }
-
         actionPlanSection
-        launchRoadmapDisplaySection
-        marketingAcquisitionSection
-        bookkeepingTaxSection
 
         if store.isPremium {
+            whatYouNeedToStartSection
+            startupCostBreakdownSection
+            typicalPricingSection
+
+            let content = startupContent
+            if !content.licensesAndPermits.isEmpty {
+                licensesPermitsSection(content.licensesAndPermits)
+            }
+            if !content.toolsAndEquipment.isEmpty {
+                toolsEquipmentSection(content.toolsAndEquipment)
+            }
+
+            launchRoadmapDisplaySection
+            marketingAcquisitionSection
+            bookkeepingTaxSection
             emailSection
             textMessageSection
             scriptSection(title: "Sales Intro Script", icon: "person.wave.2.fill", content: path.salesIntroScript)
@@ -908,8 +908,25 @@ struct PathDetailView: View {
             pricingSheetSection
             businessPlanSection
         } else {
-            lockedProContentSection
+            businessProUpgradePrompt
         }
+    }
+
+    private var businessProUpgradePrompt: some View {
+        ProUpgradePromptView(
+            title: "Unlock Your Full Business Plan",
+            subtitle: "Get everything you need to launch and grow this business.",
+            features: [
+                "Startup cost breakdown & checklist",
+                "Pricing tiers & revenue projections",
+                "Licenses, permits & tools needed",
+                "30-60-90 day launch roadmap",
+                "Marketing & customer acquisition plan",
+                "Email, text & sales scripts",
+                "One-page business plan & PDF export"
+            ],
+            onUpgrade: { showPaywall = true }
+        )
     }
 
     // MARK: - Business Track Sections
@@ -1349,32 +1366,33 @@ struct PathDetailView: View {
         }
 
         tradeTimeToEntrySection
-        tradeTuitionCostSection
-
-        if let edu = linkedEducation {
-            tradeCertRequirements(edu)
-        }
-
-        tradeToolsExamLicensingSection
-        tradePaySection
-        tradeAIResistantSection
-        tradeFirstJobStrategySection
-
-        if let edu = linkedEducation {
-            tradeFundingSection(edu)
-            tradeFindProgramsSection(edu)
-        }
-
-        actionPlanSection
-
-        tradeFutureBusinessSection
-
-        let setupSteps = SmartCareerBrain.businessSetupSteps(for: path)
-        if !setupSteps.isEmpty {
-            businessSetupSection(setupSteps)
-        }
 
         if store.isPremium {
+            tradeTuitionCostSection
+
+            if let edu = linkedEducation {
+                tradeCertRequirements(edu)
+            }
+
+            tradeToolsExamLicensingSection
+            tradePaySection
+            tradeAIResistantSection
+            tradeFirstJobStrategySection
+
+            if let edu = linkedEducation {
+                tradeFundingSection(edu)
+                tradeFindProgramsSection(edu)
+            }
+
+            actionPlanSection
+
+            tradeFutureBusinessSection
+
+            let setupSteps = SmartCareerBrain.businessSetupSteps(for: path)
+            if !setupSteps.isEmpty {
+                businessSetupSection(setupSteps)
+            }
+
             whatOthersChargeSection
             pricingSection
             emailSection
@@ -1383,8 +1401,25 @@ struct PathDetailView: View {
             socialMediaSection
             pricingSheetSection
         } else {
-            lockedProContentSection
+            tradeProUpgradePrompt
         }
+    }
+
+    private var tradeProUpgradePrompt: some View {
+        ProUpgradePromptView(
+            title: "Unlock Full Trade Career Details",
+            subtitle: "Get the complete roadmap for this career path.",
+            features: [
+                "Tuition & training cost breakdown",
+                "Certification & licensing requirements",
+                "Pay ranges: entry to self-employment",
+                "Why this career is AI-resistant",
+                "First job strategy & action plan",
+                "Funding options & program finder",
+                "Future business opportunity"
+            ],
+            onUpgrade: { showPaywall = true }
+        )
     }
 
     // MARK: - Trade Detail Sections (Phase 3)
@@ -1720,21 +1755,43 @@ struct PathDetailView: View {
         if degreeDetailData != nil || linkedEducation != nil {
             degreeDegreeRequiredSection
             degreeTimelineSection
-            degreePrerequisitesSection
-            degreeLicensingExamSection
-            degreeSalaryRangeSection
-            degreeAIResistantSection
-            degreeClinicalSection
-            degreeDemandStabilitySection
-            degreeBestFitSection
 
-            if let edu = linkedEducation {
-                degreeFundingSection(edu)
-                degreeFindProgramsSection(edu)
+            if store.isPremium {
+                degreePrerequisitesSection
+                degreeLicensingExamSection
+                degreeSalaryRangeSection
+                degreeAIResistantSection
+                degreeClinicalSection
+                degreeDemandStabilitySection
+                degreeBestFitSection
+
+                if let edu = linkedEducation {
+                    degreeFundingSection(edu)
+                    degreeFindProgramsSection(edu)
+                }
+            } else {
+                degreeProUpgradePrompt
             }
         } else {
             degreeFallbackSection
         }
+    }
+
+    private var degreeProUpgradePrompt: some View {
+        ProUpgradePromptView(
+            title: "Unlock Full Career Pathway",
+            subtitle: "Get the complete education and career roadmap.",
+            features: [
+                "Prerequisites & admissions prep",
+                "Licensing & exam path details",
+                "Salary range: early to established",
+                "Why this career is AI-resistant",
+                "Clinical / residency requirements",
+                "Demand & long-term stability",
+                "Best fit summary & funding options"
+            ],
+            onUpgrade: { showPaywall = true }
+        )
     }
 
     // MARK: - Trade Track Sections

@@ -5,16 +5,16 @@ struct ProVsFreeComparisonView: View {
     var onUpgrade: () -> Void
 
     private let comparisons: [(feature: String, icon: String, free: FeatureAccess, pro: FeatureAccess)] = [
-        ("Business Path Matches", "chart.bar.fill", .limited("20"), .full("50")),
-        ("Daily Tips", "lightbulb.fill", .included, .included),
-        ("Draft Email Templates", "envelope.fill", .locked, .included),
-        ("Text Message Templates", "message.fill", .locked, .included),
-        ("Sales Intro Scripts", "person.wave.2.fill", .locked, .included),
-        ("Social Media Posts", "square.and.arrow.up.fill", .locked, .included),
-        ("Offer & Pricing Sheets", "dollarsign.square.fill", .locked, .included),
-        ("One-Page Business Plans", "doc.text.fill", .locked, .included),
-        ("PDF Export", "doc.fill", .locked, .included),
-        ("What-If Scenarios", "arrow.triangle.branch", .locked, .included)
+        ("Career Matches", "chart.bar.fill", .limited("All"), .full("All")),
+        ("Overview & Action Plan", "text.alignleft", .included, .included),
+        ("Daily Tips & Streaks", "lightbulb.fill", .included, .included),
+        ("Build System Basics", "hammer.fill", .included, .included),
+        ("Full Career Roadmaps", "map.fill", .locked, .included),
+        ("Salary & Cost Data", "dollarsign.circle.fill", .locked, .included),
+        ("AI-Resistance Analysis", "shield.checkered", .locked, .included),
+        ("Licensing & Exam Paths", "checkmark.seal.fill", .locked, .included),
+        ("Business Plans & Scripts", "doc.text.fill", .locked, .included),
+        ("PDF Export", "arrow.down.doc.fill", .locked, .included)
     ]
 
     var body: some View {

@@ -9,12 +9,12 @@ struct PaywallView: View {
     @State private var showEULA: Bool = false
 
     private let benefits: [(String, String)] = [
-        ("doc.text.fill", "Business plan templates"),
-        ("text.bubble.fill", "Client outreach scripts"),
-        ("envelope.fill", "Draft email templates"),
-        ("square.and.arrow.up.fill", "Export to PDF"),
-        ("chart.bar.fill", "50 matched business paths"),
-        ("wand.and.stars", "Deeper launch tools")
+        ("map.fill", "Full career & business roadmaps"),
+        ("dollarsign.circle.fill", "Salary ranges & cost breakdowns"),
+        ("shield.checkered", "AI-resistance analysis"),
+        ("checkmark.seal.fill", "Licensing & certification paths"),
+        ("doc.text.fill", "Business plans & outreach scripts"),
+        ("arrow.down.doc.fill", "PDF export & editable notes")
     ]
 
     var body: some View {
@@ -94,52 +94,61 @@ struct PaywallView: View {
 
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Get your complete\nbusiness launch kit")
+            Text("Unlock your complete\ncareer roadmap")
                 .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(Theme.textPrimary)
                 .padding(.top, 16)
 
-            Text("Unlock templates, scripts, exports, and deeper planning tools.")
+            Text("Full details for every career path — salary data, licensing requirements, business plans, and more.")
                 .font(.body)
                 .foregroundStyle(Theme.textSecondary)
+                .lineSpacing(2)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var previewCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 8) {
-                Image(systemName: "eye.fill")
+                Image(systemName: "sparkles")
                     .font(.caption2)
                     .foregroundStyle(Theme.accent)
-                Text("PREVIEW")
+                Text("WHAT YOU GET")
                     .font(.caption2.weight(.bold))
                     .foregroundStyle(Theme.accent)
                     .tracking(0.5)
             }
 
-            Text("Business Plan Template")
+            Text("Deep Career Intelligence")
                 .font(.title3.bold())
                 .foregroundStyle(Theme.textPrimary)
 
-            Text("Step-by-step launch outline, messaging strategy, and PDF export for your matched business.")
+            Text("Every career path unlocks its full structured detail — education timelines, pay data, licensing requirements, AI-proof analysis, and actionable launch plans.")
                 .font(.subheadline)
                 .foregroundStyle(Theme.textSecondary)
                 .lineSpacing(3)
 
             HStack(spacing: 16) {
                 HStack(spacing: 4) {
-                    Image(systemName: "doc.text")
+                    Image(systemName: "briefcase.fill")
                         .font(.caption2)
-                    Text("7 sections")
+                    Text("3 career tracks")
                         .font(.caption2.weight(.medium))
                 }
                 .foregroundStyle(Theme.textTertiary)
 
                 HStack(spacing: 4) {
-                    Image(systemName: "square.and.arrow.up")
+                    Image(systemName: "doc.text")
                         .font(.caption2)
-                    Text("PDF ready")
+                    Text("Full roadmaps")
+                        .font(.caption2.weight(.medium))
+                }
+                .foregroundStyle(Theme.textTertiary)
+
+                HStack(spacing: 4) {
+                    Image(systemName: "arrow.down.doc")
+                        .font(.caption2)
+                    Text("PDF export")
                         .font(.caption2.weight(.medium))
                 }
                 .foregroundStyle(Theme.textTertiary)
