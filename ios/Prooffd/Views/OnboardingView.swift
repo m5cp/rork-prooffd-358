@@ -9,13 +9,13 @@ struct OnboardingView: View {
 
     private let pages: [OnboardingPage] = [
         OnboardingPage(
-            headline: "Find the right path\nfor you",
-            subtitle: "Take a one-time 7-question profile assessment and get matched to jobs you can start — tailored to your skills, budget, and goals.",
-            icon: "sparkles"
+            headline: "Three paths,\none future",
+            subtitle: "Start a business, learn a trade, or pursue a degree — pick the direction that fits you and explore AI-proof careers.",
+            icon: "arrow.triangle.branch"
         ),
         OnboardingPage(
-            headline: "Then build it,\nstep by step",
-            subtitle: "Get a clear action plan, track your progress, and start earning — no degree or big investment required.",
+            headline: "Build it,\nstep by step",
+            subtitle: "Get a clear action plan, track your progress, and start building toward the career you want.",
             icon: "checkmark.seal.fill"
         )
     ]
@@ -72,7 +72,7 @@ struct OnboardingView: View {
                             onComplete()
                         }
                     } label: {
-                        Text(currentPage == pages.count - 1 ? "Take the Quiz" : "Continue")
+                        Text(currentPage == pages.count - 1 ? "Choose Your Path" : "Continue")
                             .font(.headline)
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
@@ -87,7 +87,7 @@ struct OnboardingView: View {
                         Button {
                             onComplete()
                         } label: {
-                            Text("Skip to Quiz")
+                            Text("Skip")
                                 .font(.subheadline.weight(.semibold))
                                 .foregroundStyle(Theme.accent)
                         }
@@ -96,7 +96,7 @@ struct OnboardingView: View {
                     Button {
                         onSkipQuiz()
                     } label: {
-                        Text("Explore App Now")
+                        Text("Explore Without Choosing")
                             .font(.subheadline.weight(.medium))
                             .foregroundStyle(Theme.textTertiary)
                     }

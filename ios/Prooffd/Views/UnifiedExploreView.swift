@@ -179,14 +179,9 @@ struct UnifiedExploreView: View {
     @ViewBuilder
     private var forYouContent: some View {
         ScrollView {
-            VStack(spacing: 20) {
+            VStack(spacing: 24) {
                 if !appState.hasCompletedQuiz {
                     quizPromptCard
-                        .padding(.horizontal, 16)
-                }
-
-                if let topResult = recommendedResults.first {
-                    topMatchHero(topResult)
                         .padding(.horizontal, 16)
                 }
 
@@ -195,7 +190,7 @@ struct UnifiedExploreView: View {
                         .padding(.horizontal, 16)
                 }
 
-                topOpportunitiesSection
+                threePathsSection
 
                 if !store.isPremium {
                     upgradePrompt
@@ -207,6 +202,124 @@ struct UnifiedExploreView: View {
             .padding(.top, 8)
         }
         .scrollIndicators(.hidden)
+    }
+
+    // MARK: - Three Paths
+
+    private var threePathsSection: some View {
+        let orderedPaths: [ChosenPath] = {
+            guard let chosen = appState.chosenPath else {
+                return [.business, .trades, .degree]
+            }
+            var all: [ChosenPath] = [.business, .trades, .degree]
+            all.removeAll { $0 == chosen }
+            return [chosen] + all
+        }()
+
+        return VStack(spacing: 16) {
+            ForEach(orderedPaths, id: \.rawValue) { path in
+                pathHeroCard(path, isChosen: path == appState.chosenPath)
+            }
+        }
+        .padding(.horizontal, 16)
+    }
+
+    private func pathHeroCard(_ path: ChosenPath, isChosen: Bool) -> some View {
+        let count: String = {
+            switch path {
+            case .business:
+                return "\(ContentLibrary.jobCount)+ businesses"
+            case .trades:
+                return "\(EducationPathDatabase.all.count) programs"
+            case .degree:
+                return "\(DegreeCareerDatabase.allRecords.count) careers"
+            }
+        }()
+
+        return Button {
+            switch path {
+            case .business:
+                selectedSegment = .business
+            case .trades:
+                selectedSegment = .education
+            case .degree:
+                selectedSegment = .education
+            }
+        } label: {
+            VStack(spacing: 0) {
+                HStack(spacing: 16) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(path.color.opacity(0.12))
+                            .frame(width: 60, height: 60)
+                        Image(systemName: path.icon)
+                            .font(.title2)
+                            .foregroundStyle(path.color)
+                    }
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(spacing: 8) {
+                            Text(path.title)
+                                .font(.title3.weight(.bold))
+                                .foregroundStyle(Theme.textPrimary)
+                            if isChosen {
+                                Text("YOUR PICK")
+                                    .font(.system(size: 9, weight: .heavy))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(path.color)
+                                    .clipShape(.capsule)
+                            }
+                        }
+                        Text(path.subtitle)
+                            .font(.caption)
+                            .foregroundStyle(Theme.textSecondary)
+                            .lineLimit(2)
+                    }
+
+                    Spacer(minLength: 4)
+
+                    Image(systemName: "chevron.right")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(path.color)
+                }
+                .padding(20)
+
+                HStack(spacing: 0) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "square.grid.2x2")
+                            .font(.caption2)
+                        Text(count)
+                            .font(.caption.weight(.semibold))
+                    }
+                    .foregroundStyle(path.color)
+
+                    Spacer()
+
+                    Text("Explore →")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(path.color)
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(path.color.opacity(0.05))
+            }
+            .background(
+                LinearGradient(
+                    colors: [path.color.opacity(isChosen ? 0.08 : 0.03), Theme.cardBackground],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(.rect(cornerRadius: 18))
+            .overlay(
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(isChosen ? path.color.opacity(0.4) : path.color.opacity(0.12), lineWidth: isChosen ? 2 : 0.5)
+            )
+            .shadow(color: isChosen ? path.color.opacity(0.15) : .clear, radius: 12, y: 4)
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Business

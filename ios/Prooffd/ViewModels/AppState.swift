@@ -1,5 +1,43 @@
 import SwiftUI
 
+nonisolated enum ChosenPath: String, Codable, Sendable {
+    case business = "business"
+    case trades = "trades"
+    case degree = "degree"
+
+    var title: String {
+        switch self {
+        case .business: return "Start a Business"
+        case .trades: return "Trades & Certifications"
+        case .degree: return "4-Year Degree Careers"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .business: return "briefcase.fill"
+        case .trades: return "wrench.and.screwdriver.fill"
+        case .degree: return "building.columns.fill"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .business: return "Launch your own business with step-by-step plans"
+        case .trades: return "Skilled trades, healthcare, tech & professional programs"
+        case .degree: return "Licensed careers requiring a college degree"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .business: return Theme.accent
+        case .trades: return Theme.accentBlue
+        case .degree: return Color(hex: "818CF8")
+        }
+    }
+}
+
 @Observable
 class AppState {
     var currentScreen: AppScreen = .onboarding
@@ -11,6 +49,7 @@ class AppState {
     var hiddenPathIDs: Set<String> = []
     var hiddenEducationIDs: Set<String> = []
     var hiddenDegreeIDs: Set<String> = []
+    var chosenPath: ChosenPath?
     var exploreFilter: ExploreFilterMode = .all
     var showFavoritesOnly: Bool = false
     var streakTracker: StreakTracker = StreakTracker()
@@ -67,6 +106,10 @@ class AppState {
         get { UserDefaults.standard.bool(forKey: "hasSkippedQuiz") }
         set { UserDefaults.standard.set(newValue, forKey: "hasSkippedQuiz") }
     }
+    var savedChosenPath: String? {
+        get { UserDefaults.standard.string(forKey: "chosenPath") }
+        set { UserDefaults.standard.set(newValue, forKey: "chosenPath") }
+    }
 
     init() {
         loadProfile()
@@ -76,6 +119,9 @@ class AppState {
         loadUnlockedAchievements()
         loadBuilds()
         assignAvatarIfNeeded()
+        if let raw = savedChosenPath, let path = ChosenPath(rawValue: raw) {
+            chosenPath = path
+        }
         if hasCompletedQuiz || hasSkippedQuiz {
             currentScreen = .results
             runMatching()
@@ -89,6 +135,17 @@ class AppState {
         hasCompletedOnboarding = true
         withAnimation(.spring(duration: 0.5)) {
             currentScreen = .quiz
+        }
+    }
+
+    func selectPath(_ path: ChosenPath) {
+        chosenPath = path
+        savedChosenPath = path.rawValue
+        hasCompletedQuiz = true
+        hasCompletedOnboarding = true
+        runMatching()
+        withAnimation(.spring(duration: 0.5)) {
+            currentScreen = .results
         }
     }
 
