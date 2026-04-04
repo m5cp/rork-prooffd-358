@@ -4,6 +4,7 @@ import RevenueCat
 struct PaywallView: View {
     @Environment(StoreViewModel.self) private var store
     @Environment(\.dismiss) private var dismiss
+    @State private var selectedPackageType: PackageType = .lifetime
     @State private var showTerms: Bool = false
     @State private var showPrivacy: Bool = false
     @State private var showEULA: Bool = false
@@ -24,7 +25,9 @@ struct PaywallView: View {
                     headerSection
                     previewCard
                     benefitsList
-                    priceSection
+                    packageSelector
+                    purchaseButton
+                    restoreAndLinks
                     Color.clear.frame(height: 20)
                 }
                 .padding(.horizontal, 20)
@@ -99,7 +102,7 @@ struct PaywallView: View {
                 .foregroundStyle(Theme.textPrimary)
                 .padding(.top, 16)
 
-            Text("Full details for every career path — salary data, licensing requirements, business plans, and more.")
+            Text("Full details for every career path \u{2014} salary data, licensing requirements, business plans, and more.")
                 .font(.body)
                 .foregroundStyle(Theme.textSecondary)
                 .lineSpacing(2)
@@ -123,7 +126,7 @@ struct PaywallView: View {
                 .font(.title3.bold())
                 .foregroundStyle(Theme.textPrimary)
 
-            Text("Every career path unlocks its full structured detail — education timelines, pay data, licensing requirements, AI-proof analysis, and actionable launch plans.")
+            Text("Every career path unlocks its full structured detail \u{2014} education timelines, pay data, licensing requirements, AI-proof analysis, and actionable launch plans.")
                 .font(.subheadline)
                 .foregroundStyle(Theme.textSecondary)
                 .lineSpacing(3)
@@ -203,87 +206,252 @@ struct PaywallView: View {
         .clipShape(.rect(cornerRadius: 14))
     }
 
-    private var priceSection: some View {
-        VStack(spacing: 16) {
-            if let offering = store.offerings?.current,
-               let package = offering.availablePackages.first {
-                VStack(spacing: 4) {
-                    if let intro = package.storeProduct.introductoryDiscount,
-                       intro.paymentMode == .freeTrial {
-                        Text("\(intro.subscriptionPeriod.periodTitle()) Free Trial")
-                            .font(.title2.bold())
-                            .foregroundStyle(Theme.textPrimary)
-                        Text("then \(package.localizedPriceString)/month")
-                            .font(.subheadline)
-                            .foregroundStyle(Theme.textSecondary)
-                    } else if let intro = package.storeProduct.introductoryDiscount {
-                        Text(intro.localizedPriceString + "/month")
-                            .font(.title2.bold())
-                            .foregroundStyle(Theme.textPrimary)
-                        Text("then \(package.localizedPriceString)/month")
-                            .font(.subheadline)
-                            .foregroundStyle(Theme.textSecondary)
-                    } else {
-                        Text(package.localizedPriceString + "/month")
-                            .font(.title2.bold())
-                            .foregroundStyle(Theme.textPrimary)
-                    }
-                    Text("Cancel anytime")
-                        .font(.caption)
-                        .foregroundStyle(Theme.textTertiary)
-                }
+    // MARK: - Package Selector
 
-                Button {
-                    Task {
-                        await store.purchase(package: package)
-                        if store.isPremium {
-                            dismiss()
-                        }
-                    }
-                } label: {
-                    Group {
-                        if store.isPurchasing {
-                            ProgressView()
-                                .tint(.white)
-                        } else {
-                            Text(purchaseButtonTitle(for: package))
-                                .font(.headline)
-                        }
-                    }
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Theme.accent)
-                    .clipShape(.capsule)
-                }
-                .disabled(store.isPurchasing)
-            } else {
-                VStack(spacing: 4) {
-                    Text("$1.99/month")
-                        .font(.title2.bold())
-                        .foregroundStyle(Theme.textPrimary)
-                    Text("Cancel anytime")
-                        .font(.caption)
-                        .foregroundStyle(Theme.textTertiary)
-                }
+    private var packageSelector: some View {
+        let monthlyPkg = resolvedMonthlyPackage
+        let lifetimePkg = resolvedLifetimePackage
 
-                Button {
-                } label: {
-                    Text("Start Free Trial")
-                        .font(.headline)
+        return VStack(spacing: 12) {
+            lifetimeCard(package: lifetimePkg)
+            monthlyCard(package: monthlyPkg)
+        }
+    }
+
+    private func lifetimeCard(package: Package?) -> some View {
+        let isSelected = selectedPackageType == .lifetime
+        let priceString = package?.localizedPriceString ?? "$29.99"
+
+        return Button {
+            withAnimation(.spring(duration: 0.25)) {
+                selectedPackageType = .lifetime
+            }
+        } label: {
+            VStack(spacing: 0) {
+                HStack {
+                    Spacer()
+                    Text("BEST VALUE")
+                        .font(.caption2.weight(.heavy))
                         .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Theme.accent)
-                        .clipShape(.capsule)
+                        .tracking(0.5)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 5)
+                        .background(
+                            LinearGradient(
+                                colors: [Theme.accent, Theme.accentBlue],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .clipShape(.rect(cornerRadii: .init(topLeading: 0, bottomLeading: 8, bottomTrailing: 0, topTrailing: 12)))
                 }
 
-                if store.isLoading {
-                    ProgressView()
-                        .tint(Theme.textSecondary)
+                HStack(spacing: 14) {
+                    ZStack {
+                        Circle()
+                            .stroke(isSelected ? Theme.accent : Theme.border, lineWidth: isSelected ? 2.5 : 1.5)
+                            .frame(width: 24, height: 24)
+                        if isSelected {
+                            Circle()
+                                .fill(Theme.accent)
+                                .frame(width: 14, height: 14)
+                        }
+                    }
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        HStack(spacing: 8) {
+                            Text("Lifetime Access")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Theme.textPrimary)
+
+                            Text("Save 75%")
+                                .font(.caption2.weight(.bold))
+                                .foregroundStyle(Theme.accent)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(Theme.accent.opacity(0.12))
+                                .clipShape(.capsule)
+                        }
+                        Text("One-time purchase \u{2022} Never pay again")
+                            .font(.caption)
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+
+                    Spacer()
+
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(priceString)
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(Theme.textPrimary)
+                        Text("one time")
+                            .font(.caption2)
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 6)
+                .padding(.bottom, 16)
+            }
+            .background(
+                isSelected
+                    ? AnyShapeStyle(LinearGradient(
+                        colors: [Theme.accent.opacity(0.08), Theme.cardBackground],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                      ))
+                    : AnyShapeStyle(Theme.cardBackground)
+            )
+            .clipShape(.rect(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(isSelected ? Theme.accent : Theme.border, lineWidth: isSelected ? 2 : 1)
+            )
+        }
+        .sensoryFeedback(.selection, trigger: selectedPackageType)
+    }
+
+    private func monthlyCard(package: Package?) -> some View {
+        let isSelected = selectedPackageType == .monthly
+        let priceString: String
+        let subtitleString: String
+
+        if let pkg = package,
+           let intro = pkg.storeProduct.introductoryDiscount,
+           intro.paymentMode == .freeTrial {
+            priceString = pkg.localizedPriceString + "/mo"
+            subtitleString = "\(intro.subscriptionPeriod.periodTitle()) free trial, then \(pkg.localizedPriceString)/mo"
+        } else if let pkg = package {
+            priceString = pkg.localizedPriceString + "/mo"
+            subtitleString = "Billed monthly \u{2022} Cancel anytime"
+        } else {
+            priceString = "$1.99/mo"
+            subtitleString = "Billed monthly \u{2022} Cancel anytime"
+        }
+
+        return Button {
+            withAnimation(.spring(duration: 0.25)) {
+                selectedPackageType = .monthly
+            }
+        } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle()
+                        .stroke(isSelected ? Theme.accent : Theme.border, lineWidth: isSelected ? 2.5 : 1.5)
+                        .frame(width: 24, height: 24)
+                    if isSelected {
+                        Circle()
+                            .fill(Theme.accent)
+                            .frame(width: 14, height: 14)
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Monthly")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Theme.textPrimary)
+                    Text(subtitleString)
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+
+                Spacer()
+
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(priceString)
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(Theme.textPrimary)
+                    Text("per month")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.textTertiary)
                 }
             }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 16)
+            .background(
+                isSelected
+                    ? AnyShapeStyle(LinearGradient(
+                        colors: [Theme.accent.opacity(0.08), Theme.cardBackground],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                      ))
+                    : AnyShapeStyle(Theme.cardBackground)
+            )
+            .clipShape(.rect(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(isSelected ? Theme.accent : Theme.border, lineWidth: isSelected ? 2 : 1)
+            )
+        }
+        .sensoryFeedback(.selection, trigger: selectedPackageType)
+    }
 
+    // MARK: - Purchase
+
+    private var purchaseButton: some View {
+        VStack(spacing: 12) {
+            if let error = store.error {
+                Text(error)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .multilineTextAlignment(.center)
+            }
+
+            Button {
+                Task {
+                    guard let pkg = selectedPackage else { return }
+                    await store.purchase(package: pkg)
+                    if store.isPremium {
+                        dismiss()
+                    }
+                }
+            } label: {
+                Group {
+                    if store.isPurchasing {
+                        ProgressView()
+                            .tint(.white)
+                    } else {
+                        Text(purchaseButtonTitle)
+                            .font(.headline)
+                    }
+                }
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(
+                    LinearGradient(
+                        colors: [Theme.accent, Theme.accent.opacity(0.85)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .clipShape(.capsule)
+                .shadow(color: Theme.accent.opacity(0.3), radius: 8, y: 4)
+            }
+            .disabled(store.isPurchasing || selectedPackage == nil)
+
+            if store.isLoading && store.offerings == nil {
+                ProgressView()
+                    .tint(Theme.textSecondary)
+            }
+        }
+    }
+
+    private var purchaseButtonTitle: String {
+        switch selectedPackageType {
+        case .lifetime:
+            return "Get Lifetime Access"
+        case .monthly:
+            if let pkg = resolvedMonthlyPackage,
+               let intro = pkg.storeProduct.introductoryDiscount,
+               intro.paymentMode == .freeTrial {
+                return "Start Free Trial"
+            }
+            return "Subscribe Now"
+        }
+    }
+
+    private var restoreAndLinks: some View {
+        VStack(spacing: 16) {
             Button {
                 Task { await store.restore() }
             } label: {
@@ -292,28 +460,7 @@ struct PaywallView: View {
                     .foregroundStyle(Theme.textTertiary)
             }
 
-            if let error = store.error {
-                Text(error)
-                    .font(.caption)
-                    .foregroundStyle(.red)
-                    .multilineTextAlignment(.center)
-            }
-
             subscriptionDisclosure
-        }
-    }
-
-    private func purchaseButtonTitle(for package: Package) -> String {
-        guard let intro = package.storeProduct.introductoryDiscount else {
-            return "Subscribe Now"
-        }
-        switch intro.paymentMode {
-        case .freeTrial:
-            return "Start Free Trial"
-        case .payAsYouGo, .payUpFront:
-            return "Start Intro Offer"
-        @unknown default:
-            return "Subscribe Now"
         }
     }
 
@@ -323,16 +470,22 @@ struct PaywallView: View {
                 .background(Theme.cardBackgroundLight)
                 .padding(.vertical, 4)
 
-            Text("Prooffd Pro Monthly")
+            Text("Prooffd Pro")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(Theme.textSecondary)
 
-            Text("Auto-renewable subscription. $1.99/month. Payment will be charged to your Apple ID account at confirmation of purchase. Subscription automatically renews unless cancelled at least 24 hours before the end of the current monthly period. Your account will be charged for renewal within 24 hours prior to the end of the current period. You can manage and cancel your subscription in your Apple ID Account Settings.")
-                .font(.caption2)
-                .foregroundStyle(Theme.textTertiary)
-                .multilineTextAlignment(.center)
-                .lineSpacing(2)
-                .fixedSize(horizontal: false, vertical: true)
+            Group {
+                if selectedPackageType == .lifetime {
+                    Text("One-time purchase. Lifetime access to all Pro features. No recurring charges. Payment will be charged to your Apple ID account at confirmation of purchase.")
+                } else {
+                    Text("Auto-renewable subscription. Payment will be charged to your Apple ID account at confirmation of purchase. Subscription automatically renews unless cancelled at least 24 hours before the end of the current period. You can manage and cancel your subscription in your Apple ID Account Settings.")
+                }
+            }
+            .font(.caption2)
+            .foregroundStyle(Theme.textTertiary)
+            .multilineTextAlignment(.center)
+            .lineSpacing(2)
+            .fixedSize(horizontal: false, vertical: true)
 
             HStack(spacing: 12) {
                 Button {
@@ -370,4 +523,32 @@ struct PaywallView: View {
             .padding(.top, 4)
         }
     }
+
+    // MARK: - Package Resolution
+
+    private var resolvedMonthlyPackage: Package? {
+        guard let offering = store.offerings?.current else { return nil }
+        return offering.monthly ?? offering.availablePackages.first(where: {
+            $0.storeProduct.subscriptionPeriod?.unit == .month
+        })
+    }
+
+    private var resolvedLifetimePackage: Package? {
+        guard let offering = store.offerings?.current else { return nil }
+        return offering.lifetime ?? offering.availablePackages.first(where: {
+            $0.storeProduct.subscriptionPeriod == nil
+        })
+    }
+
+    private var selectedPackage: Package? {
+        switch selectedPackageType {
+        case .monthly: return resolvedMonthlyPackage
+        case .lifetime: return resolvedLifetimePackage
+        }
+    }
+}
+
+nonisolated enum PackageType: String, Sendable {
+    case monthly
+    case lifetime
 }
