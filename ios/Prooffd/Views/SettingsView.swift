@@ -220,7 +220,7 @@ struct SettingsView: View {
                 Section {
                     HStack {
                         Spacer()
-                        Text("Prooffd v1.0")
+                        Text("Prooffd v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
                             .font(.caption)
                             .foregroundStyle(Theme.textTertiary)
                         Spacer()

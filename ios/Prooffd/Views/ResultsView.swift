@@ -1,5 +1,4 @@
 import SwiftUI
-import Combine
 
 struct ResultsView: View {
     @Environment(AppState.self) private var appState
