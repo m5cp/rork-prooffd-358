@@ -82,33 +82,26 @@ class AppState {
             UserDefaults.standard.set(Array(newValue), forKey: "completedChallengeWeeks")
         }
     }
-    var hasCompletedOnboarding: Bool {
-        get { UserDefaults.standard.bool(forKey: "hasCompletedOnboarding") }
-        set { UserDefaults.standard.set(newValue, forKey: "hasCompletedOnboarding") }
+    var hasCompletedOnboarding: Bool = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding") {
+        didSet { UserDefaults.standard.set(hasCompletedOnboarding, forKey: "hasCompletedOnboarding") }
     }
-    var hasCompletedQuiz: Bool {
-        get { UserDefaults.standard.bool(forKey: "hasCompletedQuiz") }
-        set { UserDefaults.standard.set(newValue, forKey: "hasCompletedQuiz") }
+    var hasCompletedQuiz: Bool = UserDefaults.standard.bool(forKey: "hasCompletedQuiz") {
+        didSet { UserDefaults.standard.set(hasCompletedQuiz, forKey: "hasCompletedQuiz") }
     }
-    var hasSeenResultsReveal: Bool {
-        get { UserDefaults.standard.bool(forKey: "hasSeenResultsReveal") }
-        set { UserDefaults.standard.set(newValue, forKey: "hasSeenResultsReveal") }
+    var hasSeenResultsReveal: Bool = UserDefaults.standard.bool(forKey: "hasSeenResultsReveal") {
+        didSet { UserDefaults.standard.set(hasSeenResultsReveal, forKey: "hasSeenResultsReveal") }
     }
-    var completedFirstStep: Bool {
-        get { UserDefaults.standard.bool(forKey: "completedFirstStep") }
-        set { UserDefaults.standard.set(newValue, forKey: "completedFirstStep") }
+    var completedFirstStep: Bool = UserDefaults.standard.bool(forKey: "completedFirstStep") {
+        didSet { UserDefaults.standard.set(completedFirstStep, forKey: "completedFirstStep") }
     }
-    var hasBeenPromptedForRating: Bool {
-        get { UserDefaults.standard.bool(forKey: "hasBeenPromptedForRating") }
-        set { UserDefaults.standard.set(newValue, forKey: "hasBeenPromptedForRating") }
+    var hasBeenPromptedForRating: Bool = UserDefaults.standard.bool(forKey: "hasBeenPromptedForRating") {
+        didSet { UserDefaults.standard.set(hasBeenPromptedForRating, forKey: "hasBeenPromptedForRating") }
     }
-    var hasSkippedQuiz: Bool {
-        get { UserDefaults.standard.bool(forKey: "hasSkippedQuiz") }
-        set { UserDefaults.standard.set(newValue, forKey: "hasSkippedQuiz") }
+    var hasSkippedQuiz: Bool = UserDefaults.standard.bool(forKey: "hasSkippedQuiz") {
+        didSet { UserDefaults.standard.set(hasSkippedQuiz, forKey: "hasSkippedQuiz") }
     }
-    var savedChosenPath: String? {
-        get { UserDefaults.standard.string(forKey: "chosenPath") }
-        set { UserDefaults.standard.set(newValue, forKey: "chosenPath") }
+    var savedChosenPath: String? = UserDefaults.standard.string(forKey: "chosenPath") {
+        didSet { UserDefaults.standard.set(savedChosenPath, forKey: "chosenPath") }
     }
 
     init() {
