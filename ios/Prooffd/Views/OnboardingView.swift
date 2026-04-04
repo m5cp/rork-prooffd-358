@@ -2,107 +2,114 @@ import SwiftUI
 
 struct OnboardingView: View {
     var onComplete: () -> Void
-    var onSkipQuiz: () -> Void
-    @State private var currentPage: Int = 0
+    @State private var appeared: Bool = false
     @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    private let pages: [OnboardingPage] = [
-        OnboardingPage(
-            headline: "Three paths,\none future",
-            subtitle: "Start a business, learn a trade, or pursue a degree — pick the direction that fits you and explore AI-proof careers.",
-            icon: "arrow.triangle.branch"
-        ),
-        OnboardingPage(
-            headline: "Build it,\nstep by step",
-            subtitle: "Get a clear action plan, track your progress, and start building toward the career you want.",
-            icon: "checkmark.seal.fill"
-        )
-    ]
 
     var body: some View {
         ZStack {
             meshBackground
+
             VStack(spacing: 0) {
                 Spacer()
-                TabView(selection: $currentPage) {
-                    ForEach(Array(pages.enumerated()), id: \.offset) { index, page in
-                        VStack(spacing: 24) {
-                            Image(systemName: page.icon)
-                                .font(.system(.largeTitle, design: .default, weight: .bold))
+
+                VStack(spacing: 32) {
+                    VStack(spacing: 20) {
+                        ZStack {
+                            Circle()
+                                .fill(.ultraThinMaterial)
+                                .frame(width: 88, height: 88)
+                            Image(systemName: "sparkles")
+                                .font(.system(size: 36, weight: .semibold))
                                 .foregroundStyle(Theme.accent)
-                                .symbolEffect(.pulse, options: .repeating, isActive: !reduceMotion)
-                                .accessibilityHidden(true)
+                                .symbolEffect(.breathe, options: .repeating)
+                        }
+                        .opacity(appeared ? 1 : 0)
+                        .scaleEffect(appeared ? 1 : 0.8)
 
-                            Text(page.headline)
+                        VStack(spacing: 10) {
+                            Text("Welcome to Prooffd")
                                 .font(.largeTitle.bold())
-                                .multilineTextAlignment(.center)
                                 .foregroundStyle(Theme.textPrimary)
-                                .dynamicTypeSize(...DynamicTypeSize.accessibility2)
 
-                            Text(page.subtitle)
-                                .font(.body)
-                                .multilineTextAlignment(.center)
+                            Text("Explore careers that AI can't replace")
+                                .font(.title3)
                                 .foregroundStyle(Theme.textSecondary)
-                                .padding(.horizontal, 32)
                         }
-                        .tag(index)
-                    }
-                }
-                .tabViewStyle(.page(indexDisplayMode: .never))
-
-                Spacer()
-
-                VStack(spacing: 16) {
-                    HStack(spacing: 8) {
-                        ForEach(0..<pages.count, id: \.self) { index in
-                            Capsule()
-                                .fill(index == currentPage ? Theme.accent : Theme.textTertiary)
-                                .frame(width: index == currentPage ? 24 : 8, height: 8)
-                                .animation(.spring(duration: 0.3), value: currentPage)
-                        }
+                        .opacity(appeared ? 1 : 0)
+                        .offset(y: appeared ? 0 : 16)
                     }
 
-                    Button {
-                        if currentPage < pages.count - 1 {
-                            withAnimation(reduceMotion ? .none : .spring(duration: 0.4)) {
-                                currentPage += 1
-                            }
-                        } else {
-                            onComplete()
-                        }
-                    } label: {
-                        Text(currentPage == pages.count - 1 ? "Choose Your Path" : "Continue")
-                            .font(.headline)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(Theme.accent)
-                            .clipShape(.capsule)
+                    VStack(spacing: 14) {
+                        pathRow(
+                            icon: "briefcase.fill",
+                            color: Theme.accent,
+                            title: "Start a Business",
+                            detail: "Step-by-step plans for 100+ businesses"
+                        )
+                        pathRow(
+                            icon: "wrench.and.screwdriver.fill",
+                            color: Theme.accentBlue,
+                            title: "Learn a Trade",
+                            detail: "Certifications, apprenticeships & programs"
+                        )
+                        pathRow(
+                            icon: "building.columns.fill",
+                            color: Color(hex: "818CF8"),
+                            title: "Pursue a Degree",
+                            detail: "Licensed careers requiring a college degree"
+                        )
                     }
                     .padding(.horizontal, 24)
-                    .sensoryFeedback(.selection, trigger: currentPage)
-
-                    if currentPage < pages.count - 1 {
-                        Button {
-                            onComplete()
-                        } label: {
-                            Text("Skip")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(Theme.accent)
-                        }
-                    }
-
-                    Button {
-                        onSkipQuiz()
-                    } label: {
-                        Text("Explore Without Choosing")
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(Theme.textTertiary)
-                    }
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 24)
                 }
-                .padding(.bottom, 48)
+
+                Spacer()
+                Spacer()
+
+                Button {
+                    onComplete()
+                } label: {
+                    Text("Get Started")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Theme.accent)
+                        .clipShape(.capsule)
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 56)
+                .opacity(appeared ? 1 : 0)
+                .offset(y: appeared ? 0 : 20)
             }
+        }
+        .onAppear {
+            withAnimation(.spring(duration: 0.8, bounce: 0.15).delay(0.15)) {
+                appeared = true
+            }
+        }
+    }
+
+    private func pathRow(icon: String, color: Color, title: String, detail: String) -> some View {
+        HStack(spacing: 16) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundStyle(color)
+                .frame(width: 44, height: 44)
+                .background(color.opacity(0.12))
+                .clipShape(.rect(cornerRadius: 12))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(Theme.textSecondary)
+            }
+
+            Spacer()
         }
     }
 
@@ -132,19 +139,13 @@ struct OnboardingView: View {
                         [0, 1], [0.5, 1], [1, 1]
                     ],
                     colors: [
-                        Color(hex: "F5F5F7"), Color(hex: "EDF2F0"), Color(hex: "F5F5F7"),
-                        Color(hex: "EFF3EE"), Color(hex: "E8EFE8"), Color(hex: "EEF1F5"),
-                        Color(hex: "F5F5F7"), Color(hex: "F0F0F3"), Color(hex: "F5F5F7")
+                        Color(hex: "F8F8FA"), Color(hex: "EEF5F0"), Color(hex: "F8F8FA"),
+                        Color(hex: "F0F5EE"), Color(hex: "E8F0E8"), Color(hex: "EEF2F6"),
+                        Color(hex: "F8F8FA"), Color(hex: "F2F2F5"), Color(hex: "F8F8FA")
                     ]
                 )
                 .ignoresSafeArea()
             }
         }
     }
-}
-
-private struct OnboardingPage {
-    let headline: String
-    let subtitle: String
-    let icon: String
 }

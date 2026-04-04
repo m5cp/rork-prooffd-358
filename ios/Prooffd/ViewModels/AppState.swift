@@ -40,7 +40,7 @@ nonisolated enum ChosenPath: String, Codable, Sendable {
 
 @Observable
 class AppState {
-    var currentScreen: AppScreen = .onboarding
+    var currentScreen: AppScreen = .results
     var userProfile: UserProfile = UserProfile()
     var matchResults: [MatchResult] = []
     var favoritePathIDs: Set<String> = []
@@ -122,19 +122,20 @@ class AppState {
         if let raw = savedChosenPath, let path = ChosenPath(rawValue: raw) {
             chosenPath = path
         }
-        if hasCompletedQuiz || hasSkippedQuiz {
+        if hasCompletedOnboarding {
             currentScreen = .results
             runMatching()
             checkWelcomeBack()
-        } else if hasCompletedOnboarding {
-            currentScreen = .quiz
         }
     }
 
     func completeOnboarding() {
         hasCompletedOnboarding = true
+        hasCompletedQuiz = true
+        hasSkippedQuiz = true
+        runMatching()
         withAnimation(.spring(duration: 0.5)) {
-            currentScreen = .quiz
+            currentScreen = .results
         }
     }
 

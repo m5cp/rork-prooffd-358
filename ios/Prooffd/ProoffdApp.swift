@@ -52,30 +52,13 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            switch appState.currentScreen {
-            case .onboarding:
-                OnboardingView(
-                    onComplete: { appState.completeOnboarding() },
-                    onSkipQuiz: { appState.skipQuiz() }
-                )
-            case .quiz:
-                QuizView(
-                    onComplete: { profile in
-                        appState.userProfile = profile
-                        appState.completeQuiz()
-                    },
-                    onSkip: { appState.skipQuiz() },
-                    onEarlyComplete: { profile in
-                        appState.completeEarlyQuiz(partialProfile: profile)
-                    },
-                    initialProfile: appState.userProfile
-                )
-            case .analyzing:
-                AnalyzingView()
-            case .resultsReveal:
-                ResultsRevealView()
-            case .results:
+            if appState.hasCompletedOnboarding {
                 ResultsView()
+            } else {
+                OnboardingView {
+                    appState.completeOnboarding()
+                    appState.runMatching()
+                }
             }
         }
     }

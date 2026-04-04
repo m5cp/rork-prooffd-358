@@ -5,13 +5,11 @@ struct ProfileTabView: View {
     @Environment(StoreViewModel.self) private var store
     @Environment(ThemeManager.self) private var themeManager
     @State private var showPaywall: Bool = false
-    @State private var showRetakeConfirm: Bool = false
-    @State private var showProfileDetails: Bool = false
     @State private var showAchievements: Bool = false
-    @State private var showMyPathShare: Bool = false
     @State private var showAvatarPicker: Bool = false
     @State private var showNameEdit: Bool = false
     @State private var editingName: String = ""
+    @State private var showMyPathShare: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -26,10 +24,9 @@ struct ProfileTabView: View {
                 .padding(.top, 8)
             }
             .scrollIndicators(.hidden)
-            .background(Theme.background)
-            .navigationTitle("Profile")
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle("You")
             .navigationBarTitleDisplayMode(.large)
-            .toolbarBackground(Theme.background, for: .navigationBar)
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
             }
@@ -62,14 +59,6 @@ struct ProfileTabView: View {
             } message: {
                 Text("Enter your display name")
             }
-            .alert("Retake Quiz?", isPresented: $showRetakeConfirm) {
-                Button("Cancel", role: .cancel) {}
-                Button("Retake", role: .destructive) {
-                    appState.retakeQuiz()
-                }
-            } message: {
-                Text("This will reset your profile and match results. You can retake the quiz to get new matches.")
-            }
         }
     }
 
@@ -94,10 +83,10 @@ struct ProfileTabView: View {
                     HStack(spacing: 6) {
                         Text(appState.userProfile.firstName.isEmpty ? "User" : appState.userProfile.firstName)
                             .font(.title3.weight(.bold))
-                            .foregroundStyle(Theme.textPrimary)
+                            .foregroundStyle(.primary)
                         Image(systemName: "pencil")
                             .font(.caption2)
-                            .foregroundStyle(Theme.textTertiary)
+                            .foregroundStyle(.tertiary)
                     }
                 }
 
@@ -120,9 +109,8 @@ struct ProfileTabView: View {
             Spacer()
         }
         .padding(20)
-        .background(Theme.cardBackground)
+        .background(Color(.secondarySystemGroupedBackground))
         .clipShape(.rect(cornerRadius: 18))
-        .cardShadow()
     }
 
     private var statsRow: some View {
@@ -131,13 +119,13 @@ struct ProfileTabView: View {
                 value: "\(appState.streakTracker.currentStreak)",
                 label: "Streak",
                 icon: "flame.fill",
-                color: appState.streakTracker.currentStreak > 0 ? .orange : Theme.textTertiary
+                color: appState.streakTracker.currentStreak > 0 ? .orange : .secondary
             )
 
             statCell(
                 value: "\(appState.builds.count)",
-                label: "Builds",
-                icon: "list.bullet.clipboard",
+                label: "Plans",
+                icon: "hammer.fill",
                 color: Theme.accent
             )
 
@@ -167,16 +155,15 @@ struct ProfileTabView: View {
                 .foregroundStyle(color)
             Text(value)
                 .font(.title3.weight(.bold))
-                .foregroundStyle(Theme.textPrimary)
+                .foregroundStyle(.primary)
             Text(label)
                 .font(.caption2)
-                .foregroundStyle(Theme.textTertiary)
+                .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 16)
-        .background(Theme.cardBackground)
+        .background(Color(.secondarySystemGroupedBackground))
         .clipShape(.rect(cornerRadius: 14))
-        .cardShadow()
     }
 
     private var settingsSection: some View {
@@ -185,25 +172,7 @@ struct ProfileTabView: View {
                 Button {
                     showPaywall = true
                 } label: {
-                    HStack(spacing: 12) {
-                        Image(systemName: "crown.fill")
-                            .foregroundStyle(.yellow)
-                            .frame(width: 22)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Upgrade to Pro")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(Theme.textPrimary)
-                            Text("Templates, scripts & exports")
-                                .font(.caption)
-                                .foregroundStyle(Theme.textSecondary)
-                        }
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.caption2)
-                            .foregroundStyle(Theme.textTertiary)
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 13)
+                    settingsRowContent(icon: "crown.fill", color: .yellow, title: "Upgrade to Pro")
                 }
                 settingsDivider
             }
@@ -230,15 +199,12 @@ struct ProfileTabView: View {
                         }
                     }
                 ))
-                .foregroundStyle(Theme.textPrimary)
+                .foregroundStyle(.primary)
                 .tint(Theme.accent)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
 
-            settingsDivider
-
-            profileDetailsRow
             settingsDivider
 
             if store.isPremium {
@@ -254,7 +220,8 @@ struct ProfileTabView: View {
                 Task { await store.restore() }
             }
             settingsDivider
-            settingsLink(icon: "questionmark.circle.fill", color: Theme.accentBlue, title: "Support", external: true) {
+
+            settingsLink(icon: "questionmark.circle.fill", color: .secondary, title: "Support", external: true) {
                 if let url = URL(string: "https://gist.github.com/m5cp/c630ed25e00a4a0e80702603e7093a16") {
                     UIApplication.shared.open(url)
                 }
@@ -264,30 +231,23 @@ struct ProfileTabView: View {
             NavigationLink {
                 TermsOfServiceView()
             } label: {
-                settingsRowContent(icon: "doc.text", color: Theme.textSecondary, title: "Terms of Use")
+                settingsRowContent(icon: "doc.text", color: .secondary, title: "Terms of Use")
             }
             settingsDivider
             NavigationLink {
                 PrivacyPolicyView()
             } label: {
-                settingsRowContent(icon: "hand.raised.fill", color: Theme.textSecondary, title: "Privacy Policy")
+                settingsRowContent(icon: "hand.raised.fill", color: .secondary, title: "Privacy Policy")
             }
             settingsDivider
             NavigationLink {
                 DisclaimerView()
             } label: {
-                settingsRowContent(icon: "exclamationmark.triangle.fill", color: Theme.textSecondary, title: "Disclaimer")
-            }
-            settingsDivider
-            NavigationLink {
-                AccessibilityView()
-            } label: {
-                settingsRowContent(icon: "accessibility", color: Theme.textSecondary, title: "Accessibility")
+                settingsRowContent(icon: "exclamationmark.triangle.fill", color: .secondary, title: "Disclaimer")
             }
         }
-        .background(Theme.cardBackground)
+        .background(Color(.secondarySystemGroupedBackground))
         .clipShape(.rect(cornerRadius: 16))
-        .cardShadow()
     }
 
     private var themeRow: some View {
@@ -296,7 +256,7 @@ struct ProfileTabView: View {
                 .foregroundStyle(Theme.accent)
                 .frame(width: 22)
             Text("Theme")
-                .foregroundStyle(Theme.textPrimary)
+                .foregroundStyle(.primary)
             Spacer()
             Picker("", selection: Binding(
                 get: { themeManager.mode },
@@ -313,80 +273,6 @@ struct ProfileTabView: View {
         .padding(.vertical, 10)
     }
 
-    private var profileDetailsRow: some View {
-        VStack(spacing: 0) {
-            Button {
-                withAnimation(.spring(duration: 0.3)) {
-                    showProfileDetails.toggle()
-                }
-            } label: {
-                HStack(spacing: 12) {
-                    Image(systemName: "person.text.rectangle.fill")
-                        .foregroundStyle(Theme.accent)
-                        .frame(width: 22)
-                    Text("View My Answers")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(Theme.textPrimary)
-                    Spacer()
-                    Image(systemName: showProfileDetails ? "chevron.up" : "chevron.down")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(Theme.textTertiary)
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 13)
-            }
-            .sensoryFeedback(.selection, trigger: showProfileDetails)
-
-            if showProfileDetails {
-                VStack(spacing: 0) {
-                    if !appState.userProfile.selectedCategories.isEmpty {
-                        profileDetailRow(label: "Interests", value: appState.userProfile.selectedCategories.map(\.rawValue).joined(separator: ", "))
-                    }
-                    if !appState.userProfile.workEnvironments.isEmpty {
-                        profileDetailRow(label: "Work Environment", value: appState.userProfile.workEnvironments.map(\.rawValue).joined(separator: ", "))
-                    }
-                    if !appState.userProfile.workConditions.isEmpty {
-                        profileDetailRow(label: "Conditions OK", value: appState.userProfile.workConditions.map(\.rawValue).joined(separator: ", "))
-                    }
-                    if !appState.userProfile.situationTags.isEmpty {
-                        profileDetailRow(label: "Situation", value: appState.userProfile.situationTags.map(\.rawValue).joined(separator: ", "))
-                    }
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 8)
-            }
-
-            Button {
-                showRetakeConfirm = true
-            } label: {
-                HStack(spacing: 12) {
-                    Image(systemName: "arrow.counterclockwise")
-                        .foregroundStyle(Theme.accent)
-                        .frame(width: 22)
-                    Text("Retake Profile Quiz")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(Theme.accent)
-                    Spacer()
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 13)
-            }
-        }
-    }
-
-    private func profileDetailRow(label: String, value: String) -> some View {
-        HStack {
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(Theme.textTertiary)
-            Spacer()
-            Text(value)
-                .font(.caption.weight(.medium))
-                .foregroundStyle(Theme.textSecondary)
-        }
-        .padding(.vertical, 6)
-    }
-
     private func settingsLink(icon: String, color: Color, title: String, external: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 12) {
@@ -395,11 +281,11 @@ struct ProfileTabView: View {
                     .frame(width: 22)
                 Text(title)
                     .font(.subheadline.weight(.medium))
-                    .foregroundStyle(Theme.textPrimary)
+                    .foregroundStyle(.primary)
                 Spacer()
                 Image(systemName: external ? "arrow.up.right" : "chevron.right")
                     .font(.caption2)
-                    .foregroundStyle(Theme.textTertiary)
+                    .foregroundStyle(.tertiary)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 13)
@@ -413,11 +299,11 @@ struct ProfileTabView: View {
                 .frame(width: 22)
             Text(title)
                 .font(.subheadline.weight(.medium))
-                .foregroundStyle(Theme.textPrimary)
+                .foregroundStyle(.primary)
             Spacer()
             Image(systemName: "chevron.right")
                 .font(.caption2)
-                .foregroundStyle(Theme.textTertiary)
+                .foregroundStyle(.tertiary)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 13)
@@ -425,7 +311,7 @@ struct ProfileTabView: View {
 
     private var settingsDivider: some View {
         Rectangle()
-            .fill(Theme.cardBackgroundLight)
+            .fill(Color(.separator).opacity(0.3))
             .frame(height: 0.5)
             .padding(.leading, 50)
     }
