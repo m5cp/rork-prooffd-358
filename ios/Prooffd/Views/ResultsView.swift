@@ -10,13 +10,13 @@ struct ResultsView: View {
         TabView(selection: $state.selectedTab) {
             UnifiedExploreView()
                 .tabItem {
-                    Label("Explore", systemImage: "compass")
+                    Label("Explore", systemImage: "safari")
                 }
                 .tag(0)
 
             MyBuildsView()
                 .tabItem {
-                    Label("My Plan", systemImage: "hammer.fill")
+                    Label("My Plan", systemImage: "list.clipboard.fill")
                 }
                 .tag(1)
 

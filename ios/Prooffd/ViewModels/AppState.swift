@@ -56,6 +56,7 @@ class AppState {
     var unlockedAchievementIDs: Set<String> = []
     var exploredPathIDs: Set<String> = []
     var builds: [BuildProject] = []
+    var planItems: [PlanItem] = []
     var selectedTab: Int = 0
     var showWelcomeBack: Bool = false
     var momentum: MomentumSystem = MomentumSystem()
@@ -111,6 +112,7 @@ class AppState {
         loadExploredPaths()
         loadUnlockedAchievements()
         loadBuilds()
+        loadPlanItems()
         assignAvatarIfNeeded()
         if let raw = savedChosenPath, let path = ChosenPath(rawValue: raw) {
             chosenPath = path
@@ -343,6 +345,36 @@ class AppState {
         if let data = UserDefaults.standard.data(forKey: "builds"),
            let saved = try? JSONDecoder().decode([BuildProject].self, from: data) {
             builds = saved
+        }
+    }
+
+    // MARK: - Plan Items
+
+    func addPlanItem(_ item: PlanItem) {
+        guard !planItems.contains(where: { $0.itemId == item.itemId && $0.type == item.type }) else { return }
+        planItems.append(item)
+        savePlanItems()
+    }
+
+    func removePlanItem(_ itemId: String) {
+        planItems.removeAll { $0.id == itemId }
+        savePlanItems()
+    }
+
+    func hasPlanItem(itemId: String, type: PlanItemType) -> Bool {
+        planItems.contains { $0.itemId == itemId && $0.type == type }
+    }
+
+    private func savePlanItems() {
+        if let data = try? JSONEncoder().encode(planItems) {
+            UserDefaults.standard.set(data, forKey: "planItems")
+        }
+    }
+
+    private func loadPlanItems() {
+        if let data = UserDefaults.standard.data(forKey: "planItems"),
+           let saved = try? JSONDecoder().decode([PlanItem].self, from: data) {
+            planItems = saved
         }
     }
 

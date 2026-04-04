@@ -9,20 +9,45 @@ struct MyBuildsView: View {
     @State private var showStepCelebration: Bool = false
     @State private var celebratedStepTitle: String = ""
     @State private var showProgressShare: Bool = false
+    @State private var selectedEducationPath: CareerPath?
+    @State private var selectedDegreeRecord: DegreeCareerRecord?
+
+    private var isEmpty: Bool {
+        appState.builds.isEmpty && appState.planItems.isEmpty
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    if appState.builds.isEmpty {
+                    if isEmpty {
                         emptyState
                     } else {
                         if let today = appState.todayStep {
                             todayStepCard(today)
                         }
 
-                        ForEach(appState.builds) { build in
-                            buildCard(build)
+                        if !appState.builds.isEmpty {
+                            sectionLabel("Business Plans", icon: "briefcase.fill", color: Theme.accent)
+                            ForEach(appState.builds) { build in
+                                buildCard(build)
+                            }
+                        }
+
+                        let tradeItems = appState.planItems.filter { $0.type == .trade }
+                        if !tradeItems.isEmpty {
+                            sectionLabel("Trades & Certifications", icon: "wrench.and.screwdriver.fill", color: Theme.accentBlue)
+                            ForEach(tradeItems) { item in
+                                planItemCard(item)
+                            }
+                        }
+
+                        let degreeItems = appState.planItems.filter { $0.type == .degree }
+                        if !degreeItems.isEmpty {
+                            sectionLabel("Degree Careers", icon: "building.columns.fill", color: Color(hex: "818CF8"))
+                            ForEach(degreeItems) { item in
+                                planItemCard(item)
+                            }
                         }
                     }
 
@@ -46,6 +71,12 @@ struct MyBuildsView: View {
                     ShareCardPresenterSheet(content: .progress(from: build))
                 }
             }
+            .sheet(item: $selectedEducationPath) { path in
+                CareerPathDetailSheet(career: path)
+            }
+            .sheet(item: $selectedDegreeRecord) { record in
+                DegreeCareerDetailSheet(record: record)
+            }
             .overlay {
                 if showStepCelebration {
                     StepCompletionOverlay(
@@ -67,6 +98,19 @@ struct MyBuildsView: View {
             }
             .animation(.spring(duration: 0.4), value: showStepCelebration)
         }
+    }
+
+    private func sectionLabel(_ title: String, icon: String, color: Color) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.caption)
+                .foregroundStyle(color)
+            Text(title)
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(.primary)
+            Spacer()
+        }
+        .padding(.top, 4)
     }
 
     private func todayStepCard(_ today: (build: BuildProject, step: BuildStep)) -> some View {
@@ -199,9 +243,63 @@ struct MyBuildsView: View {
         .buttonStyle(.plain)
     }
 
+    private func planItemCard(_ item: PlanItem) -> some View {
+        let color: Color = item.type == .trade ? Theme.accentBlue : Color(hex: "818CF8")
+
+        return Button {
+            if item.type == .trade {
+                if let path = EducationPathDatabase.all.first(where: { $0.id == item.itemId }) {
+                    selectedEducationPath = path
+                }
+            } else if item.type == .degree {
+                if let record = DegreeCareerDatabase.allRecords.first(where: { $0.id == item.itemId }) {
+                    selectedDegreeRecord = record
+                }
+            }
+        } label: {
+            HStack(spacing: 14) {
+                Image(systemName: item.icon)
+                    .font(.body)
+                    .foregroundStyle(color)
+                    .frame(width: 44, height: 44)
+                    .background(color.opacity(0.1))
+                    .clipShape(.rect(cornerRadius: 12))
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(item.title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+                    Text(item.subtitle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(16)
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(.rect(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
+        .contextMenu {
+            Button(role: .destructive) {
+                withAnimation {
+                    appState.removePlanItem(item.id)
+                }
+            } label: {
+                Label("Remove from Plan", systemImage: "trash")
+            }
+        }
+    }
+
     private var emptyState: some View {
         VStack(spacing: 20) {
-            Image(systemName: "hammer")
+            Image(systemName: "list.clipboard")
                 .font(.system(size: 48))
                 .foregroundStyle(.tertiary)
 
@@ -209,7 +307,7 @@ struct MyBuildsView: View {
                 Text("No plans yet")
                     .font(.title3.weight(.bold))
                     .foregroundStyle(.primary)
-                Text("Browse careers in Explore and tap\n\"Add to My Build\" to start a plan.")
+                Text("Browse careers in Explore and tap\n\"Add to My Plan\" to start planning.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)

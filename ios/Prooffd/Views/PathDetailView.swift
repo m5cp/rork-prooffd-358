@@ -65,14 +65,14 @@ struct PathDetailView: View {
             .sheet(isPresented: $showShareSheet) {
                 ShareCardPresenterSheet(content: .topMatch(from: result))
             }
-            .confirmationDialog("Added to My Builds!", isPresented: $showBuildAdded, titleVisibility: .visible) {
-                Button("Go to Build Now") {
+            .confirmationDialog("Added to My Plan!", isPresented: $showBuildAdded, titleVisibility: .visible) {
+                Button("Go Now") {
                     appState.selectedTab = 1
                     dismiss()
                 }
-                Button("Stay on This Page", role: .cancel) { }
+                Button("Stay on Page", role: .cancel) { }
             } message: {
-                Text("\(path.name) has been added to your builds.")
+                Text("\(path.name) has been added to your plan.")
             }
         }
         .presentationDetents([.large])
@@ -744,7 +744,7 @@ struct PathDetailView: View {
                 } label: {
                     HStack(spacing: 8) {
                         Image(systemName: "hammer.fill")
-                        Text("Go to My Build")
+                        Text("Go to My Plan")
                     }
                     .font(.headline)
                     .foregroundStyle(.white)
@@ -762,7 +762,7 @@ struct PathDetailView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "hammer.fill")
                             .accessibilityHidden(true)
-                        Text("Add to My Build")
+                        Text("Add to My Plan")
                     }
                     .font(.headline)
                     .foregroundStyle(.white)

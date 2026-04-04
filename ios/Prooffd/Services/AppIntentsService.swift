@@ -14,8 +14,8 @@ struct ShowDailyTipIntent: AppIntent {
 }
 
 struct ShowMyBuildsIntent: AppIntent {
-    static var title: LocalizedStringResource = "Show My Builds"
-    static var description = IntentDescription("Opens your active builds in Prooffd.")
+    static var title: LocalizedStringResource = "Show My Plan"
+    static var description = IntentDescription("Opens your active plan in Prooffd.")
     static var openAppWhenRun: Bool = true
 
     func perform() async throws -> some IntentResult {
@@ -63,10 +63,10 @@ struct ProoffdShortcuts: AppShortcutsProvider {
         AppShortcut(
             intent: ShowMyBuildsIntent(),
             phrases: [
-                "Show my builds in \(.applicationName)",
-                "Open my career builds on \(.applicationName)"
+                "Show my plan in \(.applicationName)",
+                "Open my career plan on \(.applicationName)"
             ],
-            shortTitle: "My Builds",
+            shortTitle: "My Plan",
             systemImageName: "list.bullet.clipboard"
         )
         AppShortcut(

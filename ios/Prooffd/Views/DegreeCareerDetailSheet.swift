@@ -6,6 +6,7 @@ struct DegreeCareerDetailSheet: View {
     @Environment(StoreViewModel.self) private var store
     @Environment(AppState.self) private var appState
     @State private var showPaywall: Bool = false
+    @State private var showPlanAdded: Bool = false
 
     private var detail: DegreeCareerDetailData? {
         DegreeCareerDatabase.lookup(record.id)
@@ -39,6 +40,7 @@ struct DegreeCareerDetailSheet: View {
                 VStack(spacing: 20) {
                     heroHeader
                     statsBar
+                    addToPlanButton
                     favBar
                     overviewCard
 
@@ -79,10 +81,64 @@ struct DegreeCareerDetailSheet: View {
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
             }
+            .confirmationDialog("Added to My Plan!", isPresented: $showPlanAdded, titleVisibility: .visible) {
+                Button("Go Now") {
+                    appState.selectedTab = 1
+                    dismiss()
+                }
+                Button("Stay on Page", role: .cancel) { }
+            } message: {
+                Text("\(record.title) has been added to your plan.")
+            }
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         .presentationBackground(Theme.background)
+    }
+
+    private var addToPlanButton: some View {
+        Group {
+            if appState.hasPlanItem(itemId: record.id, type: .degree) {
+                Button {
+                    appState.selectedTab = 1
+                    dismiss()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "list.clipboard.fill")
+                        Text("Go to My Plan")
+                    }
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color(hex: "818CF8"))
+                    .clipShape(.capsule)
+                }
+            } else {
+                Button {
+                    appState.addPlanItem(.fromDegree(record))
+                    showPlanAdded = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "plus.circle.fill")
+                        Text("Add to My Plan")
+                    }
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        LinearGradient(
+                            colors: [Color(hex: "818CF8"), Theme.accentBlue],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .clipShape(.capsule)
+                }
+                .sensoryFeedback(.impact(weight: .medium), trigger: showPlanAdded)
+            }
+        }
     }
 
     private var heroHeader: some View {

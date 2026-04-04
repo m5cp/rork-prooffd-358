@@ -375,6 +375,7 @@ struct CareerPathDetailSheet: View {
     @Environment(StoreViewModel.self) private var store
     @Environment(AppState.self) private var appState
     @State private var showPaywall: Bool = false
+    @State private var showPlanAdded: Bool = false
 
     private var isFav: Bool { appState.isEducationFavorite(career.id) }
     private var isHidden: Bool { appState.isEducationHidden(career.id) }
@@ -386,6 +387,7 @@ struct CareerPathDetailSheet: View {
                     heroHeader
                     deliveryBadge
                     statsBar
+                    addToPlanButton
                     favHideBar
                     overviewCard
                     firstStepsCard
@@ -420,10 +422,64 @@ struct CareerPathDetailSheet: View {
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
             }
+            .confirmationDialog("Added to My Plan!", isPresented: $showPlanAdded, titleVisibility: .visible) {
+                Button("Go Now") {
+                    appState.selectedTab = 1
+                    dismiss()
+                }
+                Button("Stay on Page", role: .cancel) { }
+            } message: {
+                Text("\(career.title) has been added to your plan.")
+            }
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         .presentationBackground(Theme.background)
+    }
+
+    private var addToPlanButton: some View {
+        Group {
+            if appState.hasPlanItem(itemId: career.id, type: .trade) {
+                Button {
+                    appState.selectedTab = 1
+                    dismiss()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "list.clipboard.fill")
+                        Text("Go to My Plan")
+                    }
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Theme.accentBlue)
+                    .clipShape(.capsule)
+                }
+            } else {
+                Button {
+                    appState.addPlanItem(.fromEducation(career))
+                    showPlanAdded = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "plus.circle.fill")
+                        Text("Add to My Plan")
+                    }
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        LinearGradient(
+                            colors: [Theme.accentBlue, Color(hex: "818CF8")],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .clipShape(.capsule)
+                }
+                .sensoryFeedback(.impact(weight: .medium), trigger: showPlanAdded)
+            }
+        }
     }
 
     private var heroHeader: some View {
