@@ -183,6 +183,11 @@ struct TradesExplorePage: View {
             } label: {
                 Label(appState.isEducationHidden(path.id) ? "Unhide" : "Hide", systemImage: appState.isEducationHidden(path.id) ? "eye.fill" : "eye.slash.fill")
             }
+            Button {
+                QuickShareHelper.shareTrade(path.title)
+            } label: {
+                Label("Share", systemImage: "square.and.arrow.up")
+            }
         }
     }
 

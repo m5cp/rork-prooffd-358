@@ -10,7 +10,7 @@ struct AccessibilityView: View {
                     Text("Accessibility")
                         .font(.largeTitle.bold())
                         .foregroundStyle(Theme.textPrimary)
-                    Text("Last updated: March 2026")
+                    Text("Last updated: April 2026")
                         .font(.subheadline)
                         .foregroundStyle(Theme.textTertiary)
                 }
@@ -50,6 +50,24 @@ struct AccessibilityView: View {
                     icon: "waveform",
                     title: "Haptic Feedback",
                     description: "Meaningful haptic feedback for key interactions like completing steps, earning badges, and navigating between sections."
+                )
+
+                featureCard(
+                    icon: "mic.fill",
+                    title: "Siri & Shortcuts",
+                    description: "Access daily tips, your plan, and streaks hands-free using Siri voice commands and the Shortcuts app."
+                )
+
+                featureCard(
+                    icon: "magnifyingglass",
+                    title: "Spotlight Search",
+                    description: "Find careers and businesses directly from your home screen using iOS Spotlight search."
+                )
+
+                featureCard(
+                    icon: "brain.head.profile",
+                    title: "Apple Intelligence Compatible",
+                    description: "Prooffd is compatible with Apple Intelligence features on supported devices. System-level text tools, Siri enhancements, and smart suggestions work seamlessly with app content."
                 )
 
                 Button {

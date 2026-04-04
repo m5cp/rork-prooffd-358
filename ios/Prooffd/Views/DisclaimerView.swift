@@ -8,7 +8,7 @@ struct DisclaimerView: View {
                     Text("Disclaimer")
                         .font(.largeTitle.bold())
                         .foregroundStyle(Theme.textPrimary)
-                    Text("Last updated: March 2026")
+                    Text("Last updated: April 2026")
                         .font(.subheadline)
                         .foregroundStyle(Theme.textTertiary)
                 }
@@ -56,6 +56,12 @@ struct DisclaimerView: View {
                     title: "Limitation of Liability",
                     icon: "shield.slash",
                     content: "To the fullest extent permitted by law, Prooffd and its creators, owners, employees, and affiliates shall not be held liable for any damages, losses, costs, or expenses (including lost profits or lost money) arising from or related to your use of this app or any information contained within it. By using this app, you acknowledge and accept all risks associated with acting on any information provided."
+                )
+
+                disclaimerSection(
+                    title: "Apple Intelligence & Siri",
+                    icon: "brain.head.profile",
+                    content: "Prooffd integrates with Apple platform features including Siri, Shortcuts, Spotlight, and Widgets. These features are provided by Apple and governed by Apple's terms and privacy policies. Prooffd is compatible with Apple Intelligence on supported devices. Any on-device AI processing is handled entirely by the operating system. Prooffd does not use AI to generate career advice, business plans, or financial projections — all content is human-curated and stored locally in the app."
                 )
 
                 Color.clear.frame(height: 40)

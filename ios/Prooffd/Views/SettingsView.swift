@@ -164,6 +164,25 @@ struct SettingsView: View {
                     .listRowBackground(Theme.cardBackground)
                 }
 
+                Section("Apple Intelligence") {
+                    NavigationLink {
+                        AppleIntelligenceView()
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "brain.head.profile")
+                                .foregroundStyle(Theme.accent)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Apple Intelligence")
+                                    .foregroundStyle(Theme.textPrimary)
+                                Text("Siri, Spotlight, Widgets & more")
+                                    .font(.caption)
+                                    .foregroundStyle(Theme.textTertiary)
+                            }
+                        }
+                    }
+                    .listRowBackground(Theme.cardBackground)
+                }
+
                 Section("Legal") {
                     NavigationLink {
                         TermsOfServiceView()

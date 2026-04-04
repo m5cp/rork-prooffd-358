@@ -171,6 +171,13 @@ struct BusinessExplorePage: View {
             .clipShape(.rect(cornerRadius: 14))
         }
         .buttonStyle(.plain)
+        .contextMenu {
+            Button {
+                QuickShareHelper.shareBusiness(path.name)
+            } label: {
+                Label("Share", systemImage: "square.and.arrow.up")
+            }
+        }
     }
 
     private var filterBar: some View {

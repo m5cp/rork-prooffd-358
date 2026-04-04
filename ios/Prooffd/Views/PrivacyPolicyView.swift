@@ -10,7 +10,7 @@ struct PrivacyPolicyView: View {
                     Text("Privacy Policy")
                         .font(.largeTitle.bold())
                         .foregroundStyle(Theme.textPrimary)
-                    Text("Last updated: March 2026")
+                    Text("Last updated: April 2026")
                         .font(.subheadline)
                         .foregroundStyle(Theme.textTertiary)
                 }
@@ -51,6 +51,30 @@ struct PrivacyPolicyView: View {
                         icon: "cart.fill",
                         title: "Subscriptions",
                         text: "In-app purchases are handled securely by Apple and our payment partner RevenueCat. We do not store or have access to your payment details."
+                    )
+
+                    privacySection(
+                        icon: "mic.fill",
+                        title: "Siri & Shortcuts",
+                        text: "Prooffd integrates with Siri and Apple Shortcuts to let you access daily tips, your plan, and streaks hands-free. Siri interactions are processed by Apple on-device or through Apple's servers per Apple's privacy policy. We do not receive, store, or transmit any Siri voice data."
+                    )
+
+                    privacySection(
+                        icon: "magnifyingglass",
+                        title: "Spotlight Search",
+                        text: "Career and business paths are indexed for Spotlight search so you can find them quickly from your home screen. This data is stored locally in Apple's on-device index and is never sent to external servers."
+                    )
+
+                    privacySection(
+                        icon: "rectangle.on.rectangle",
+                        title: "Widgets",
+                        text: "Prooffd widgets display streaks, tips, and micro-actions on your home and lock screens. Widget data is stored in a shared App Group container on your device and is never transmitted externally."
+                    )
+
+                    privacySection(
+                        icon: "brain.head.profile",
+                        title: "Apple Intelligence Compatibility",
+                        text: "Prooffd is compatible with Apple Intelligence features available on supported devices (iPhone 15 Pro and later, iPad and Mac with M1 or later). All Apple Intelligence processing happens on-device or through Apple's Private Cloud Compute. Prooffd does not send any data to Apple for AI processing — Apple Intelligence features are initiated and controlled entirely by the operating system."
                     )
                 }
                 .padding(16)

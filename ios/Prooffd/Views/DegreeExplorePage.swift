@@ -153,6 +153,11 @@ struct DegreeExplorePage: View {
             } label: {
                 Label("Hide", systemImage: "eye.slash.fill")
             }
+            Button {
+                QuickShareHelper.shareDegreeCareer(record.title)
+            } label: {
+                Label("Share", systemImage: "square.and.arrow.up")
+            }
         }
     }
 

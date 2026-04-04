@@ -572,6 +572,22 @@ struct CareerPathDetailSheet: View {
                 .clipShape(.capsule)
             }
 
+            Button {
+                QuickShareHelper.shareTrade(career.title)
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.caption)
+                    Text("Share")
+                        .font(.caption.weight(.semibold))
+                }
+                .foregroundStyle(Theme.textSecondary)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Theme.cardBackground)
+                .clipShape(.capsule)
+            }
+
             Spacer()
         }
     }

@@ -13,7 +13,7 @@ struct TermsOfServiceView: View {
                     Text("Terms of Use")
                         .font(.largeTitle.bold())
                         .foregroundStyle(Theme.textPrimary)
-                    Text("Last updated: March 2026")
+                    Text("Last updated: April 2026")
                         .font(.subheadline)
                         .foregroundStyle(Theme.textTertiary)
                 }
@@ -33,6 +33,44 @@ struct TermsOfServiceView: View {
                     url: eulaURL
                 )
 
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "info.circle.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.accent)
+                        Text("Apple Platform Integrations")
+                            .font(.headline)
+                            .foregroundStyle(Theme.textPrimary)
+                    }
+
+                    integrationRow(
+                        icon: "mic.fill",
+                        title: "Siri & Shortcuts",
+                        text: "Prooffd provides App Intents for Siri and the Shortcuts app. Voice interactions are governed by Apple's Siri & Privacy terms."
+                    )
+
+                    integrationRow(
+                        icon: "magnifyingglass",
+                        title: "Spotlight Search",
+                        text: "Career paths are indexed locally for Spotlight. Apple's search terms apply."
+                    )
+
+                    integrationRow(
+                        icon: "rectangle.on.rectangle",
+                        title: "Widgets & Live Activities",
+                        text: "Home and Lock Screen widgets use shared on-device storage. No external data transmission."
+                    )
+
+                    integrationRow(
+                        icon: "brain.head.profile",
+                        title: "Apple Intelligence",
+                        text: "Compatible with Apple Intelligence on supported devices. All on-device AI processing is governed by Apple's terms."
+                    )
+                }
+                .padding(16)
+                .background(Theme.cardBackground)
+                .clipShape(.rect(cornerRadius: 12))
+
                 Color.clear.frame(height: 40)
             }
             .padding(.horizontal, 20)
@@ -43,6 +81,25 @@ struct TermsOfServiceView: View {
         .navigationTitle("Terms of Use")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Theme.background, for: .navigationBar)
+    }
+
+    private func integrationRow(icon: String, title: String, text: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .font(.caption)
+                .foregroundStyle(Theme.accentBlue)
+                .frame(width: 20)
+                .padding(.top, 2)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                Text(text)
+                    .font(.caption)
+                    .foregroundStyle(Theme.textSecondary)
+                    .lineSpacing(2)
+            }
+        }
     }
 
     private func linkCard(icon: String, title: String, subtitle: String, url: URL) -> some View {
