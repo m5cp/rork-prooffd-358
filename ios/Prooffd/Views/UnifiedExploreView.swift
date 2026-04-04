@@ -192,6 +192,20 @@ struct UnifiedExploreView: View {
 
                 threePathsSection
 
+                forYouDegreeCareerSection
+
+                forYouTradeCareerSection
+
+                if !recommendedResults.isEmpty {
+                    horizontalSection(
+                        title: "Top Business Matches",
+                        icon: "sparkle",
+                        iconColor: Theme.accent,
+                        results: recommendedResults,
+                        mode: .recommended
+                    )
+                }
+
                 if !store.isPremium {
                     upgradePrompt
                         .padding(.horizontal, 16)
@@ -202,6 +216,257 @@ struct UnifiedExploreView: View {
             .padding(.top, 8)
         }
         .scrollIndicators(.hidden)
+    }
+
+    // MARK: - For You: Degree Careers
+
+    private var forYouDegreeRecords: [DegreeCareerRecord] {
+        let records = DegreeCareerDatabase.allRecords.filter { !appState.isDegreeHidden($0.id) }
+        let favs = records.filter { appState.isDegreeFavorite($0.id) }
+        if !favs.isEmpty { return Array(favs.prefix(10)) }
+        return Array(records.prefix(10))
+    }
+
+    private var forYouDegreeCareerSection: some View {
+        let records = forYouDegreeRecords
+        return Group {
+            if !records.isEmpty {
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "building.columns.fill")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Color(hex: "818CF8"))
+                        Text("4-Year Degree Careers")
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(Theme.textPrimary)
+                        Spacer()
+                        Button {
+                            selectedSegment = .education
+                        } label: {
+                            Text("See All")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Theme.accent)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+
+                    ScrollView(.horizontal) {
+                        HStack(spacing: 12) {
+                            ForEach(records) { record in
+                                forYouDegreeCard(record)
+                            }
+                        }
+                    }
+                    .contentMargins(.horizontal, 16)
+                    .scrollIndicators(.hidden)
+                }
+            }
+        }
+    }
+
+    private func forYouDegreeCard(_ record: DegreeCareerRecord) -> some View {
+        let catColor: Color = {
+            switch record.category {
+            case .healthcare: return Color(hex: "F472B6")
+            case .mentalHealth: return Color(hex: "818CF8")
+            case .engineering: return Theme.accentBlue
+            case .legal: return Color(hex: "FB923C")
+            case .education: return Theme.accent
+            case .aviation: return Color(hex: "38BDF8")
+            case .military: return Color(hex: "4ADE80")
+            }
+        }()
+        let tierColor: Color = record.aiProofTier == .tier1 ? Color(hex: "34D399") : record.aiProofTier == .tier2 ? Theme.accentBlue : Color(hex: "FBBF24")
+
+        return Button {
+            showDegreeCategorySheet = record.category
+        } label: {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 10) {
+                    ZStack {
+                        Circle()
+                            .fill(catColor.opacity(0.15))
+                            .frame(width: 40, height: 40)
+                        Image(systemName: record.icon)
+                            .font(.body)
+                            .foregroundStyle(catColor)
+                    }
+                    Spacer()
+                    HStack(spacing: 3) {
+                        Image(systemName: record.aiProofTier.icon)
+                            .font(.system(size: 9))
+                        Text(record.aiProofTier == .tier1 ? "T1" : record.aiProofTier == .tier2 ? "T2" : "T3")
+                            .font(.caption2.weight(.bold))
+                    }
+                    .foregroundStyle(tierColor)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(tierColor.opacity(0.12))
+                    .clipShape(.capsule)
+                }
+
+                Text(record.title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Spacer(minLength: 0)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "dollarsign.circle")
+                            .font(.system(size: 9))
+                        Text(record.salaryExperienced)
+                            .font(.caption2.weight(.medium))
+                    }
+                    .foregroundStyle(Theme.accent)
+
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock")
+                            .font(.system(size: 9))
+                        Text(record.timeline)
+                            .font(.caption2)
+                    }
+                    .foregroundStyle(Theme.textTertiary)
+                }
+            }
+            .frame(width: 160, height: 170, alignment: .leading)
+            .padding(14)
+            .background(Theme.cardBackground)
+            .clipShape(.rect(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(catColor.opacity(0.1), lineWidth: 0.5)
+            )
+            .cardShadow()
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - For You: Trade & Certification Careers
+
+    private var forYouEducationPaths: [EducationPath] {
+        let paths = EducationPathDatabase.all.filter { !appState.isEducationHidden($0.id) }
+        let favs = paths.filter { appState.isEducationFavorite($0.id) }
+        if !favs.isEmpty { return Array(favs.prefix(10)) }
+        return Array(paths.prefix(10))
+    }
+
+    private var forYouTradeCareerSection: some View {
+        let paths = forYouEducationPaths
+        return Group {
+            if !paths.isEmpty {
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "wrench.and.screwdriver.fill")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Theme.accentBlue)
+                        Text("Trades & Certifications")
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(Theme.textPrimary)
+                        Spacer()
+                        Button {
+                            selectedSegment = .education
+                        } label: {
+                            Text("See All")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Theme.accent)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+
+                    ScrollView(.horizontal) {
+                        HStack(spacing: 12) {
+                            ForEach(paths) { path in
+                                forYouTradeCard(path)
+                            }
+                        }
+                    }
+                    .contentMargins(.horizontal, 16)
+                    .scrollIndicators(.hidden)
+                }
+            }
+        }
+    }
+
+    private func forYouTradeCard(_ path: EducationPath) -> some View {
+        let catColor: Color = {
+            switch path.category {
+            case .trade: return Theme.accent
+            case .certification: return Color(hex: "FBBF24")
+            case .healthcare: return Color(hex: "F472B6")
+            case .technology: return Theme.accentBlue
+            case .business: return Color(hex: "FB923C")
+            case .creative: return Color(hex: "818CF8")
+            case .military: return Color(hex: "4ADE80")
+            }
+        }()
+        let zone = path.zone
+        let zoneColor: Color = zone == .safe ? Theme.accent : zone == .human ? Color(hex: "FBBF24") : .orange
+
+        return Button {
+            showEducationCategorySheet = path.category
+        } label: {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 10) {
+                    ZStack {
+                        Circle()
+                            .fill(catColor.opacity(0.15))
+                            .frame(width: 40, height: 40)
+                        Image(systemName: path.icon)
+                            .font(.body)
+                            .foregroundStyle(catColor)
+                    }
+                    Spacer()
+                    Text("\(path.aiSafeScore)/100")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(zoneColor)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(zoneColor.opacity(0.12))
+                        .clipShape(.capsule)
+                }
+
+                Text(path.title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Spacer(minLength: 0)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "dollarsign.circle")
+                            .font(.system(size: 9))
+                        Text(path.typicalSalaryRange)
+                            .font(.caption2.weight(.medium))
+                    }
+                    .foregroundStyle(Theme.accent)
+
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock")
+                            .font(.system(size: 9))
+                        Text(path.timeToComplete)
+                            .font(.caption2)
+                    }
+                    .foregroundStyle(Theme.textTertiary)
+                }
+            }
+            .frame(width: 160, height: 170, alignment: .leading)
+            .padding(14)
+            .background(Theme.cardBackground)
+            .clipShape(.rect(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(catColor.opacity(0.1), lineWidth: 0.5)
+            )
+            .cardShadow()
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Three Paths
