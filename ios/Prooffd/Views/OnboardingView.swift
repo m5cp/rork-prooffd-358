@@ -31,7 +31,7 @@ struct OnboardingView: View {
                                 .font(.largeTitle.bold())
                                 .foregroundStyle(Theme.textPrimary)
 
-                            Text("Explore careers that AI can't replace")
+                            Text("Careers with AI Resistance")
                                 .font(.title3)
                                 .foregroundStyle(Theme.textSecondary)
                         }
