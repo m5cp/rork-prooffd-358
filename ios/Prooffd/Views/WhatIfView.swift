@@ -248,9 +248,13 @@ struct WhatIfView: View {
 
                     Spacer()
 
-                    Text("\(result.scorePercentage)%")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(result.scorePercentage >= 80 ? Theme.accent : Theme.accentBlue)
+                    HStack(spacing: 3) {
+                        Image(systemName: result.businessPath.zone.icon)
+                            .font(.system(size: 9))
+                        Text("\(result.businessPath.aiProofRating)")
+                            .font(.caption.weight(.bold))
+                    }
+                    .foregroundStyle(result.businessPath.zone == .safe ? Theme.accent : result.businessPath.zone == .human ? Color(hex: "FBBF24") : .orange)
                 }
             }
 

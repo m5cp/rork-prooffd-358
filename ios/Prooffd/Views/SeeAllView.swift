@@ -248,14 +248,7 @@ struct SeeAllResultCard: View {
 
                     Spacer(minLength: 4)
 
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("\(result.scorePercentage)%")
-                            .font(.title3.weight(.bold))
-                            .foregroundStyle(matchColor)
-                        Text("match")
-                            .font(.caption2)
-                            .foregroundStyle(Theme.textTertiary)
-                    }
+                    aiProofBadge
                 }
 
                 credibilityTags
@@ -309,10 +302,20 @@ struct SeeAllResultCard: View {
         }
     }
 
-    private var matchColor: Color {
-        if result.scorePercentage >= 80 { return Theme.accent }
-        if result.scorePercentage >= 60 { return Theme.accentBlue }
-        return Color(hex: "FB923C")
+    private var aiProofBadge: some View {
+        let zone = path.zone
+        let color: Color = zone == .safe ? Theme.accent : zone == .human ? Color(hex: "FBBF24") : .orange
+        return HStack(spacing: 4) {
+            Image(systemName: zone.icon)
+                .font(.system(size: 10))
+            Text("\(path.aiProofRating)")
+                .font(.caption.weight(.bold))
+        }
+        .foregroundStyle(color)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(color.opacity(0.12))
+        .clipShape(.capsule)
     }
 }
 

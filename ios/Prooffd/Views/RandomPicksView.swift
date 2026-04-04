@@ -118,14 +118,13 @@ struct RandomPicksView: View {
 
                     Spacer()
 
-                    VStack(spacing: 4) {
-                        Text("\(result.scorePercentage)%")
+                    HStack(spacing: 4) {
+                        Image(systemName: result.businessPath.zone.icon)
+                            .font(.system(size: 10))
+                        Text("\(result.businessPath.aiProofRating)")
                             .font(.title3.weight(.bold))
-                            .foregroundStyle(scoreColor(result.scorePercentage))
-                        Text("match")
-                            .font(.caption2)
-                            .foregroundStyle(Theme.textTertiary)
                     }
+                    .foregroundStyle(aiZoneColor(result.businessPath.zone))
                 }
 
                 HStack(spacing: 12) {
@@ -172,9 +171,11 @@ struct RandomPicksView: View {
         .foregroundStyle(Theme.textTertiary)
     }
 
-    private func scoreColor(_ percentage: Int) -> Color {
-        if percentage >= 80 { return Theme.accent }
-        if percentage >= 60 { return Theme.accentBlue }
-        return .orange
+    private func aiZoneColor(_ zone: AIZone) -> Color {
+        switch zone {
+        case .safe: return Theme.accent
+        case .human: return Color(hex: "FBBF24")
+        case .augmented: return .orange
+        }
     }
 }

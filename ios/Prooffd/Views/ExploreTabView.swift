@@ -150,10 +150,12 @@ struct ExploreTabView: View {
                 Spacer(minLength: 0)
 
                 HStack(spacing: 4) {
-                    Text("\(result.scorePercentage)% match")
+                    Image(systemName: result.businessPath.zone.icon)
+                        .font(.system(size: 9))
+                    Text("\(result.businessPath.aiProofRating)/100")
                         .font(.caption2.weight(.semibold))
-                        .foregroundStyle(catColor)
                 }
+                .foregroundStyle(catColor)
 
                 Text(result.businessPath.startupCostRange)
                     .font(.caption2)

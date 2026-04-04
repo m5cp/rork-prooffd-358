@@ -65,27 +65,15 @@ struct PathDetailView: View {
             .sheet(isPresented: $showShareSheet) {
                 ShareCardPresenterSheet(content: .topMatch(from: result))
             }
-            .overlay {
-                if showBuildAdded {
-                    VStack {
-                        HStack(spacing: 10) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(Theme.accent)
-                            Text("Added to My Builds!")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(Theme.textPrimary)
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 12)
-                        .background(.ultraThinMaterial)
-                        .clipShape(.capsule)
-                        .padding(.top, 60)
-                        Spacer()
-                    }
-                    .transition(.move(edge: .top).combined(with: .opacity))
+            .confirmationDialog("Added to My Builds!", isPresented: $showBuildAdded, titleVisibility: .visible) {
+                Button("Go to Build Now") {
+                    appState.selectedTab = 1
+                    dismiss()
                 }
+                Button("Stay on This Page", role: .cancel) { }
+            } message: {
+                Text("\(path.name) has been added to your builds.")
             }
-            .animation(.spring(duration: 0.4), value: showBuildAdded)
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
@@ -172,21 +160,28 @@ struct PathDetailView: View {
             .background(catColor.opacity(0.1))
             .clipShape(.capsule)
 
-            scoreDisplay
+            aiProofDisplay
         }
     }
 
-    private var scoreDisplay: some View {
-        HStack(spacing: 4) {
-            Text("\(result.scorePercentage)%")
-                .font(.title.bold())
-                .foregroundStyle(Theme.accent)
-            Text("match")
-                .font(.subheadline)
-                .foregroundStyle(Theme.textSecondary)
+    private var aiProofDisplay: some View {
+        let zone = path.zone
+        let color: Color = zone == .safe ? Theme.accent : zone == .human ? Color(hex: "FBBF24") : .orange
+        return HStack(spacing: 6) {
+            Image(systemName: zone.icon)
+                .font(.caption)
+            Text(zone.label)
+                .font(.subheadline.weight(.semibold))
+            Text("\(path.aiProofRating)/100")
+                .font(.subheadline.weight(.bold))
         }
+        .foregroundStyle(color)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(color.opacity(0.12))
+        .clipShape(.capsule)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(result.scorePercentage) percent match")
+        .accessibilityLabel("AI Proof rating \(path.aiProofRating) out of 100, \(zone.label)")
     }
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -743,32 +738,31 @@ struct PathDetailView: View {
     private var startBuildSection: some View {
         VStack(spacing: 12) {
             if alreadyBuilding {
-                HStack(spacing: 8) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(Theme.accent)
-                    Text("Already in My Builds")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Theme.accent)
+                Button {
+                    appState.selectedTab = 1
+                    dismiss()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "hammer.fill")
+                        Text("Go to My Build")
+                    }
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Theme.accent)
+                    .clipShape(.capsule)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Theme.accent.opacity(0.12))
-                .clipShape(.capsule)
-                .accessibilityElement(children: .combine)
-                .accessibilityLabel("\(path.name) is already in your builds")
+                .accessibilityLabel("Go to build for \(path.name)")
             } else {
                 Button {
                     appState.addBuild(from: path)
                     showBuildAdded = true
-                    Task {
-                        try? await Task.sleep(for: .seconds(2))
-                        showBuildAdded = false
-                    }
                 } label: {
                     HStack(spacing: 8) {
                         Image(systemName: "hammer.fill")
                             .accessibilityHidden(true)
-                        Text("Start This Build")
+                        Text("Add to My Build")
                     }
                     .font(.headline)
                     .foregroundStyle(.white)
@@ -783,8 +777,7 @@ struct PathDetailView: View {
                     )
                     .clipShape(.capsule)
                 }
-                .accessibilityLabel("Start building \(path.name)")
-                .accessibilityHint("Adds this path to your builds with a step-by-step plan")
+                .accessibilityLabel("Add \(path.name) to your builds")
                 .sensoryFeedback(.impact(weight: .medium), trigger: showBuildAdded)
             }
         }

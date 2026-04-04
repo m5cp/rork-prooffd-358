@@ -33,7 +33,7 @@ struct UnifiedExploreView: View {
     }
 
     private var recommendedResults: [MatchResult] {
-        Array(allResults.sorted { $0.scorePercentage > $1.scorePercentage }.prefix(8))
+        Array(allResults.sorted { $0.businessPath.aiProofRating > $1.businessPath.aiProofRating }.prefix(8))
     }
 
     private var fastStartResults: [MatchResult] {
@@ -165,10 +165,10 @@ struct UnifiedExploreView: View {
 
     private func resultsForMode(_ mode: SeeAllMode) -> [MatchResult] {
         switch mode {
-        case .recommended: return allResults.sorted { $0.scorePercentage > $1.scorePercentage }
+        case .recommended: return allResults.sorted { $0.businessPath.aiProofRating > $1.businessPath.aiProofRating }
         case .fastStart: return allResults.filter { $0.businessPath.minBudget < 200 && $0.businessPath.fastCashPotential }
         case .aiSafe: return allResults.filter { $0.businessPath.aiProofRating >= 80 }.sorted { $0.businessPath.aiProofRating > $1.businessPath.aiProofRating }
-        case .trending: return allResults.sorted { $0.scorePercentage > $1.scorePercentage }
+        case .trending: return allResults.sorted { $0.businessPath.aiProofRating > $1.businessPath.aiProofRating }
         case .category(let cat): return allResults.filter { $0.businessPath.category == cat }
         case .search: return searchResults
         }
@@ -198,8 +198,8 @@ struct UnifiedExploreView: View {
 
                 if !recommendedResults.isEmpty {
                     horizontalSection(
-                        title: "Top Business Matches",
-                        icon: "sparkle",
+                        title: "Most AI-Proof Businesses",
+                        icon: "shield.checkered",
                         iconColor: Theme.accent,
                         results: recommendedResults,
                         mode: .recommended
@@ -589,10 +589,32 @@ struct UnifiedExploreView: View {
 
     // MARK: - Business
 
+    private var highAIProofBusinesses: [MatchResult] {
+        Array(allResults.filter { $0.businessPath.aiProofRating >= 80 }
+            .sorted { $0.businessPath.aiProofRating > $1.businessPath.aiProofRating }
+            .prefix(8))
+    }
+
+    private var scalableBusinesses: [MatchResult] {
+        Array(allResults.filter { $0.businessPath.isScalable && $0.businessPath.aiProofRating >= 60 }
+            .sorted { $0.businessPath.aiProofRating > $1.businessPath.aiProofRating }
+            .prefix(8))
+    }
+
     @ViewBuilder
     private var businessContent: some View {
         ScrollView {
-            VStack(spacing: 20) {
+            VStack(spacing: 24) {
+                if !highAIProofBusinesses.isEmpty {
+                    horizontalSection(
+                        title: "Most AI-Proof",
+                        icon: "shield.checkered",
+                        iconColor: Theme.accent,
+                        results: highAIProofBusinesses,
+                        mode: .aiSafe
+                    )
+                }
+
                 browseByCategorySection
 
                 if !fastStartResults.isEmpty {
@@ -602,6 +624,16 @@ struct UnifiedExploreView: View {
                         iconColor: Color(hex: "FB923C"),
                         results: fastStartResults,
                         mode: .fastStart
+                    )
+                }
+
+                if !scalableBusinesses.isEmpty {
+                    horizontalSection(
+                        title: "Scalable Businesses",
+                        icon: "chart.line.uptrend.xyaxis",
+                        iconColor: Color(hex: "818CF8"),
+                        results: scalableBusinesses,
+                        mode: .recommended
                     )
                 }
 
@@ -961,11 +993,13 @@ struct UnifiedExploreView: View {
                                 .foregroundStyle(Theme.textPrimary)
                                 .lineLimit(2)
                                 .multilineTextAlignment(.leading)
-                            HStack(spacing: 8) {
-                                Text("\(result.scorePercentage)% Match")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(scoreColor(result.scorePercentage))
+                            HStack(spacing: 6) {
+                                Image(systemName: result.businessPath.zone.icon)
+                                    .font(.system(size: 10))
+                                Text(result.businessPath.zone.label)
+                                    .font(.caption.weight(.semibold))
                             }
+                            .foregroundStyle(aiZoneColor(result.businessPath.zone))
                         }
 
                         Spacer(minLength: 0)
@@ -1190,13 +1224,17 @@ struct UnifiedExploreView: View {
                             .foregroundStyle(isSideHustle ? Theme.textTertiary : catColor)
                     }
                     Spacer()
-                    Text("\(result.scorePercentage)%")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(scoreColor(result.scorePercentage))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(scoreColor(result.scorePercentage).opacity(0.12))
-                        .clipShape(.capsule)
+                    HStack(spacing: 3) {
+                        Image(systemName: result.businessPath.zone.icon)
+                            .font(.system(size: 9))
+                        Text("\(result.businessPath.aiProofRating)")
+                            .font(.caption2.weight(.bold))
+                    }
+                    .foregroundStyle(aiZoneColor(result.businessPath.zone))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(aiZoneColor(result.businessPath.zone).opacity(0.12))
+                    .clipShape(.capsule)
                 }
 
                 Text(result.businessPath.name)
@@ -1669,16 +1707,12 @@ struct UnifiedExploreView: View {
 
     // MARK: - Helpers
 
-    private func scoreColor(_ percentage: Int) -> Color {
-        if percentage >= 80 { return Theme.accent }
-        if percentage >= 60 { return Theme.accentBlue }
-        return .orange
-    }
-
-    private func aiScoreColor(_ score: Int) -> Color {
-        if score >= 80 { return Theme.accent }
-        if score >= 50 { return Color(hex: "FBBF24") }
-        return .orange
+    private func aiZoneColor(_ zone: AIZone) -> Color {
+        switch zone {
+        case .safe: return Theme.accent
+        case .human: return Color(hex: "FBBF24")
+        case .augmented: return .orange
+        }
     }
 
     private func perfectForLine(_ result: MatchResult) -> String {

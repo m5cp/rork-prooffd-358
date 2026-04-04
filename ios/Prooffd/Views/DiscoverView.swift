@@ -276,12 +276,13 @@ struct DiscoverView: View {
                     Spacer()
 
                     VStack(spacing: 2) {
-                        Text("\(result.scorePercentage)%")
-                            .font(.title2.weight(.bold))
-                            .foregroundStyle(scoreColor(result.scorePercentage))
-                        Text("match")
-                            .font(.caption2)
-                            .foregroundStyle(Theme.textTertiary)
+                        HStack(spacing: 4) {
+                            Image(systemName: result.businessPath.zone.icon)
+                                .font(.system(size: 10))
+                            Text("\(result.businessPath.aiProofRating)")
+                                .font(.title3.weight(.bold))
+                        }
+                        .foregroundStyle(zoneColor)
                     }
                 }
 
@@ -330,7 +331,7 @@ struct DiscoverView: View {
             .cardShadow()
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(rankLabel), \(result.businessPath.name), \(result.scorePercentage) percent match, AI Safe Zone \(zone.label)")
+        .accessibilityLabel("\(rankLabel), \(result.businessPath.name), AI Proof \(result.businessPath.aiProofRating), \(zone.label)")
         .accessibilityHint("Opens details for \(result.businessPath.name)")
     }
 
@@ -366,9 +367,13 @@ struct DiscoverView: View {
                             .contentShape(Rectangle())
                     }
                     .accessibilityLabel("Share top match")
-                    Text("\(result.scorePercentage)% match")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(scoreColor(result.scorePercentage))
+                    HStack(spacing: 4) {
+                        Image(systemName: result.businessPath.zone.icon)
+                            .font(.system(size: 10))
+                        Text(result.businessPath.zone.label)
+                            .font(.caption.weight(.bold))
+                    }
+                    .foregroundStyle(zoneColor)
                 }
 
                 HStack(spacing: 14) {
@@ -453,7 +458,7 @@ struct DiscoverView: View {
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("Top Match, \(result.businessPath.name), \(result.scorePercentage) percent match, AI Safe Zone \(zone.label), typical market rate \(result.businessPath.typicalMarketRates)")
+        .accessibilityLabel("Top Match, \(result.businessPath.name), AI Proof \(result.businessPath.aiProofRating), \(zone.label)")
     }
 
     // MARK: - Start Here
@@ -524,10 +529,12 @@ struct DiscoverView: View {
 
     // MARK: - Helpers
 
-    private func scoreColor(_ percentage: Int) -> Color {
-        if percentage >= 80 { return Theme.accent }
-        if percentage >= 60 { return Theme.accentBlue }
-        return Color(hex: "FB923C")
+    private func zoneColor(for zone: AIZone) -> Color {
+        switch zone {
+        case .safe: return Theme.accent
+        case .human: return Color(hex: "FBBF24")
+        case .augmented: return .orange
+        }
     }
 
     private func perfectForLine(_ result: MatchResult) -> String {

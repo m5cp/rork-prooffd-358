@@ -11,7 +11,7 @@ struct ResultsRevealView: View {
     @State private var showShareSheet: Bool = false
 
     private var strongMatches: [MatchResult] {
-        appState.matchResults.filter { $0.scorePercentage >= 70 }
+        appState.matchResults.filter { $0.businessPath.aiProofRating >= 70 }
     }
 
     private var targetCount: Int {
@@ -47,7 +47,7 @@ struct ResultsRevealView: View {
                         .foregroundStyle(Theme.accent)
                         .contentTransition(.numericText(countsDown: false))
 
-                    Text("strong matches (70%+)")
+                    Text("AI-proof career paths")
                         .font(.subheadline)
                         .foregroundStyle(Theme.textSecondary)
                 }
@@ -87,17 +87,15 @@ struct ResultsRevealView: View {
                                 Text(top.businessPath.name)
                                     .font(.headline)
                                     .foregroundStyle(Theme.textPrimary)
-                                HStack(spacing: 8) {
-                                    Text("\(top.scorePercentage)% match")
+                                HStack(spacing: 6) {
+                                    Image(systemName: top.businessPath.zone.icon)
+                                        .font(.system(size: 10))
+                                    Text(top.businessPath.zone.label)
                                         .font(.caption.weight(.semibold))
-                                        .foregroundStyle(catColor)
-                                    Text("\u{2022}")
-                                        .foregroundStyle(Theme.textTertiary)
-                                        .accessibilityHidden(true)
-                                    Text("AI Safe: \(top.businessPath.aiProofRating)")
-                                        .font(.caption.weight(.medium))
-                                        .foregroundStyle(Theme.textTertiary)
+                                    Text("\(top.businessPath.aiProofRating)/100")
+                                        .font(.caption.weight(.bold))
                                 }
+                                .foregroundStyle(catColor)
                             }
 
                             Spacer()
@@ -109,7 +107,7 @@ struct ResultsRevealView: View {
                     .padding(.horizontal, 32)
                     .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .bottom)))
                     .accessibilityElement(children: .combine)
-                    .accessibilityLabel("Your number 1 match: \(top.businessPath.name), \(top.scorePercentage) percent match, AI Safe score \(top.businessPath.aiProofRating)")
+                    .accessibilityLabel("Your number 1 match: \(top.businessPath.name), AI Proof \(top.businessPath.aiProofRating) out of 100")
                 }
 
                 Spacer()
