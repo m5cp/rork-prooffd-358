@@ -7,8 +7,10 @@ class AppState {
     var matchResults: [MatchResult] = []
     var favoritePathIDs: Set<String> = []
     var favoriteEducationIDs: Set<String> = []
+    var favoriteDegreeIDs: Set<String> = []
     var hiddenPathIDs: Set<String> = []
     var hiddenEducationIDs: Set<String> = []
+    var hiddenDegreeIDs: Set<String> = []
     var exploreFilter: ExploreFilterMode = .all
     var showFavoritesOnly: Bool = false
     var streakTracker: StreakTracker = StreakTracker()
@@ -356,6 +358,19 @@ class AppState {
         favoriteEducationIDs.contains(pathID)
     }
 
+    func toggleDegreeFavorite(_ pathID: String) {
+        if favoriteDegreeIDs.contains(pathID) {
+            favoriteDegreeIDs.remove(pathID)
+        } else {
+            favoriteDegreeIDs.insert(pathID)
+        }
+        saveFavorites()
+    }
+
+    func isDegreeFavorite(_ pathID: String) -> Bool {
+        favoriteDegreeIDs.contains(pathID)
+    }
+
     // MARK: - Hidden
 
     func toggleHiddenPath(_ pathID: String) {
@@ -382,6 +397,19 @@ class AppState {
 
     func isEducationHidden(_ pathID: String) -> Bool {
         hiddenEducationIDs.contains(pathID)
+    }
+
+    func toggleHiddenDegree(_ pathID: String) {
+        if hiddenDegreeIDs.contains(pathID) {
+            hiddenDegreeIDs.remove(pathID)
+        } else {
+            hiddenDegreeIDs.insert(pathID)
+        }
+        saveHidden()
+    }
+
+    func isDegreeHidden(_ pathID: String) -> Bool {
+        hiddenDegreeIDs.contains(pathID)
     }
 
     func markPathExplored(_ pathID: String) {
@@ -571,6 +599,7 @@ class AppState {
     private func saveFavorites() {
         UserDefaults.standard.set(Array(favoritePathIDs), forKey: "favoritePathIDs")
         UserDefaults.standard.set(Array(favoriteEducationIDs), forKey: "favoriteEducationIDs")
+        UserDefaults.standard.set(Array(favoriteDegreeIDs), forKey: "favoriteDegreeIDs")
     }
 
     private func loadFavorites() {
@@ -580,11 +609,15 @@ class AppState {
         if let ids = UserDefaults.standard.stringArray(forKey: "favoriteEducationIDs") {
             favoriteEducationIDs = Set(ids)
         }
+        if let ids = UserDefaults.standard.stringArray(forKey: "favoriteDegreeIDs") {
+            favoriteDegreeIDs = Set(ids)
+        }
     }
 
     private func saveHidden() {
         UserDefaults.standard.set(Array(hiddenPathIDs), forKey: "hiddenPathIDs")
         UserDefaults.standard.set(Array(hiddenEducationIDs), forKey: "hiddenEducationIDs")
+        UserDefaults.standard.set(Array(hiddenDegreeIDs), forKey: "hiddenDegreeIDs")
     }
 
     private func loadHidden() {
@@ -593,6 +626,9 @@ class AppState {
         }
         if let ids = UserDefaults.standard.stringArray(forKey: "hiddenEducationIDs") {
             hiddenEducationIDs = Set(ids)
+        }
+        if let ids = UserDefaults.standard.stringArray(forKey: "hiddenDegreeIDs") {
+            hiddenDegreeIDs = Set(ids)
         }
     }
 

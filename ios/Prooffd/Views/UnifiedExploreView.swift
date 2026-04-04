@@ -25,6 +25,7 @@ struct UnifiedExploreView: View {
     @State private var showProgressShare: Bool = false
     @State private var showJobShare: MatchResult?
     @State private var showEducationCategorySheet: EducationCategory?
+    @State private var showDegreeCategorySheet: DegreeCareerCategory?
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     private var allResults: [MatchResult] {
@@ -131,6 +132,9 @@ struct UnifiedExploreView: View {
             .sheet(item: $showEducationCategorySheet) { category in
                 EducationCategoryListSheet(category: category)
             }
+            .sheet(item: $showDegreeCategorySheet) { category in
+                DegreeCareerCategoryListSheet(category: category)
+            }
         }
     }
 
@@ -235,8 +239,9 @@ struct UnifiedExploreView: View {
     @ViewBuilder
     private var educationContent: some View {
         ScrollView {
-            VStack(spacing: 20) {
+            VStack(spacing: 24) {
                 educationOverviewSection
+                degreeCareerSection
                 shareLoopSection
                 Color.clear.frame(height: 40)
             }
@@ -253,8 +258,9 @@ struct UnifiedExploreView: View {
             VStack(spacing: 16) {
                 let savedBusiness = allResults.filter { appState.isFavorite($0.businessPath.id) }
                 let savedEducation = EducationPathDatabase.all.filter { appState.isEducationFavorite($0.id) }
+                let savedDegree = DegreeCareerDatabase.allRecords.filter { appState.isDegreeFavorite($0.id) }
 
-                if savedBusiness.isEmpty && savedEducation.isEmpty {
+                if savedBusiness.isEmpty && savedEducation.isEmpty && savedDegree.isEmpty {
                     VStack(spacing: 16) {
                         Image(systemName: "bookmark")
                             .font(.system(size: 44))
@@ -319,6 +325,27 @@ struct UnifiedExploreView: View {
                             .padding(.horizontal, 16)
                         }
                     }
+
+                    if !savedDegree.isEmpty {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "heart.fill")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(.pink)
+                                Text("Saved Degree Careers")
+                                    .font(.title3.weight(.bold))
+                                    .foregroundStyle(Theme.textPrimary)
+                            }
+                            .padding(.horizontal, 16)
+
+                            LazyVStack(spacing: 10) {
+                                ForEach(savedDegree) { record in
+                                    savedDegreeCard(record)
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                        }
+                    }
                 }
 
                 Color.clear.frame(height: 40)
@@ -361,6 +388,56 @@ struct UnifiedExploreView: View {
                         .font(.caption2)
                         .foregroundStyle(Theme.textTertiary)
                     Text(path.typicalSalaryRange)
+                        .font(.caption2)
+                        .foregroundStyle(Theme.textTertiary)
+                }
+            }
+
+            Spacer(minLength: 4)
+
+            Image(systemName: "heart.fill")
+                .font(.caption)
+                .foregroundStyle(.pink)
+        }
+        .padding(14)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+        .cardShadow()
+    }
+
+    private func savedDegreeCard(_ record: DegreeCareerRecord) -> some View {
+        let catColor: Color = {
+            switch record.category {
+            case .healthcare: return Color(hex: "F472B6")
+            case .mentalHealth: return Color(hex: "818CF8")
+            case .engineering: return Theme.accentBlue
+            case .legal: return Color(hex: "FB923C")
+            case .education: return Theme.accent
+            case .aviation: return Color(hex: "38BDF8")
+            case .military: return Color(hex: "4ADE80")
+            }
+        }()
+
+        return HStack(spacing: 14) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(catColor.opacity(0.12))
+                    .frame(width: 48, height: 48)
+                Image(systemName: record.icon)
+                    .font(.body)
+                    .foregroundStyle(catColor)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(record.title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                    .lineLimit(1)
+                HStack(spacing: 8) {
+                    Text(record.category.rawValue)
+                        .font(.caption2)
+                        .foregroundStyle(Theme.textTertiary)
+                    Text(record.salaryExperienced)
                         .font(.caption2)
                         .foregroundStyle(Theme.textTertiary)
                 }
@@ -930,6 +1007,96 @@ struct UnifiedExploreView: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(Theme.textPrimary)
                     .lineLimit(1)
+            }
+            .padding(12)
+            .background(Theme.cardBackground)
+            .clipShape(.rect(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(catColor.opacity(0.08), lineWidth: 0.5)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Degree Careers
+
+    private var degreeCareerSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 8) {
+                Image(systemName: "building.columns.fill")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color(hex: "818CF8"))
+                Text("4-Year Degree Careers")
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(Theme.textPrimary)
+            }
+            .padding(.horizontal, 16)
+
+            Text("Licensed professions requiring bachelor's, master's, or doctoral degrees")
+                .font(.subheadline)
+                .foregroundStyle(Theme.textSecondary)
+                .padding(.horizontal, 16)
+
+            let categories = DegreeCareerCategory.allCases.filter { category in
+                DegreeCareerDatabase.allRecords.contains { $0.category == category }
+            }
+
+            let columns = sizeClass == .regular
+                ? [GridItem(.adaptive(minimum: 160), spacing: 10)]
+                : [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)]
+
+            LazyVGrid(columns: columns, spacing: 10) {
+                ForEach(categories) { category in
+                    degreeCategoryCard(category)
+                }
+            }
+            .padding(.horizontal, 16)
+        }
+    }
+
+    private func degreeCategoryCard(_ category: DegreeCareerCategory) -> some View {
+        let count = DegreeCareerDatabase.allRecords.filter { $0.category == category && !appState.isDegreeHidden($0.id) }.count
+        let catColor: Color = {
+            switch category {
+            case .healthcare: return Color(hex: "F472B6")
+            case .mentalHealth: return Color(hex: "818CF8")
+            case .engineering: return Theme.accentBlue
+            case .legal: return Color(hex: "FB923C")
+            case .education: return Theme.accent
+            case .aviation: return Color(hex: "38BDF8")
+            case .military: return Color(hex: "4ADE80")
+            }
+        }()
+
+        return Button {
+            showDegreeCategorySheet = category
+        } label: {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 10) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(catColor.opacity(0.12))
+                            .frame(width: 36, height: 36)
+                        Image(systemName: category.icon)
+                            .font(.subheadline)
+                            .foregroundStyle(catColor)
+                    }
+                    Spacer()
+                    Text("\(count)")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(catColor)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(catColor.opacity(0.1))
+                        .clipShape(.capsule)
+                }
+
+                Text(category.rawValue)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
             }
             .padding(12)
             .background(Theme.cardBackground)
