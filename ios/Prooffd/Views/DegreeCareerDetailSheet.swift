@@ -100,12 +100,16 @@ struct DegreeCareerDetailSheet: View {
         Group {
             if appState.hasPlanItem(itemId: record.id, type: .degree) {
                 Button {
-                    appState.selectedTab = 1
-                    dismiss()
+                    if appState.selectedTab == 1 {
+                        dismiss()
+                    } else {
+                        appState.selectedTab = 1
+                        dismiss()
+                    }
                 } label: {
                     HStack(spacing: 8) {
                         Image(systemName: "list.clipboard.fill")
-                        Text("Go to My Plan")
+                        Text(appState.selectedTab == 1 ? "Build My Plan" : "Go to My Plan")
                     }
                     .font(.headline)
                     .foregroundStyle(.white)

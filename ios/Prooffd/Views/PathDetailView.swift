@@ -756,12 +756,16 @@ struct PathDetailView: View {
         VStack(spacing: 12) {
             if alreadyBuilding {
                 Button {
-                    appState.selectedTab = 1
-                    dismiss()
+                    if appState.selectedTab == 1 {
+                        dismiss()
+                    } else {
+                        appState.selectedTab = 1
+                        dismiss()
+                    }
                 } label: {
                     HStack(spacing: 8) {
-                        Image(systemName: "hammer.fill")
-                        Text("Go to My Plan")
+                        Image(systemName: appState.selectedTab == 1 ? "hammer.fill" : "hammer.fill")
+                        Text(appState.selectedTab == 1 ? "Build My Plan" : "Go to My Plan")
                     }
                     .font(.headline)
                     .foregroundStyle(.white)
@@ -770,7 +774,7 @@ struct PathDetailView: View {
                     .background(Theme.accent)
                     .clipShape(.capsule)
                 }
-                .accessibilityLabel("Go to build for \(path.name)")
+                .accessibilityLabel(appState.selectedTab == 1 ? "Build plan for \(path.name)" : "Go to build for \(path.name)")
             } else {
                 Button {
                     appState.addBuild(from: path)
