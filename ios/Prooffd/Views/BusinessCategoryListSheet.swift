@@ -10,6 +10,8 @@ struct BusinessCategoryListSheet: View {
     @State private var selectedCostFilter: CostFilter?
     @State private var showFilters: Bool = false
     @State private var showPaywall: Bool = false
+    @State private var showShareEditor: Bool = false
+    @State private var shareContextImage: UIImage?
 
     private var catColor: Color { Theme.categoryColor(for: category) }
 
@@ -88,6 +90,11 @@ struct BusinessCategoryListSheet: View {
             }
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
+            }
+            .fullScreenCover(isPresented: $showShareEditor) {
+                if let image = shareContextImage {
+                    ShareEditorSheet(capturedImage: image)
+                }
             }
         }
         .presentationDetents([.large])
@@ -223,10 +230,9 @@ struct BusinessCategoryListSheet: View {
         .buttonStyle(.plain)
         .contextMenu {
             Button {
-                if store.isPremium {
-                    QuickShareHelper.shareBusiness(path.name)
-                } else {
-                    showPaywall = true
+                if let image = ScreenshotService.captureScreen() {
+                    shareContextImage = image
+                    showShareEditor = true
                 }
             } label: {
                 Label("Share", systemImage: "square.and.arrow.up")

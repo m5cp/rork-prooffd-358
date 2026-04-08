@@ -11,6 +11,8 @@ struct ExploreTabView: View {
     @State private var showHeroEducationPath: CareerPath?
     @State private var showHeroDegreeRecord: DegreeCareerRecord?
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @State private var showShareEditor: Bool = false
+    @State private var shareScreenImage: UIImage?
 
     var body: some View {
         NavigationStack {
@@ -43,6 +45,11 @@ struct ExploreTabView: View {
             }
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
+            }
+            .fullScreenCover(isPresented: $showShareEditor) {
+                if let image = shareScreenImage {
+                    ShareEditorSheet(capturedImage: image)
+                }
             }
             .sheet(item: $showEducationCategorySheet) { category in
                 EducationCategoryListSheet(category: category)
@@ -647,16 +654,9 @@ struct ExploreTabView: View {
     }
 
     private func shareApp() {
-        if let topResult = appState.matchResults.first {
-            let content = ShareCardContent.topMatch(from: topResult)
-            let card = TopMatchShareCardView(content: content, style: .clean, format: .story)
-            if let image = ShareCardRenderer.render(view: card, format: .story) {
-                let shareText = "I just found my top career matches on Prooffd — challenge yourself to find yours! Download Prooffd: https://apps.apple.com/app/prooffd/id6743071053"
-                ShareCardRenderer.share(image: image, text: shareText)
-            }
-        } else {
-            let shareText = "Check out Prooffd — find your perfect career or business match! Download: https://apps.apple.com/app/prooffd/id6743071053"
-            ShareCardRenderer.share(image: UIImage(), text: shareText)
+        if let image = ScreenshotService.captureScreen() {
+            shareScreenImage = image
+            showShareEditor = true
         }
     }
 }
@@ -868,34 +868,7 @@ struct CareerPathDetailSheet: View {
                 .clipShape(.capsule)
             }
 
-            Button {
-                if store.isPremium {
-                    QuickShareHelper.shareTrade(career.title)
-                } else {
-                    showPaywall = true
-                }
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: store.isPremium ? "square.and.arrow.up" : "lock.fill")
-                        .font(.caption)
-                    Text("Share")
-                        .font(.caption.weight(.semibold))
-                    if !store.isPremium {
-                        Text("PRO")
-                            .font(.system(size: 9, weight: .heavy))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 2)
-                            .background(Color(hex: "FBBF24"))
-                            .clipShape(.capsule)
-                    }
-                }
-                .foregroundStyle(store.isPremium ? Theme.textSecondary : Color(hex: "FBBF24"))
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(store.isPremium ? Theme.cardBackground : Color(hex: "FBBF24").opacity(0.1))
-                .clipShape(.capsule)
-            }
+            ScreenshotShareButton()
 
             Spacer()
         }

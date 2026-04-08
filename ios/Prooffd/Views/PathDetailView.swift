@@ -125,35 +125,7 @@ struct PathDetailView: View {
             }
             .accessibilityLabel(appState.isPathHidden(path.id) ? "Show this path in results" : "Hide this path from results")
 
-            Button {
-                if store.isPremium {
-                    QuickShareHelper.shareBusiness(path.name)
-                } else {
-                    showPaywall = true
-                }
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: store.isPremium ? "square.and.arrow.up" : "lock.fill")
-                        .font(.caption)
-                    Text("Share")
-                        .font(.caption.weight(.semibold))
-                    if !store.isPremium {
-                        Text("PRO")
-                            .font(.system(size: 9, weight: .heavy))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 2)
-                            .background(Color(hex: "FBBF24"))
-                            .clipShape(.capsule)
-                    }
-                }
-                .foregroundStyle(store.isPremium ? Theme.textSecondary : Color(hex: "FBBF24"))
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(store.isPremium ? Theme.cardBackground : Color(hex: "FBBF24").opacity(0.1))
-                .clipShape(.capsule)
-            }
-            .accessibilityLabel(store.isPremium ? "Share \(path.name)" : "Upgrade to Pro to share")
+            ScreenshotShareButton()
 
             Spacer()
         }
