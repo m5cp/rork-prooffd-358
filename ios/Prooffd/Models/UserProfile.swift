@@ -65,6 +65,12 @@ nonisolated enum WorkCondition: String, CaseIterable, Identifiable, Codable, Sen
     case cold = "Cold"
     case tightSpaces = "Tight spaces"
     case officeDesk = "Office/desk"
+    case patientCare = "Patient care"
+    case longShifts = "Long / irregular shifts"
+    case highStakes = "High-stakes decisions"
+    case emotionalSituations = "Emotional situations"
+    case sterileEnvironment = "Sterile / clean room"
+    case publicSpeaking = "Public speaking"
 
     var id: String { rawValue }
 
@@ -80,6 +86,12 @@ nonisolated enum WorkCondition: String, CaseIterable, Identifiable, Codable, Sen
         case .cold: return "snowflake"
         case .tightSpaces: return "rectangle.compress.vertical"
         case .officeDesk: return "desktopcomputer"
+        case .patientCare: return "heart.fill"
+        case .longShifts: return "clock.badge.fill"
+        case .highStakes: return "exclamationmark.triangle.fill"
+        case .emotionalSituations: return "person.wave.2.fill"
+        case .sterileEnvironment: return "cross.vial.fill"
+        case .publicSpeaking: return "mic.fill"
         }
     }
 }
@@ -143,6 +155,12 @@ nonisolated enum WorkEnvironment: String, CaseIterable, Identifiable, Codable, S
     case onTheRoad = "On the road / Mobile"
     case constructionSite = "Construction site"
     case clientLocation = "Client locations"
+    case hospital = "Hospital"
+    case clinic = "Clinic / Medical office"
+    case laboratory = "Laboratory"
+    case courtroom = "Courtroom / Legal office"
+    case classroom = "Classroom / School"
+    case aircraft = "Aircraft / Cockpit"
 
     var id: String { rawValue }
 
@@ -156,6 +174,12 @@ nonisolated enum WorkEnvironment: String, CaseIterable, Identifiable, Codable, S
         case .onTheRoad: return "car.fill"
         case .constructionSite: return "hammer.fill"
         case .clientLocation: return "mappin.and.ellipse"
+        case .hospital: return "cross.case.fill"
+        case .clinic: return "stethoscope"
+        case .laboratory: return "flask.fill"
+        case .courtroom: return "building.columns.fill"
+        case .classroom: return "book.fill"
+        case .aircraft: return "airplane"
         }
     }
 }

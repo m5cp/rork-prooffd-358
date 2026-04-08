@@ -137,17 +137,21 @@ class QuizViewModel {
         let conditions = profile.workConditions
         let physicalEnvs: [WorkEnvironment] = [.outdoors, .warehouse, .constructionSite]
         let digitalEnvs: [WorkEnvironment] = [.officeDesk, .homeBased]
+        let professionalEnvs: [WorkEnvironment] = [.hospital, .clinic, .laboratory, .courtroom, .classroom, .aircraft]
         let hasPhysical = envs.contains(where: { physicalEnvs.contains($0) })
         let hasDigital = envs.contains(where: { digitalEnvs.contains($0) })
-        if hasPhysical && !hasDigital {
+        let hasProfessional = envs.contains(where: { professionalEnvs.contains($0) })
+        if hasPhysical && !hasDigital && !hasProfessional {
             profile.workPreference = .physical
-        } else if hasDigital && !hasPhysical {
+        } else if hasDigital && !hasPhysical && !hasProfessional {
             profile.workPreference = .digital
-        } else if hasPhysical && hasDigital {
+        } else {
             profile.workPreference = .either
         }
         if conditions.contains(.officeDesk) && !conditions.contains(where: { [.gettingDirty, .heavyLifting, .sweaty, .heights].contains($0) }) {
             profile.techComfort = .verySavvy
+        } else if hasProfessional && !hasPhysical {
+            profile.techComfort = .moderate
         } else if !conditions.contains(.officeDesk) && conditions.contains(where: { [.gettingDirty, .heavyLifting, .sweaty].contains($0) }) {
             profile.techComfort = .basic
         } else {

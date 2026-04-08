@@ -223,6 +223,10 @@ enum MatchingEngine {
         if profile.budget == .over1000 || profile.situationTags.contains(.canInvest) || profile.incomeTimeline == .noRush {
             interests.insert("high_income")
         }
+        let healthcareEnvs: Set<WorkEnvironment> = [.hospital, .clinic, .laboratory]
+        if !Set(profile.workEnvironments).isDisjoint(with: healthcareEnvs) || profile.workConditions.contains(.patientCare) {
+            interests.insert("people_facing")
+        }
 
         return interests
     }
@@ -295,15 +299,23 @@ enum MatchingEngine {
             if !profile.workEnvironments.isEmpty {
                 let tradeEnvs: Set<WorkEnvironment> = [.outdoors, .constructionSite, .warehouse, .clientLocation]
                 let officeEnvs: Set<WorkEnvironment> = [.officeDesk, .homeBased]
+                let healthcareEnvs: Set<WorkEnvironment> = [.hospital, .clinic, .laboratory]
+                let militaryEnvs: Set<WorkEnvironment> = [.outdoors, .aircraft]
                 let userEnvSet = Set(profile.workEnvironments)
-                let isTradeCategory = [EducationCategory.trade, .certification, .healthcare].contains(path.category)
+                let isTradeCategory = [EducationCategory.trade, .certification].contains(path.category)
+                let isHealthcareCategory = path.category == .healthcare
                 let isTechCategory = [EducationCategory.technology, .creative, .business].contains(path.category)
-                if isTradeCategory && !userEnvSet.isDisjoint(with: tradeEnvs) {
+                let isMilitaryCategory = path.category == .military
+                if isHealthcareCategory && !userEnvSet.isDisjoint(with: healthcareEnvs) {
+                    score += 10
+                } else if isTradeCategory && !userEnvSet.isDisjoint(with: tradeEnvs) {
                     score += 10
                 } else if isTechCategory && !userEnvSet.isDisjoint(with: officeEnvs) {
                     score += 10
+                } else if isMilitaryCategory && !userEnvSet.isDisjoint(with: militaryEnvs) {
+                    score += 10
                 } else {
-                    score += 5
+                    score += 4
                 }
             } else {
                 score += 10
@@ -335,7 +347,6 @@ enum MatchingEngine {
 
     nonisolated static func scoreDegreeRecords(profile: UserProfile) -> [String: Int] {
         var scores: [String: Int] = [:]
-
         for record in DegreeCareerDatabase.allRecords {
             var score: Double = 0
             var maxScore: Double = 0
@@ -375,19 +386,32 @@ enum MatchingEngine {
                 }
             }
 
-            maxScore += 10
-            if !profile.workConditions.isEmpty {
-                let isHighStress = [DegreeCareerCategory.healthcare, .aviation, .military].contains(record.category)
-                let toleratesPhysical = profile.workConditions.contains(where: { [.sweaty, .heavyLifting, .heights].contains($0) })
-                if isHighStress && toleratesPhysical {
-                    score += 10
-                } else if !isHighStress && profile.workConditions.contains(.officeDesk) {
-                    score += 10
+            maxScore += 15
+            if !profile.workEnvironments.isEmpty {
+                let categoryEnvs = Self.environmentsForDegreeCategory(record.category)
+                let matchCount = profile.workEnvironments.filter { categoryEnvs.contains($0) }.count
+                if matchCount > 0 {
+                    let ratio = Double(matchCount) / Double(max(profile.workEnvironments.count, 1))
+                    score += 15 * min(ratio * 1.5, 1.0)
                 } else {
-                    score += 5
+                    score += 3
                 }
             } else {
-                score += 10
+                score += 15
+            }
+
+            maxScore += 15
+            if !profile.workConditions.isEmpty {
+                let categoryConditions = Self.conditionsForDegreeCategory(record.category)
+                let matchCount = profile.workConditions.filter { categoryConditions.contains($0) }.count
+                if matchCount > 0 {
+                    let ratio = Double(matchCount) / Double(max(profile.workConditions.count, 1))
+                    score += 15 * min(ratio * 1.5, 1.0)
+                } else {
+                    score += 3
+                }
+            } else {
+                score += 15
             }
 
             maxScore += 10
@@ -415,6 +439,44 @@ enum MatchingEngine {
             scores[record.id] = min(Int(finalScore), 99)
         }
         return scores
+    }
+
+    private nonisolated static func environmentsForDegreeCategory(_ category: DegreeCareerCategory) -> Set<WorkEnvironment> {
+        switch category {
+        case .healthcare:
+            return [.hospital, .clinic, .laboratory]
+        case .mentalHealth:
+            return [.clinic, .officeDesk, .classroom]
+        case .engineering:
+            return [.officeDesk, .laboratory, .constructionSite, .warehouse]
+        case .legal:
+            return [.courtroom, .officeDesk, .hospital, .clinic]
+        case .education:
+            return [.classroom, .officeDesk]
+        case .aviation:
+            return [.aircraft, .officeDesk]
+        case .military:
+            return [.outdoors, .aircraft, .officeDesk]
+        }
+    }
+
+    private nonisolated static func conditionsForDegreeCategory(_ category: DegreeCareerCategory) -> Set<WorkCondition> {
+        switch category {
+        case .healthcare:
+            return [.patientCare, .longShifts, .highStakes, .emotionalSituations, .sterileEnvironment, .chemicals]
+        case .mentalHealth:
+            return [.patientCare, .emotionalSituations, .officeDesk]
+        case .engineering:
+            return [.officeDesk, .highStakes, .outdoorHeat, .cold]
+        case .legal:
+            return [.publicSpeaking, .highStakes, .officeDesk, .longShifts]
+        case .education:
+            return [.publicSpeaking, .emotionalSituations, .officeDesk]
+        case .aviation:
+            return [.highStakes, .longShifts, .heights]
+        case .military:
+            return [.heavyLifting, .heights, .highStakes, .longShifts, .outdoorHeat, .cold]
+        }
     }
 
     private nonisolated static func educationLevelForPath(_ path: EducationPath) -> EducationWillingness {

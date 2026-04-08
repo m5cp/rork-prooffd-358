@@ -121,11 +121,15 @@ class OnboardingViewModel {
     private func deriveTechComfort(for profile: inout UserProfile) {
         let physicalEnvs: [WorkEnvironment] = [.outdoors, .warehouse, .constructionSite]
         let digitalEnvs: [WorkEnvironment] = [.officeDesk, .homeBased]
+        let professionalEnvs: [WorkEnvironment] = [.hospital, .clinic, .laboratory, .courtroom, .classroom, .aircraft]
         let hasPhysical = workEnvironments.contains(where: { physicalEnvs.contains($0) })
         let hasDigital = workEnvironments.contains(where: { digitalEnvs.contains($0) })
+        let hasProfessional = workEnvironments.contains(where: { professionalEnvs.contains($0) })
 
         if workConditions.contains(.officeDesk) && !workConditions.contains(where: { [.gettingDirty, .heavyLifting, .sweaty, .heights].contains($0) }) {
             profile.techComfort = .verySavvy
+        } else if hasProfessional && !hasPhysical {
+            profile.techComfort = .moderate
         } else if !workConditions.contains(.officeDesk) && workConditions.contains(where: { [.gettingDirty, .heavyLifting, .sweaty].contains($0) }) {
             profile.techComfort = .basic
         } else if hasDigital && !hasPhysical {
@@ -136,7 +140,13 @@ class OnboardingViewModel {
     }
 
     private func deriveWorkStyle(for profile: inout UserProfile) {
-        if workPreference == .digital {
+        let peopleEnvs: [WorkEnvironment] = [.hospital, .clinic, .classroom, .courtroom]
+        let hasPeopleEnv = workEnvironments.contains(where: { peopleEnvs.contains($0) })
+        let hasPeopleConditions = workConditions.contains(where: { [.patientCare, .emotionalSituations, .publicSpeaking].contains($0) })
+
+        if hasPeopleEnv || hasPeopleConditions {
+            profile.workStyle = .withPeople
+        } else if workPreference == .digital {
             profile.workStyle = .solo
         } else if workPreference == .physical {
             profile.workStyle = .withPeople
