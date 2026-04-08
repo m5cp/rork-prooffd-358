@@ -8,6 +8,9 @@ struct UnifiedExploreView: View {
     @State private var searchText: String = ""
     @State private var showJobShare: MatchResult?
     @State private var showRedoQuizAlert: Bool = false
+    @State private var showHeroBusinessResult: MatchResult?
+    @State private var showHeroEducationPath: CareerPath?
+    @State private var showHeroDegreeRecord: DegreeCareerRecord?
 
     private var allResults: [MatchResult] { appState.matchResults }
 
@@ -15,6 +18,8 @@ struct UnifiedExploreView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
+                    bestMatchHeroCard
+
                     if let build = appState.activeBuild {
                         continueCard(build)
                     }
@@ -57,6 +62,15 @@ struct UnifiedExploreView: View {
             .sheet(item: $selectedResult) { result in
                 PathDetailView(result: result)
             }
+            .sheet(item: $showHeroBusinessResult) { result in
+                PathDetailView(result: result)
+            }
+            .sheet(item: $showHeroEducationPath) { career in
+                CareerPathDetailSheet(career: career)
+            }
+            .sheet(item: $showHeroDegreeRecord) { record in
+                DegreeCareerDetailSheet(record: record)
+            }
             .sheet(item: $showJobShare) { result in
                 ShareCardPresenterSheet(content: .topMatch(from: result))
             }
@@ -74,7 +88,280 @@ struct UnifiedExploreView: View {
         }
     }
 
-    // MARK: - Hero Card
+    // MARK: - Best Match Hero Card
+
+    @ViewBuilder
+    private var bestMatchHeroCard: some View {
+        if let path = appState.chosenPath {
+            switch path {
+            case .business:
+                if let topResult = appState.matchResults.first {
+                    bestMatchBusinessCard(topResult)
+                }
+            case .trades:
+                if let topEdu = topEducationMatch {
+                    bestMatchTradesCard(topEdu.path, score: topEdu.score)
+                }
+            case .degree:
+                if let topDeg = topDegreeMatch {
+                    bestMatchDegreeCard(topDeg.record, score: topDeg.score)
+                }
+            }
+        }
+    }
+
+    private var topEducationMatch: (path: EducationPath, score: Int)? {
+        let scored = EducationPathDatabase.all.compactMap { path -> (path: EducationPath, score: Int)? in
+            let s = appState.educationScore(for: path.id)
+            return (path, s)
+        }
+        return scored.max(by: { $0.score < $1.score })
+    }
+
+    private var topDegreeMatch: (record: DegreeCareerRecord, score: Int)? {
+        let scored = DegreeCareerDatabase.allRecords.compactMap { record -> (record: DegreeCareerRecord, score: Int)? in
+            let s = appState.degreeScore(for: record.id)
+            return (record, s)
+        }
+        return scored.max(by: { $0.score < $1.score })
+    }
+
+    private func bestMatchBusinessCard(_ result: MatchResult) -> some View {
+        let catColor = Theme.categoryColor(for: result.businessPath.category)
+        return Button {
+            showHeroBusinessResult = result
+        } label: {
+            VStack(spacing: 0) {
+                HStack(spacing: 14) {
+                    ZStack {
+                        Circle()
+                            .fill(catColor.opacity(0.15))
+                            .frame(width: 52, height: 52)
+                        Image(systemName: result.businessPath.icon)
+                            .font(.title3)
+                            .foregroundStyle(catColor)
+                    }
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "crown.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.yellow)
+                            Text("Your Best Match")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(Theme.accent)
+                        }
+
+                        Text(result.businessPath.name)
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+
+                        Text(result.businessPath.category.rawValue)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    matchScoreBadge(result.scorePercentage, color: catColor)
+                }
+                .padding(16)
+
+                Rectangle()
+                    .fill(catColor.opacity(0.08))
+                    .frame(height: 1)
+
+                HStack(spacing: 16) {
+                    matchStat(icon: "dollarsign.circle.fill", value: result.businessPath.startupCostRange, color: catColor)
+                    matchStat(icon: "clock.fill", value: result.businessPath.timeToFirstDollar, color: catColor)
+                    matchStat(icon: result.businessPath.zone.icon, value: "\(result.businessPath.aiProofRating)/100", color: catColor)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+            }
+            .background(
+                LinearGradient(
+                    colors: [catColor.opacity(0.06), Color(.secondarySystemGroupedBackground)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(.rect(cornerRadius: 20))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(catColor.opacity(0.2), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func bestMatchTradesCard(_ path: EducationPath, score: Int) -> some View {
+        let catColor = Theme.accentBlue
+        return Button {
+            showHeroEducationPath = path
+        } label: {
+            VStack(spacing: 0) {
+                HStack(spacing: 14) {
+                    ZStack {
+                        Circle()
+                            .fill(catColor.opacity(0.15))
+                            .frame(width: 52, height: 52)
+                        Image(systemName: path.icon)
+                            .font(.title3)
+                            .foregroundStyle(catColor)
+                    }
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "crown.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.yellow)
+                            Text("Your Best Match")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(catColor)
+                        }
+
+                        Text(path.title)
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+
+                        Text(path.category.rawValue)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    matchScoreBadge(score, color: catColor)
+                }
+                .padding(16)
+
+                Rectangle()
+                    .fill(catColor.opacity(0.08))
+                    .frame(height: 1)
+
+                HStack(spacing: 16) {
+                    matchStat(icon: "dollarsign.circle.fill", value: path.typicalSalaryRange, color: catColor)
+                    matchStat(icon: "clock.fill", value: path.timeToComplete, color: catColor)
+                    matchStat(icon: path.zone.icon, value: "\(path.aiSafeScore)/100", color: catColor)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+            }
+            .background(
+                LinearGradient(
+                    colors: [catColor.opacity(0.06), Color(.secondarySystemGroupedBackground)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(.rect(cornerRadius: 20))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(catColor.opacity(0.2), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func bestMatchDegreeCard(_ record: DegreeCareerRecord, score: Int) -> some View {
+        let catColor = Color(hex: "818CF8")
+        return Button {
+            showHeroDegreeRecord = record
+        } label: {
+            VStack(spacing: 0) {
+                HStack(spacing: 14) {
+                    ZStack {
+                        Circle()
+                            .fill(catColor.opacity(0.15))
+                            .frame(width: 52, height: 52)
+                        Image(systemName: record.icon)
+                            .font(.title3)
+                            .foregroundStyle(catColor)
+                    }
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "crown.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.yellow)
+                            Text("Your Best Match")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(catColor)
+                        }
+
+                        Text(record.title)
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+
+                        Text(record.category.rawValue)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    matchScoreBadge(score, color: catColor)
+                }
+                .padding(16)
+
+                Rectangle()
+                    .fill(catColor.opacity(0.08))
+                    .frame(height: 1)
+
+                HStack(spacing: 16) {
+                    matchStat(icon: "dollarsign.circle.fill", value: record.salaryExperienced, color: catColor)
+                    matchStat(icon: "clock.fill", value: record.timeline, color: catColor)
+                    matchStat(icon: record.aiProofTier.icon, value: record.aiProofTier.label, color: catColor)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+            }
+            .background(
+                LinearGradient(
+                    colors: [catColor.opacity(0.06), Color(.secondarySystemGroupedBackground)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(.rect(cornerRadius: 20))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(catColor.opacity(0.2), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func matchScoreBadge(_ score: Int, color: Color) -> some View {
+        VStack(spacing: 2) {
+            Text("\(score)%")
+                .font(.title2.weight(.bold))
+                .foregroundStyle(color)
+            Text("match")
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(.secondary)
+        }
+        .frame(width: 60)
+    }
+
+    private func matchStat(icon: String, value: String, color: Color) -> some View {
+        HStack(spacing: 5) {
+            Image(systemName: icon)
+                .font(.caption2)
+                .foregroundStyle(color)
+            Text(value)
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Category Card
 
     private func heroCard(path: ChosenPath, subtitle: String) -> some View {
         NavigationLink(value: path) {
