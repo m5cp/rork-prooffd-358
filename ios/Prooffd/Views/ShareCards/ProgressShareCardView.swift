@@ -7,31 +7,6 @@ struct ProgressShareCardView: View {
 
     private var isSquare: Bool { format == .square }
 
-    private var bg: some View {
-        Group {
-            switch style {
-            case .clean:
-                LinearGradient(
-                    colors: [Color(hex: "0C1018"), Color(hex: "101E30"), Color(hex: "0B1420")],
-                    startPoint: .topLeading, endPoint: .bottomTrailing
-                )
-            case .bold:
-                ZStack {
-                    Color(hex: "0A0E1A")
-                    LinearGradient(
-                        colors: [Color(hex: "FBBF24").opacity(0.12), Color.clear],
-                        startPoint: .topLeading, endPoint: .bottomTrailing
-                    )
-                }
-            case .premium:
-                LinearGradient(
-                    colors: [Color(hex: "0D0D0D"), Color(hex: "1A1A28"), Color(hex: "0D0D12")],
-                    startPoint: .top, endPoint: .bottom
-                )
-            }
-        }
-    }
-
     private var accentColor: Color {
         switch style {
         case .clean: return Color(hex: "34D399")
@@ -47,96 +22,137 @@ struct ProgressShareCardView: View {
         return Color(hex: "FB923C")
     }
 
-    var body: some View {
-        ZStack {
-            bg.ignoresSafeArea()
-            VStack(spacing: 0) {
-                Spacer(minLength: isSquare ? 16 : 44)
-                brandLabel
-                Spacer(minLength: isSquare ? 10 : 24)
-                headerLine
-                Spacer(minLength: isSquare ? 6 : 12)
-                buildName
-                Spacer(minLength: isSquare ? 14 : 28)
-                progressRing
-                Spacer(minLength: isSquare ? 10 : 20)
-                milestonePill
-                Spacer(minLength: isSquare ? 8 : 16)
-                supportLine
-                Spacer()
-                ctaFooter
-                Spacer(minLength: isSquare ? 16 : 32)
+    private var bg: some View {
+        Group {
+            switch style {
+            case .clean:
+                ZStack {
+                    LinearGradient(
+                        colors: [Color(hex: "0C1018"), Color(hex: "101E30"), Color(hex: "0B1420")],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    )
+                    Circle()
+                        .fill(progressColor.opacity(0.08))
+                        .frame(width: isSquare ? 300 : 480)
+                        .blur(radius: 80)
+                        .offset(y: isSquare ? -30 : -60)
+                }
+            case .bold:
+                ZStack {
+                    Color(hex: "0A0E1A")
+                    RadialGradient(
+                        colors: [accentColor.opacity(0.15), Color.clear],
+                        center: .center, startRadius: 0, endRadius: isSquare ? 250 : 400
+                    )
+                    Circle()
+                        .fill(Color(hex: "F472B6").opacity(0.08))
+                        .frame(width: isSquare ? 200 : 320)
+                        .blur(radius: 60)
+                        .offset(x: 100, y: isSquare ? 100 : 180)
+                }
+            case .premium:
+                ZStack {
+                    LinearGradient(
+                        colors: [Color(hex: "0D0D0D"), Color(hex: "1A1A28"), Color(hex: "0D0D12")],
+                        startPoint: .top, endPoint: .bottom
+                    )
+                    Circle()
+                        .fill(accentColor.opacity(0.06))
+                        .frame(width: isSquare ? 280 : 440)
+                        .blur(radius: 70)
+                        .offset(y: isSquare ? 40 : 80)
+                }
             }
-            .padding(.horizontal, isSquare ? 24 : 28)
         }
     }
 
-    private var brandLabel: some View {
-        Text("P R O O F F D")
-            .font(.system(size: isSquare ? 9 : 11, weight: .bold))
-            .tracking(3)
-            .foregroundStyle(Color.white.opacity(0.35))
+    var body: some View {
+        ZStack {
+            bg.ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                Spacer()
+
+                iconBadge
+                Spacer().frame(height: isSquare ? 16 : 28)
+
+                Text(content.buildName)
+                    .font(.system(size: isSquare ? 26 : 36, weight: .heavy))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.6)
+
+                Spacer().frame(height: isSquare ? 20 : 36)
+
+                progressRing
+
+                Spacer().frame(height: isSquare ? 16 : 28)
+
+                Text("BUILDING MY PATH")
+                    .font(.system(size: isSquare ? 13 : 16, weight: .bold))
+                    .tracking(1.5)
+                    .foregroundStyle(progressColor.opacity(0.8))
+
+                Spacer()
+
+                footer
+                Spacer().frame(height: isSquare ? 20 : 36)
+            }
+            .padding(.horizontal, isSquare ? 28 : 32)
+        }
     }
 
-    private var headerLine: some View {
-        Text("I'm Building:")
-            .font(.system(size: isSquare ? 13 : 16, weight: .semibold))
-            .foregroundStyle(accentColor)
-    }
-
-    private var buildName: some View {
-        Text(content.buildName)
-            .font(.system(size: isSquare ? 22 : 30, weight: .heavy))
-            .foregroundStyle(.white)
-            .multilineTextAlignment(.center)
-            .lineLimit(2)
-            .minimumScaleFactor(0.7)
+    private var iconBadge: some View {
+        ZStack {
+            Circle()
+                .fill(progressColor.opacity(0.12))
+                .frame(width: isSquare ? 72 : 100, height: isSquare ? 72 : 100)
+            Circle()
+                .fill(progressColor.opacity(0.06))
+                .frame(width: isSquare ? 96 : 130, height: isSquare ? 96 : 130)
+            Image(systemName: content.buildIcon)
+                .font(.system(size: isSquare ? 30 : 42, weight: .semibold))
+                .foregroundStyle(progressColor)
+        }
     }
 
     private var progressRing: some View {
         ZStack {
             Circle()
-                .stroke(progressColor.opacity(0.12), lineWidth: isSquare ? 8 : 10)
+                .stroke(progressColor.opacity(0.1), lineWidth: isSquare ? 8 : 10)
             Circle()
                 .trim(from: 0, to: Double(content.progressPercent) / 100.0)
-                .stroke(progressColor, style: StrokeStyle(lineWidth: isSquare ? 8 : 10, lineCap: .round))
+                .stroke(
+                    AngularGradient(
+                        colors: [progressColor.opacity(0.4), progressColor],
+                        center: .center
+                    ),
+                    style: StrokeStyle(lineWidth: isSquare ? 8 : 10, lineCap: .round)
+                )
                 .rotationEffect(.degrees(-90))
             VStack(spacing: 2) {
-                Text("\(content.progressPercent)%")
-                    .font(.system(size: isSquare ? 32 : 44, weight: .bold, design: .rounded))
+                Text("\(content.progressPercent)")
+                    .font(.system(size: isSquare ? 36 : 52, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
-                Text("complete")
-                    .font(.system(size: isSquare ? 9 : 11, weight: .medium))
-                    .foregroundStyle(Color.white.opacity(0.5))
+                Text("% DONE")
+                    .font(.system(size: isSquare ? 10 : 13, weight: .bold))
+                    .tracking(2)
+                    .foregroundStyle(progressColor)
             }
         }
-        .frame(width: isSquare ? 110 : 140, height: isSquare ? 110 : 140)
+        .frame(width: isSquare ? 120 : 160, height: isSquare ? 120 : 160)
     }
 
-    private var milestonePill: some View {
-        Text(content.milestoneLine)
-            .font(.system(size: isSquare ? 12 : 14, weight: .semibold))
-            .foregroundStyle(progressColor)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(progressColor.opacity(0.1))
-            .clipShape(.rect(cornerRadius: 20))
-    }
-
-    private var supportLine: some View {
-        Text("Making real progress")
-            .font(.system(size: isSquare ? 11 : 14, weight: .medium))
-            .foregroundStyle(Color.white.opacity(0.45))
-    }
-
-    private var ctaFooter: some View {
-        VStack(spacing: isSquare ? 4 : 8) {
-            Text("Start your path \u{2192}")
-                .font(.system(size: isSquare ? 12 : 15, weight: .bold))
-                .foregroundStyle(accentColor)
+    private var footer: some View {
+        VStack(spacing: isSquare ? 4 : 6) {
+            Text("P R O O F F D")
+                .font(.system(size: isSquare ? 10 : 12, weight: .bold))
+                .tracking(4)
+                .foregroundStyle(Color.white.opacity(0.3))
             Text("prooffd.app")
                 .font(.system(size: isSquare ? 9 : 11, weight: .medium))
-                .foregroundStyle(Color.white.opacity(0.3))
+                .foregroundStyle(Color.white.opacity(0.2))
         }
     }
 }

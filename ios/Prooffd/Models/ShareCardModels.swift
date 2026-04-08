@@ -57,12 +57,12 @@ struct ShareCardContent {
     var topMatches: [(name: String, percent: Int, icon: String, zone: AIZone)] = []
     var jobTitle: String = ""
     var matchPercent: Int = 0
-    var aiZone: AIZone = .human
-    var typicalRate: String = ""
-    var perfectFor: String = ""
+    var jobIcon: String = "star.fill"
+    var category: BusinessCategory = .homeProperty
     var buildName: String = ""
     var progressPercent: Int = 0
-    var milestoneLine: String = ""
+    var buildIcon: String = "hammer.fill"
+    var buildCategory: BusinessCategory = .homeProperty
 
     static func quizResults(from results: [MatchResult]) -> ShareCardContent {
         let top3 = Array(results.prefix(3))
@@ -74,41 +74,22 @@ struct ShareCardContent {
 
     static func topMatch(from result: MatchResult) -> ShareCardContent {
         let path = result.businessPath
-        let fitLine: String
-        if path.isDigital && path.soloFriendly {
-            fitLine = "remote work + flexible schedule"
-        } else if path.fastCashPotential {
-            fitLine = "fast income + low startup cost"
-        } else if path.soloFriendly {
-            fitLine = "solo-friendly + scalable"
-        } else {
-            fitLine = "high demand + strong earning potential"
-        }
         return ShareCardContent(
             type: .topMatch,
             jobTitle: path.name,
             matchPercent: result.scorePercentage,
-            aiZone: path.zone,
-            typicalRate: path.typicalMarketRates.isEmpty ? path.starterPricing : path.typicalMarketRates,
-            perfectFor: fitLine
+            jobIcon: path.icon,
+            category: path.category
         )
     }
 
     static func progress(from build: BuildProject) -> ShareCardContent {
-        let milestone: String
-        switch build.progressPercentage {
-        case 0..<10: milestone = "Just getting started"
-        case 10..<25: milestone = "First steps complete"
-        case 25..<50: milestone = "Building momentum"
-        case 50..<75: milestone = "Over halfway there"
-        case 75..<100: milestone = "Almost launch-ready"
-        default: milestone = "Build complete"
-        }
         return ShareCardContent(
             type: .progress,
             buildName: build.businessName.isEmpty ? build.pathName : build.businessName,
             progressPercent: build.progressPercentage,
-            milestoneLine: milestone
+            buildIcon: build.pathIcon,
+            buildCategory: build.category
         )
     }
 }
