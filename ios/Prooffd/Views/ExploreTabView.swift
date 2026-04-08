@@ -7,12 +7,16 @@ struct ExploreTabView: View {
     @State private var showPaywall: Bool = false
     @State private var showEducationCategorySheet: EducationCategory?
     @State private var randomizedTrending: [MatchResult] = []
+    @State private var showHeroBusinessResult: MatchResult?
+    @State private var showHeroEducationPath: CareerPath?
+    @State private var showHeroDegreeRecord: DegreeCareerRecord?
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
+                    bestMatchHeroCard
                     filterBar
                     educationOverviewSection
                     shareLoopSection
@@ -28,6 +32,15 @@ struct ExploreTabView: View {
             .sheet(item: $selectedResult) { result in
                 PathDetailView(result: result)
             }
+            .sheet(item: $showHeroBusinessResult) { result in
+                PathDetailView(result: result)
+            }
+            .sheet(item: $showHeroEducationPath) { career in
+                CareerPathDetailSheet(career: career)
+            }
+            .sheet(item: $showHeroDegreeRecord) { record in
+                DegreeCareerDetailSheet(record: record)
+            }
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
             }
@@ -42,6 +55,285 @@ struct ExploreTabView: View {
 
     private func shuffleTrending() {
         randomizedTrending = Array(appState.matchResults.shuffled().prefix(6))
+    }
+
+    // MARK: - Best Match Hero Card
+
+    @ViewBuilder
+    private var bestMatchHeroCard: some View {
+        if let path = appState.chosenPath {
+            switch path {
+            case .business:
+                if let topResult = appState.matchResults.first {
+                    heroBusinessCard(topResult)
+                }
+            case .trades:
+                if let topEdu = topEducationMatch {
+                    heroTradesCard(topEdu.path, score: topEdu.score)
+                }
+            case .degree:
+                if let topDeg = topDegreeMatch {
+                    heroDegreeCard(topDeg.record, score: topDeg.score)
+                }
+            }
+        }
+    }
+
+    private var topEducationMatch: (path: EducationPath, score: Int)? {
+        let scored = EducationPathDatabase.all.compactMap { path -> (path: EducationPath, score: Int)? in
+            let s = appState.educationScore(for: path.id)
+            return (path, s)
+        }
+        return scored.max(by: { $0.score < $1.score })
+    }
+
+    private var topDegreeMatch: (record: DegreeCareerRecord, score: Int)? {
+        let scored = DegreeCareerDatabase.allRecords.compactMap { record -> (record: DegreeCareerRecord, score: Int)? in
+            let s = appState.degreeScore(for: record.id)
+            return (record, s)
+        }
+        return scored.max(by: { $0.score < $1.score })
+    }
+
+    private func heroBusinessCard(_ result: MatchResult) -> some View {
+        let catColor = Theme.categoryColor(for: result.businessPath.category)
+        return Button {
+            showHeroBusinessResult = result
+        } label: {
+            VStack(spacing: 0) {
+                HStack(spacing: 14) {
+                    ZStack {
+                        Circle()
+                            .fill(catColor.opacity(0.15))
+                            .frame(width: 52, height: 52)
+                        Image(systemName: result.businessPath.icon)
+                            .font(.title3)
+                            .foregroundStyle(catColor)
+                    }
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "crown.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.yellow)
+                            Text("Your Best Match")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(Theme.accent)
+                        }
+
+                        Text(result.businessPath.name)
+                            .font(.headline)
+                            .foregroundStyle(Theme.textPrimary)
+                            .lineLimit(1)
+
+                        Text(result.businessPath.category.rawValue)
+                            .font(.caption)
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+
+                    Spacer()
+
+                    heroScoreBadge(result.scorePercentage, color: catColor)
+                }
+                .padding(16)
+
+                Rectangle()
+                    .fill(catColor.opacity(0.08))
+                    .frame(height: 1)
+
+                HStack(spacing: 16) {
+                    heroStat(icon: "dollarsign.circle.fill", value: result.businessPath.startupCostRange, color: catColor)
+                    heroStat(icon: "clock.fill", value: result.businessPath.timeToFirstDollar, color: catColor)
+                    heroStat(icon: result.businessPath.zone.icon, value: "\(result.businessPath.aiProofRating)/100", color: catColor)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+            }
+            .background(
+                LinearGradient(
+                    colors: [catColor.opacity(0.06), Theme.cardBackground],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(.rect(cornerRadius: 16))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(catColor.opacity(0.2), lineWidth: 1)
+            )
+            .cardShadow()
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 16)
+    }
+
+    private func heroTradesCard(_ path: EducationPath, score: Int) -> some View {
+        let catColor = Theme.accentBlue
+        return Button {
+            showHeroEducationPath = path
+        } label: {
+            VStack(spacing: 0) {
+                HStack(spacing: 14) {
+                    ZStack {
+                        Circle()
+                            .fill(catColor.opacity(0.15))
+                            .frame(width: 52, height: 52)
+                        Image(systemName: path.icon)
+                            .font(.title3)
+                            .foregroundStyle(catColor)
+                    }
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "crown.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.yellow)
+                            Text("Your Best Match")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(catColor)
+                        }
+
+                        Text(path.title)
+                            .font(.headline)
+                            .foregroundStyle(Theme.textPrimary)
+                            .lineLimit(1)
+
+                        Text(path.category.rawValue)
+                            .font(.caption)
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+
+                    Spacer()
+
+                    heroScoreBadge(score, color: catColor)
+                }
+                .padding(16)
+
+                Rectangle()
+                    .fill(catColor.opacity(0.08))
+                    .frame(height: 1)
+
+                HStack(spacing: 16) {
+                    heroStat(icon: "dollarsign.circle.fill", value: path.typicalSalaryRange, color: catColor)
+                    heroStat(icon: "clock.fill", value: path.timeToComplete, color: catColor)
+                    heroStat(icon: path.zone.icon, value: "\(path.aiSafeScore)/100", color: catColor)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+            }
+            .background(
+                LinearGradient(
+                    colors: [catColor.opacity(0.06), Theme.cardBackground],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(.rect(cornerRadius: 16))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(catColor.opacity(0.2), lineWidth: 1)
+            )
+            .cardShadow()
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 16)
+    }
+
+    private func heroDegreeCard(_ record: DegreeCareerRecord, score: Int) -> some View {
+        let catColor = Color(hex: "818CF8")
+        return Button {
+            showHeroDegreeRecord = record
+        } label: {
+            VStack(spacing: 0) {
+                HStack(spacing: 14) {
+                    ZStack {
+                        Circle()
+                            .fill(catColor.opacity(0.15))
+                            .frame(width: 52, height: 52)
+                        Image(systemName: record.icon)
+                            .font(.title3)
+                            .foregroundStyle(catColor)
+                    }
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "crown.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.yellow)
+                            Text("Your Best Match")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(catColor)
+                        }
+
+                        Text(record.title)
+                            .font(.headline)
+                            .foregroundStyle(Theme.textPrimary)
+                            .lineLimit(1)
+
+                        Text(record.category.rawValue)
+                            .font(.caption)
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+
+                    Spacer()
+
+                    heroScoreBadge(score, color: catColor)
+                }
+                .padding(16)
+
+                Rectangle()
+                    .fill(catColor.opacity(0.08))
+                    .frame(height: 1)
+
+                HStack(spacing: 16) {
+                    heroStat(icon: "dollarsign.circle.fill", value: record.salaryExperienced, color: catColor)
+                    heroStat(icon: "clock.fill", value: record.timeline, color: catColor)
+                    heroStat(icon: record.aiProofTier.icon, value: record.aiProofTier.label, color: catColor)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+            }
+            .background(
+                LinearGradient(
+                    colors: [catColor.opacity(0.06), Theme.cardBackground],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(.rect(cornerRadius: 16))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(catColor.opacity(0.2), lineWidth: 1)
+            )
+            .cardShadow()
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 16)
+    }
+
+    private func heroScoreBadge(_ score: Int, color: Color) -> some View {
+        VStack(spacing: 2) {
+            Text("\(score)%")
+                .font(.title2.weight(.bold))
+                .foregroundStyle(color)
+            Text("match")
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(Theme.textTertiary)
+        }
+        .frame(width: 60)
+    }
+
+    private func heroStat(icon: String, value: String, color: Color) -> some View {
+        HStack(spacing: 5) {
+            Image(systemName: icon)
+                .font(.caption2)
+                .foregroundStyle(color)
+            Text(value)
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(Theme.textSecondary)
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private var filterBar: some View {
