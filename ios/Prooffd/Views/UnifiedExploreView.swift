@@ -7,6 +7,7 @@ struct UnifiedExploreView: View {
     @State private var showPaywall: Bool = false
     @State private var searchText: String = ""
     @State private var showJobShare: MatchResult?
+    @State private var showRedoQuizAlert: Bool = false
 
     private var allResults: [MatchResult] { appState.matchResults }
 
@@ -25,6 +26,8 @@ struct UnifiedExploreView: View {
                     if !store.isPremium {
                         upgradeCard
                     }
+
+                    redoQuizCard
 
                     Color.clear.frame(height: 40)
                 }
@@ -59,6 +62,14 @@ struct UnifiedExploreView: View {
             }
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
+            }
+            .alert("Redo Quiz?", isPresented: $showRedoQuizAlert) {
+                Button("Redo Quiz", role: .destructive) {
+                    appState.retakeQuiz()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This will reset your matches and restart the quiz.")
             }
         }
     }
@@ -224,6 +235,39 @@ struct UnifiedExploreView: View {
         }
         .padding(.vertical, 10)
         .padding(.horizontal, 4)
+    }
+
+    // MARK: - Redo Quiz
+
+    private var redoQuizCard: some View {
+        Button {
+            showRedoQuizAlert = true
+        } label: {
+            HStack(spacing: 14) {
+                Image(systemName: "arrow.counterclockwise")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(Theme.accentBlue)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Redo Quiz")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.primary)
+                    Text("Retake the quiz to update your matches")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(16)
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(.rect(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Upgrade
