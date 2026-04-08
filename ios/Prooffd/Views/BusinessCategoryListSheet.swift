@@ -223,7 +223,11 @@ struct BusinessCategoryListSheet: View {
         .buttonStyle(.plain)
         .contextMenu {
             Button {
-                QuickShareHelper.shareBusiness(path.name)
+                if store.isPremium {
+                    QuickShareHelper.shareBusiness(path.name)
+                } else {
+                    showPaywall = true
+                }
             } label: {
                 Label("Share", systemImage: "square.and.arrow.up")
             }

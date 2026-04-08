@@ -869,18 +869,31 @@ struct CareerPathDetailSheet: View {
             }
 
             Button {
-                QuickShareHelper.shareTrade(career.title)
+                if store.isPremium {
+                    QuickShareHelper.shareTrade(career.title)
+                } else {
+                    showPaywall = true
+                }
             } label: {
                 HStack(spacing: 6) {
-                    Image(systemName: "square.and.arrow.up")
+                    Image(systemName: store.isPremium ? "square.and.arrow.up" : "lock.fill")
                         .font(.caption)
                     Text("Share")
                         .font(.caption.weight(.semibold))
+                    if !store.isPremium {
+                        Text("PRO")
+                            .font(.system(size: 9, weight: .heavy))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 2)
+                            .background(Color(hex: "FBBF24"))
+                            .clipShape(.capsule)
+                    }
                 }
-                .foregroundStyle(Theme.textSecondary)
+                .foregroundStyle(store.isPremium ? Theme.textSecondary : Color(hex: "FBBF24"))
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
-                .background(Theme.cardBackground)
+                .background(store.isPremium ? Theme.cardBackground : Color(hex: "FBBF24").opacity(0.1))
                 .clipShape(.capsule)
             }
 
