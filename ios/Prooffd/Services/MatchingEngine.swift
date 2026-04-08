@@ -2,7 +2,7 @@ import Foundation
 
 enum MatchingEngine {
     nonisolated static func match(profile: UserProfile, paths: [BusinessPath]) -> [MatchResult] {
-        let hasAnswers = !profile.selectedCategories.isEmpty || profile.budget != nil || profile.workPreference != nil || !profile.situationTags.isEmpty
+        let hasAnswers = !profile.selectedCategories.isEmpty || profile.budget != nil || profile.workPreference != nil || !profile.situationTags.isEmpty || !profile.workEnvironments.isEmpty || !profile.educationWillingnesses.isEmpty
 
         if !hasAnswers {
             return browseAll(paths: paths)
@@ -236,6 +236,206 @@ enum MatchingEngine {
                 score: Double(baseScore),
                 scorePercentage: baseScore
             )
+        }
+    }
+
+    // MARK: - Education Path Scoring
+
+    nonisolated static func scoreEducationPaths(profile: UserProfile) -> [String: Int] {
+        var scores: [String: Int] = [:]
+        let userInterests = deriveInterests(from: profile)
+
+        for path in EducationPathDatabase.all {
+            var score: Double = 0
+            var maxScore: Double = 0
+
+            maxScore += 25
+            if !profile.educationWillingnesses.isEmpty {
+                let required = educationLevelForPath(path)
+                if profile.educationWillingnesses.contains(required) {
+                    score += 25
+                } else if profile.educationWillingnesses.contains(where: {
+                    EducationWillingness.allCases.firstIndex(of: $0)! >= EducationWillingness.allCases.firstIndex(of: required)!
+                }) {
+                    score += 15
+                } else {
+                    score += 5
+                }
+            }
+
+            maxScore += 20
+            if let pref = profile.workPreference {
+                let isHandsOn = [EducationCategory.trade].contains(path.category)
+                let isDigital = [EducationCategory.technology, .creative].contains(path.category)
+                switch pref {
+                case .physical:
+                    if isHandsOn { score += 20 } else if !isDigital { score += 10 }
+                case .digital:
+                    if isDigital { score += 20 } else if !isHandsOn { score += 10 }
+                case .either:
+                    score += 20
+                }
+            }
+
+            maxScore += 15
+            if let timeline = profile.incomeTimeline {
+                switch timeline {
+                case .asap:
+                    if path.isFastStart { score += 15 } else { score += 3 }
+                case .oneToThree:
+                    if path.isFastStart { score += 12 } else { score += 8 }
+                case .threeToSix:
+                    score += 12
+                case .noRush:
+                    score += 15
+                }
+            }
+
+            maxScore += 10
+            if !profile.workEnvironments.isEmpty {
+                let tradeEnvs: Set<WorkEnvironment> = [.outdoors, .constructionSite, .warehouse, .clientLocation]
+                let officeEnvs: Set<WorkEnvironment> = [.officeDesk, .homeBased]
+                let userEnvSet = Set(profile.workEnvironments)
+                let isTradeCategory = [EducationCategory.trade, .certification, .healthcare].contains(path.category)
+                let isTechCategory = [EducationCategory.technology, .creative, .business].contains(path.category)
+                if isTradeCategory && !userEnvSet.isDisjoint(with: tradeEnvs) {
+                    score += 10
+                } else if isTechCategory && !userEnvSet.isDisjoint(with: officeEnvs) {
+                    score += 10
+                } else {
+                    score += 5
+                }
+            } else {
+                score += 10
+            }
+
+            maxScore += 10
+            var interestBonus: Double = 0
+            for interest in path.alignedInterests {
+                if userInterests.contains(interest) { interestBonus += 3 }
+            }
+            score += min(interestBonus, 10)
+
+            let userMatch = maxScore > 0 ? (score / maxScore) * 100 : 50
+            let finalScore = CareerScoringEngine.shared.adjustedFinalScore(
+                userMatchScore: min(99, userMatch),
+                requiresLicense: path.requiresLicense,
+                incomeLevel: path.incomeLevel,
+                demandLevel: path.demandLevel,
+                categoryTier: path.categoryTier,
+                isFastStart: path.isFastStart,
+                isScalable: path.isScalable
+            )
+            scores[path.id] = min(Int(finalScore), 99)
+        }
+        return scores
+    }
+
+    // MARK: - Degree Career Scoring
+
+    nonisolated static func scoreDegreeRecords(profile: UserProfile) -> [String: Int] {
+        var scores: [String: Int] = [:]
+
+        for record in DegreeCareerDatabase.allRecords {
+            var score: Double = 0
+            var maxScore: Double = 0
+
+            maxScore += 30
+            if !profile.educationWillingnesses.isEmpty {
+                if profile.educationWillingnesses.contains(.fourYear) {
+                    score += 30
+                } else if profile.educationWillingnesses.contains(.twoYear) {
+                    score += 15
+                } else {
+                    score += 5
+                }
+            }
+
+            maxScore += 20
+            if let timeline = profile.incomeTimeline {
+                switch timeline {
+                case .asap: score += 3
+                case .oneToThree: score += 5
+                case .threeToSix: score += 10
+                case .noRush: score += 20
+                }
+            }
+
+            maxScore += 15
+            if let pref = profile.workPreference {
+                let isPhysicalCareer = [DegreeCareerCategory.healthcare, .engineering, .aviation].contains(record.category)
+                let isOfficeCareer = [DegreeCareerCategory.legal, .mentalHealth, .education].contains(record.category)
+                switch pref {
+                case .physical:
+                    if isPhysicalCareer { score += 15 } else { score += 5 }
+                case .digital:
+                    if isOfficeCareer { score += 15 } else { score += 8 }
+                case .either:
+                    score += 15
+                }
+            }
+
+            maxScore += 10
+            if !profile.workConditions.isEmpty {
+                let isHighStress = [DegreeCareerCategory.healthcare, .aviation, .military].contains(record.category)
+                let toleratesPhysical = profile.workConditions.contains(where: { [.sweaty, .heavyLifting, .heights].contains($0) })
+                if isHighStress && toleratesPhysical {
+                    score += 10
+                } else if !isHighStress && profile.workConditions.contains(.officeDesk) {
+                    score += 10
+                } else {
+                    score += 5
+                }
+            } else {
+                score += 10
+            }
+
+            maxScore += 10
+            let tierBonus: Double = record.aiProofTier == .tier1 ? 10 : record.aiProofTier == .tier2 ? 7 : 4
+            score += tierBonus
+
+            let userMatch = maxScore > 0 ? (score / maxScore) * 100 : 50
+
+            let incomeLevel: IncomeLevel
+            if record.salaryExperienced.contains("100K") || record.salaryExperienced.contains("120K") || record.salaryExperienced.contains("140K") || record.salaryExperienced.contains("150K") || record.salaryExperienced.contains("200K") || record.salaryExperienced.contains("250K") || record.salaryExperienced.contains("500K") {
+                incomeLevel = .high
+            } else {
+                incomeLevel = .medium
+            }
+
+            let finalScore = CareerScoringEngine.shared.adjustedFinalScore(
+                userMatchScore: min(99, userMatch),
+                requiresLicense: record.licensingRequired,
+                incomeLevel: incomeLevel,
+                demandLevel: .medium,
+                categoryTier: .highValue,
+                isFastStart: false,
+                isScalable: false
+            )
+            scores[record.id] = min(Int(finalScore), 99)
+        }
+        return scores
+    }
+
+    private nonisolated static func educationLevelForPath(_ path: EducationPath) -> EducationWillingness {
+        let time = path.timeToComplete.lowercased()
+        if time.contains("4") || time.contains("5") || time.contains("year") && (time.contains("4") || time.contains("5")) {
+            return .tradeSchool
+        }
+        if time.contains("week") || time.contains("1 month") || time.contains("2 month") || time.contains("3 month") {
+            return .shortCert
+        }
+        if time.contains("6 month") || time.contains("12 month") || time.contains("1 year") || time.contains("2 year") {
+            return .tradeSchool
+        }
+        switch path.category {
+        case .trade: return .tradeSchool
+        case .certification: return .shortCert
+        case .healthcare: return .twoYear
+        case .technology: return .shortCert
+        case .business: return .shortCert
+        case .creative: return .selfTaught
+        case .military: return .tradeSchool
         }
     }
 }

@@ -55,9 +55,8 @@ struct RootView: View {
             if appState.hasCompletedOnboarding {
                 ResultsView()
             } else {
-                OnboardingView {
-                    appState.completeOnboarding()
-                    appState.runMatching()
+                OnboardingView { path, profile in
+                    appState.completeOnboardingWithQuiz(path: path, profile: profile)
                 }
             }
         }

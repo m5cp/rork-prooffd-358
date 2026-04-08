@@ -10,11 +10,13 @@ struct EducationCategoryListSheet: View {
 
     private var paths: [EducationPath] {
         let all = EducationPathDatabase.all.filter { $0.category == category }
+        let filtered: [EducationPath]
         switch filterMode {
-        case .all: return all.filter { !appState.isEducationHidden($0.id) }
-        case .favorites: return all.filter { appState.isEducationFavorite($0.id) }
-        case .hidden: return all.filter { appState.isEducationHidden($0.id) }
+        case .all: filtered = all.filter { !appState.isEducationHidden($0.id) }
+        case .favorites: filtered = all.filter { appState.isEducationFavorite($0.id) }
+        case .hidden: filtered = all.filter { appState.isEducationHidden($0.id) }
         }
+        return filtered.sorted { appState.educationScore(for: $0.id) > appState.educationScore(for: $1.id) }
     }
 
     private var catColor: Color {
@@ -155,14 +157,16 @@ struct EducationCategoryListSheet: View {
 
                     Spacer(minLength: 4)
 
-                    VStack(alignment: .trailing, spacing: 2) {
+                    VStack(alignment: .trailing, spacing: 4) {
+                        let matchScore = appState.educationScore(for: path.id)
+                        let matchColor: Color = matchScore >= 70 ? Theme.accent : matchScore >= 50 ? Color(hex: "FBBF24") : Theme.textTertiary
                         HStack(spacing: 3) {
-                            Image(systemName: "shield.checkered")
+                            Image(systemName: "target")
                                 .font(.system(size: 9))
-                            Text("\(path.aiSafeScore)")
+                            Text("\(matchScore)%")
                                 .font(.caption2.weight(.bold))
                         }
-                        .foregroundStyle(aiColor)
+                        .foregroundStyle(matchColor)
 
                         Image(systemName: "chevron.right")
                             .font(.caption2.weight(.bold))

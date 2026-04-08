@@ -8,7 +8,9 @@ struct DegreeCareerCategoryListSheet: View {
     @State private var selectedRecord: DegreeCareerRecord?
 
     private var records: [DegreeCareerRecord] {
-        DegreeCareerDatabase.allRecords.filter { $0.category == category && !appState.isDegreeHidden($0.id) }
+        DegreeCareerDatabase.allRecords
+            .filter { $0.category == category && !appState.isDegreeHidden($0.id) }
+            .sorted { appState.degreeScore(for: $0.id) > appState.degreeScore(for: $1.id) }
     }
 
     private var catColor: Color {
@@ -125,14 +127,16 @@ struct DegreeCareerCategoryListSheet: View {
 
                     Spacer(minLength: 4)
 
-                    VStack(alignment: .trailing, spacing: 2) {
+                    VStack(alignment: .trailing, spacing: 4) {
+                        let matchScore = appState.degreeScore(for: record.id)
+                        let matchColor: Color = matchScore >= 70 ? Theme.accent : matchScore >= 50 ? Color(hex: "FBBF24") : Theme.textTertiary
                         HStack(spacing: 3) {
-                            Image(systemName: record.aiProofTier.icon)
+                            Image(systemName: "target")
                                 .font(.system(size: 9))
-                            Text(record.aiProofTier == .tier1 ? "T1" : record.aiProofTier == .tier2 ? "T2" : "T3")
+                            Text("\(matchScore)%")
                                 .font(.caption2.weight(.bold))
                         }
-                        .foregroundStyle(tierColor)
+                        .foregroundStyle(matchColor)
 
                         Image(systemName: "chevron.right")
                             .font(.caption2.weight(.bold))

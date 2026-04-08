@@ -43,6 +43,8 @@ class AppState {
     var currentScreen: AppScreen = .results
     var userProfile: UserProfile = UserProfile()
     var matchResults: [MatchResult] = []
+    var educationScores: [String: Int] = [:]
+    var degreeScores: [String: Int] = [:]
     var favoritePathIDs: Set<String> = []
     var favoriteEducationIDs: Set<String> = []
     var favoriteDegreeIDs: Set<String> = []
@@ -134,6 +136,20 @@ class AppState {
         }
     }
 
+    func completeOnboardingWithQuiz(path: ChosenPath, profile: UserProfile) {
+        chosenPath = path
+        savedChosenPath = path.rawValue
+        userProfile = profile
+        saveProfile()
+        hasCompletedOnboarding = true
+        hasCompletedQuiz = true
+        runMatching()
+        AnalyticsTracker.shared.trackQuizCompletion()
+        withAnimation(.spring(duration: 0.5)) {
+            currentScreen = .resultsReveal
+        }
+    }
+
     func selectPath(_ path: ChosenPath) {
         chosenPath = path
         savedChosenPath = path.rawValue
@@ -198,17 +214,32 @@ class AppState {
     func retakeQuiz() {
         userProfile = UserProfile()
         matchResults = []
+        educationScores = [:]
+        degreeScores = [:]
         hasCompletedQuiz = false
+        hasCompletedOnboarding = false
         hasSeenResultsReveal = false
         hasSkippedQuiz = false
+        chosenPath = nil
+        savedChosenPath = nil
         saveProfile()
         withAnimation(.spring(duration: 0.5)) {
-            currentScreen = .quiz
+            currentScreen = .onboarding
         }
     }
 
     func runMatching() {
         matchResults = MatchingEngine.match(profile: userProfile, paths: BusinessPathDatabase.allPaths)
+        educationScores = MatchingEngine.scoreEducationPaths(profile: userProfile)
+        degreeScores = MatchingEngine.scoreDegreeRecords(profile: userProfile)
+    }
+
+    func educationScore(for id: String) -> Int {
+        educationScores[id] ?? 50
+    }
+
+    func degreeScore(for id: String) -> Int {
+        degreeScores[id] ?? 50
     }
 
     private func checkWelcomeBack() {
