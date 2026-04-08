@@ -5,7 +5,15 @@ struct DegreeExplorePage: View {
     @Environment(StoreViewModel.self) private var store
     @State private var searchText: String = ""
     @State private var selectedCategory: DegreeCareerCategory?
+    @State private var selectedTopRecord: DegreeCareerRecord?
     @Environment(\.horizontalSizeClass) private var sizeClass
+
+    private var topMatches: [DegreeCareerRecord] {
+        let all = DegreeCareerDatabase.allRecords.filter { !appState.isDegreeHidden($0.id) }
+        let sorted = all.sorted { appState.degreeScore(for: $0.id) > appState.degreeScore(for: $1.id) }
+        if searchText.isEmpty { return Array(sorted.prefix(3)) }
+        return Array(sorted.filter { $0.title.localizedStandardContains(searchText) }.prefix(3))
+    }
 
     private var visibleCategories: [DegreeCareerCategory] {
         DegreeCareerCategory.allCases.filter { cat in
@@ -23,19 +31,27 @@ struct DegreeExplorePage: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                if visibleCategories.isEmpty {
+                if !topMatches.isEmpty && appState.hasCompletedQuiz {
+                    topMatchesSection
+                }
+
+                if visibleCategories.isEmpty && topMatches.isEmpty {
                     emptyState
                 } else {
-                    let columns = sizeClass == .regular
-                        ? [GridItem(.adaptive(minimum: 160), spacing: 12)]
-                        : [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
+                    if !visibleCategories.isEmpty {
+                        categoriesHeader
 
-                    LazyVGrid(columns: columns, spacing: 12) {
-                        ForEach(visibleCategories) { category in
-                            degreeCategoryCard(category)
+                        let columns = sizeClass == .regular
+                            ? [GridItem(.adaptive(minimum: 160), spacing: 12)]
+                            : [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
+
+                        LazyVGrid(columns: columns, spacing: 12) {
+                            ForEach(visibleCategories) { category in
+                                degreeCategoryCard(category)
+                            }
                         }
+                        .padding(.horizontal, 16)
                     }
-                    .padding(.horizontal, 16)
                 }
             }
             .padding(.top, 8)
@@ -49,6 +65,108 @@ struct DegreeExplorePage: View {
         .sheet(item: $selectedCategory) { category in
             DegreeCareerCategoryListSheet(category: category)
         }
+        .sheet(item: $selectedTopRecord) { record in
+            DegreeCareerDetailSheet(record: record)
+        }
+    }
+
+    private let degreeAccent = Color(hex: "818CF8")
+
+    private var topMatchesSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 6) {
+                Image(systemName: "sparkles")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(degreeAccent)
+                Text("YOUR TOP MATCHES")
+                    .font(.caption.weight(.heavy))
+                    .foregroundStyle(degreeAccent)
+                    .tracking(0.8)
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+
+            ForEach(Array(topMatches.enumerated()), id: \.element.id) { index, record in
+                topMatchCard(record, rank: index + 1)
+            }
+        }
+        .padding(.bottom, 4)
+    }
+
+    private func topMatchCard(_ record: DegreeCareerRecord, rank: Int) -> some View {
+        let isTop = rank == 1
+        let matchScore = appState.degreeScore(for: record.id)
+
+        return Button {
+            selectedTopRecord = record
+        } label: {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(isTop ? degreeAccent : degreeAccent.opacity(0.15))
+                        .frame(width: 44, height: 44)
+                    if isTop {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(.white)
+                    } else {
+                        Text("#\(rank)")
+                            .font(.caption.weight(.heavy))
+                            .foregroundStyle(degreeAccent)
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(record.title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+                    Text(record.category.rawValue)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer(minLength: 4)
+
+                HStack(spacing: 4) {
+                    Image(systemName: "target")
+                        .font(.system(size: 11, weight: .bold))
+                    Text("\(matchScore)%")
+                        .font(.subheadline.weight(.bold))
+                        .monospacedDigit()
+                }
+                .foregroundStyle(matchScore >= 70 ? Theme.accent : matchScore >= 50 ? Color(hex: "FBBF24") : .secondary)
+
+                Image(systemName: "chevron.right")
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(14)
+            .background(
+                isTop
+                    ? AnyShapeStyle(degreeAccent.opacity(0.06))
+                    : AnyShapeStyle(Color(.secondarySystemGroupedBackground))
+            )
+            .clipShape(.rect(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(isTop ? degreeAccent.opacity(0.3) : .clear, lineWidth: 1.5)
+            )
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 16)
+    }
+
+    private var categoriesHeader: some View {
+        HStack {
+            Text("EXPLORE CATEGORIES")
+                .font(.caption.weight(.heavy))
+                .foregroundStyle(.secondary)
+                .tracking(0.8)
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
     }
 
     private func degreeCategoryCard(_ category: DegreeCareerCategory) -> some View {

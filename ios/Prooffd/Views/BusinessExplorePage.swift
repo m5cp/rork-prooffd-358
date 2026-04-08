@@ -5,9 +5,22 @@ struct BusinessExplorePage: View {
     @Environment(StoreViewModel.self) private var store
     @State private var searchText: String = ""
     @State private var selectedCategory: BusinessCategory?
+    @State private var selectedTopMatch: MatchResult?
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     private var allResults: [MatchResult] { appState.matchResults }
+
+    private var topMatches: [MatchResult] {
+        let sorted = allResults
+            .filter { !appState.isPathHidden($0.businessPath.id) }
+            .sorted { $0.scorePercentage > $1.scorePercentage }
+        if searchText.isEmpty { return Array(sorted.prefix(3)) }
+        let q = searchText
+        return Array(sorted.filter {
+            $0.businessPath.name.localizedStandardContains(q) ||
+            $0.businessPath.overview.localizedStandardContains(q)
+        }.prefix(3))
+    }
 
     private var visibleCategories: [BusinessCategory] {
         BusinessCategory.allCases.filter { cat in
@@ -29,19 +42,27 @@ struct BusinessExplorePage: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                if visibleCategories.isEmpty {
+                if !topMatches.isEmpty && appState.hasCompletedQuiz {
+                    topMatchesSection
+                }
+
+                if visibleCategories.isEmpty && topMatches.isEmpty {
                     emptyState
                 } else {
-                    let columns = sizeClass == .regular
-                        ? [GridItem(.adaptive(minimum: 160), spacing: 12)]
-                        : [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
+                    if !visibleCategories.isEmpty {
+                        categoriesHeader
 
-                    LazyVGrid(columns: columns, spacing: 12) {
-                        ForEach(visibleCategories) { category in
-                            businessCategoryCard(category)
+                        let columns = sizeClass == .regular
+                            ? [GridItem(.adaptive(minimum: 160), spacing: 12)]
+                            : [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
+
+                        LazyVGrid(columns: columns, spacing: 12) {
+                            ForEach(visibleCategories) { category in
+                                businessCategoryCard(category)
+                            }
                         }
+                        .padding(.horizontal, 16)
                     }
-                    .padding(.horizontal, 16)
                 }
             }
             .padding(.top, 8)
@@ -55,6 +76,106 @@ struct BusinessExplorePage: View {
         .sheet(item: $selectedCategory) { category in
             BusinessCategoryListSheet(category: category)
         }
+        .sheet(item: $selectedTopMatch) { result in
+            PathDetailView(result: result)
+        }
+    }
+
+    private var topMatchesSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 6) {
+                Image(systemName: "sparkles")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Theme.accent)
+                Text("YOUR TOP MATCHES")
+                    .font(.caption.weight(.heavy))
+                    .foregroundStyle(Theme.accent)
+                    .tracking(0.8)
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+
+            ForEach(Array(topMatches.enumerated()), id: \.element.id) { index, match in
+                topMatchCard(match, rank: index + 1)
+            }
+        }
+        .padding(.bottom, 4)
+    }
+
+    private func topMatchCard(_ match: MatchResult, rank: Int) -> some View {
+        let isTop = rank == 1
+        let catColor = Theme.categoryColor(for: match.businessPath.category)
+
+        return Button {
+            selectedTopMatch = match
+        } label: {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(isTop ? Theme.accent : Theme.accent.opacity(0.15))
+                        .frame(width: 44, height: 44)
+                    if isTop {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(.white)
+                    } else {
+                        Text("#\(rank)")
+                            .font(.caption.weight(.heavy))
+                            .foregroundStyle(Theme.accent)
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(match.businessPath.name)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+                    Text(match.businessPath.category.rawValue)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer(minLength: 4)
+
+                HStack(spacing: 4) {
+                    Image(systemName: "target")
+                        .font(.system(size: 11, weight: .bold))
+                    Text("\(match.scorePercentage)%")
+                        .font(.subheadline.weight(.bold))
+                        .monospacedDigit()
+                }
+                .foregroundStyle(match.scorePercentage >= 70 ? Theme.accent : match.scorePercentage >= 50 ? Color(hex: "FBBF24") : .secondary)
+
+                Image(systemName: "chevron.right")
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(14)
+            .background(
+                isTop
+                    ? AnyShapeStyle(Theme.accent.opacity(0.06))
+                    : AnyShapeStyle(Color(.secondarySystemGroupedBackground))
+            )
+            .clipShape(.rect(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(isTop ? Theme.accent.opacity(0.3) : .clear, lineWidth: 1.5)
+            )
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 16)
+    }
+
+    private var categoriesHeader: some View {
+        HStack {
+            Text("EXPLORE CATEGORIES")
+                .font(.caption.weight(.heavy))
+                .foregroundStyle(.secondary)
+                .tracking(0.8)
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
     }
 
     private func businessCategoryCard(_ category: BusinessCategory) -> some View {
