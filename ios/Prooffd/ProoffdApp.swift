@@ -53,7 +53,14 @@ struct RootView: View {
     var body: some View {
         Group {
             if appState.hasCompletedOnboarding {
-                ResultsView()
+                switch appState.currentScreen {
+                case .resultsReveal:
+                    ResultsRevealView()
+                case .analyzing:
+                    AnalyzingView()
+                default:
+                    ResultsView()
+                }
             } else {
                 OnboardingView { path, profile in
                     appState.completeOnboardingWithQuiz(path: path, profile: profile)
