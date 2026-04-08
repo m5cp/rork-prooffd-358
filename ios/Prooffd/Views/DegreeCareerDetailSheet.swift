@@ -7,6 +7,7 @@ struct DegreeCareerDetailSheet: View {
     @Environment(AppState.self) private var appState
     @State private var showPaywall: Bool = false
     @State private var showPlanAdded: Bool = false
+    @State private var showShareCard: Bool = false
 
     private var detail: DegreeCareerDetailData? {
         DegreeCareerDatabase.lookup(record.id)
@@ -80,6 +81,9 @@ struct DegreeCareerDetailSheet: View {
             .toolbarBackground(Theme.background, for: .navigationBar)
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
+            }
+            .sheet(isPresented: $showShareCard) {
+                ShareCardPresenterSheet(content: .degreeCareer(from: record))
             }
             .confirmationDialog("Added to My Plan!", isPresented: $showPlanAdded, titleVisibility: .visible) {
                 Button("Go Now") {
@@ -243,7 +247,21 @@ struct DegreeCareerDetailSheet: View {
             }
             .sensoryFeedback(.selection, trigger: isFav)
 
-            ScreenshotShareButton()
+            Button {
+                showShareCard = true
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.caption)
+                    Text("Share")
+                        .font(.caption.weight(.semibold))
+                }
+                .foregroundStyle(Theme.textSecondary)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Theme.cardBackground)
+                .clipShape(.capsule)
+            }
 
             Spacer()
         }

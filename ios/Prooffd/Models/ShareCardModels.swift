@@ -92,4 +92,27 @@ struct ShareCardContent {
             buildCategory: build.category
         )
     }
+
+    static func degreeCareer(from record: DegreeCareerRecord) -> ShareCardContent {
+        let score: Int = switch record.aiProofTier {
+        case .tier1: 95
+        case .tier2: 75
+        case .tier3: 55
+        }
+        return ShareCardContent(
+            type: .topMatch,
+            jobTitle: record.title,
+            matchPercent: score,
+            jobIcon: record.icon
+        )
+    }
+
+    static func educationPath(from path: EducationPath) -> ShareCardContent {
+        return ShareCardContent(
+            type: .topMatch,
+            jobTitle: path.title,
+            matchPercent: path.aiSafeScore,
+            jobIcon: path.icon
+        )
+    }
 }
