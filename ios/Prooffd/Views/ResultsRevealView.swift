@@ -1,5 +1,13 @@
 import SwiftUI
 
+private struct RevealMatch: Identifiable {
+    let id: String
+    let name: String
+    let category: String
+    let icon: String
+    let scorePercentage: Int
+}
+
 struct ResultsRevealView: View {
     @Environment(AppState.self) private var appState
     @Environment(\.colorScheme) private var colorScheme
@@ -16,20 +24,53 @@ struct ResultsRevealView: View {
     @State private var pulseScale: CGFloat = 0.3
     @State private var glowOpacity: Double = 0
 
-    private var sortedMatches: [MatchResult] {
-        appState.matchResults.sorted { $0.scorePercentage > $1.scorePercentage }
+    private var allRevealMatches: [RevealMatch] {
+        switch appState.chosenPath {
+        case .trades:
+            return EducationPathDatabase.all.map { path in
+                RevealMatch(
+                    id: path.id,
+                    name: path.title,
+                    category: path.category.rawValue,
+                    icon: path.icon,
+                    scorePercentage: appState.educationScore(for: path.id)
+                )
+            }.sorted { $0.scorePercentage > $1.scorePercentage }
+        case .degree:
+            return DegreeCareerDatabase.allRecords.map { record in
+                RevealMatch(
+                    id: record.id,
+                    name: record.title,
+                    category: record.category.rawValue,
+                    icon: record.icon,
+                    scorePercentage: appState.degreeScore(for: record.id)
+                )
+            }.sorted { $0.scorePercentage > $1.scorePercentage }
+        default:
+            return appState.matchResults
+                .sorted { $0.scorePercentage > $1.scorePercentage }
+                .map { match in
+                    RevealMatch(
+                        id: match.id,
+                        name: match.businessPath.name,
+                        category: match.businessPath.category.rawValue,
+                        icon: match.businessPath.icon,
+                        scorePercentage: match.scorePercentage
+                    )
+                }
+        }
     }
 
-    private var strongMatches: [MatchResult] {
-        sortedMatches.filter { $0.scorePercentage >= 50 }
+    private var strongMatchCount: Int {
+        allRevealMatches.filter { $0.scorePercentage >= 50 }.count
     }
 
     private var targetCount: Int {
-        strongMatches.count
+        strongMatchCount
     }
 
-    private var topMatches: [MatchResult] {
-        Array(sortedMatches.prefix(3))
+    private var topMatches: [RevealMatch] {
+        Array(allRevealMatches.prefix(3))
     }
 
     private var pathColor: Color {
@@ -226,7 +267,7 @@ struct ResultsRevealView: View {
             .padding(.bottom, 4)
 
             ForEach(Array(topMatches.enumerated()), id: \.element.id) { index, match in
-                topMatchCard(match, rank: index + 1)
+                revealMatchCard(match, rank: index + 1)
                     .opacity(showTopCards ? 1 : 0)
                     .offset(y: showTopCards ? 0 : 30)
                     .animation(
@@ -237,14 +278,13 @@ struct ResultsRevealView: View {
         }
     }
 
-    private func topMatchCard(_ match: MatchResult, rank: Int) -> some View {
-        let catColor = Theme.categoryColor(for: match.businessPath.category)
+    private func revealMatchCard(_ match: RevealMatch, rank: Int) -> some View {
         let isTop = rank == 1
 
         return HStack(spacing: 12) {
             ZStack {
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(isTop ? pathColor : catColor.opacity(0.15))
+                    .fill(isTop ? pathColor : pathColor.opacity(0.15))
                     .frame(width: 44, height: 44)
                 if isTop {
                     Image(systemName: "crown.fill")
@@ -253,16 +293,16 @@ struct ResultsRevealView: View {
                 } else {
                     Text("#\(rank)")
                         .font(.caption.weight(.heavy))
-                        .foregroundStyle(catColor)
+                        .foregroundStyle(pathColor)
                 }
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(match.businessPath.name)
+                Text(match.name)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Theme.textPrimary)
                     .lineLimit(1)
-                Text(match.businessPath.category.rawValue)
+                Text(match.category)
                     .font(.caption2)
                     .foregroundStyle(Theme.textSecondary)
             }
