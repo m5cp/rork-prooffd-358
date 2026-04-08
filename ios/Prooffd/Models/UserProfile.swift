@@ -156,9 +156,9 @@ nonisolated enum WorkEnvironment: String, CaseIterable, Identifiable, Codable, S
     case constructionSite = "Construction site"
     case clientLocation = "Client locations"
     case hospital = "Hospital"
-    case clinic = "Clinic / Medical office"
+    case clinic = "Clinic / Medical"
     case laboratory = "Laboratory"
-    case courtroom = "Courtroom / Legal office"
+    case courtroom = "Courtroom / Legal"
     case classroom = "Classroom / School"
     case aircraft = "Aircraft / Cockpit"
 
