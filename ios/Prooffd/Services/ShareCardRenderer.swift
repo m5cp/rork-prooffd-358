@@ -17,7 +17,7 @@ struct ShareCardRenderer {
         let items: [Any] = [image, text]
         let activityVC = UIActivityViewController(activityItems: items, applicationActivities: nil)
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let root = windowScene.windows.first?.rootViewController else { return }
+              let root = (windowScene.keyWindow ?? windowScene.windows.first)?.rootViewController else { return }
         var topController = root
         while let presented = topController.presentedViewController {
             topController = presented

@@ -558,7 +558,7 @@ struct ImageEditorView: View {
         let shareText = "Check out what I found on Prooffd! Download: https://apps.apple.com/app/prooffd/id6743071053"
         let activityVC = UIActivityViewController(activityItems: [finalImage, shareText], applicationActivities: nil)
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let root = windowScene.windows.first?.rootViewController {
+           let root = (windowScene.keyWindow ?? windowScene.windows.first)?.rootViewController {
             var topController = root
             while let presented = topController.presentedViewController { topController = presented }
             activityVC.popoverPresentationController?.sourceView = topController.view

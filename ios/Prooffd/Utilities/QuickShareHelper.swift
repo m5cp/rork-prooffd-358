@@ -27,7 +27,7 @@ enum QuickShareHelper {
     private static func presentShareSheet(items: [Any]) {
         let activityVC = UIActivityViewController(activityItems: items, applicationActivities: nil)
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let root = windowScene.windows.first?.rootViewController {
+           let root = (windowScene.keyWindow ?? windowScene.windows.first)?.rootViewController {
             var topController = root
             while let presented = topController.presentedViewController {
                 topController = presented

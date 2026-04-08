@@ -18,6 +18,7 @@ struct ShareEditorSheet: View {
 struct ScreenshotShareButton: View {
     @State private var capturedImage: UIImage?
     @State private var showEditor: Bool = false
+    @State private var isCapturing: Bool = false
 
     var body: some View {
         Button {
@@ -35,17 +36,29 @@ struct ScreenshotShareButton: View {
             .background(Theme.cardBackground)
             .clipShape(.capsule)
         }
-        .fullScreenCover(isPresented: $showEditor) {
+        .disabled(isCapturing)
+        .fullScreenCover(isPresented: $showEditor, onDismiss: {
+            capturedImage = nil
+        }) {
             if let image = capturedImage {
                 ShareEditorSheet(capturedImage: image)
+            } else {
+                Color.black
+                    .ignoresSafeArea()
+                    .onAppear { showEditor = false }
             }
         }
     }
 
     private func captureAndShow() {
-        capturedImage = ScreenshotService.captureScreen()
-        if capturedImage != nil {
-            showEditor = true
+        isCapturing = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            let image = ScreenshotService.captureScreen()
+            capturedImage = image
+            isCapturing = false
+            if image != nil {
+                showEditor = true
+            }
         }
     }
 }
