@@ -21,7 +21,7 @@ struct BusinessCategoryListSheet: View {
         if let cost = selectedCostFilter {
             items = items.filter { cost.matches($0.businessPath) }
         }
-        return items.sorted { $0.businessPath.aiProofRating > $1.businessPath.aiProofRating }
+        return items.sorted { $0.scorePercentage > $1.scorePercentage }
     }
 
     private var hasActiveFilters: Bool {
@@ -164,8 +164,8 @@ struct BusinessCategoryListSheet: View {
 
     private func businessCard(_ result: MatchResult) -> some View {
         let path = result.businessPath
-        let zone = path.zone
-        let aiColor: Color = zone == .safe ? Theme.accent : zone == .human ? Color(hex: "FBBF24") : .orange
+        let matchScore = result.scorePercentage
+        let matchColor: Color = matchScore >= 70 ? Theme.accent : matchScore >= 50 ? Color(hex: "FBBF24") : Color(.tertiaryLabel)
 
         return Button {
             selectedResult = result
@@ -202,17 +202,19 @@ struct BusinessCategoryListSheet: View {
 
                 Spacer(minLength: 4)
 
-                HStack(spacing: 4) {
-                    Image(systemName: zone.icon)
-                        .font(.system(size: 10))
-                    Text("\(path.aiProofRating)")
-                        .font(.caption.weight(.bold))
+                VStack(alignment: .trailing, spacing: 4) {
+                    HStack(spacing: 3) {
+                        Image(systemName: "target")
+                            .font(.system(size: 9))
+                        Text("\(matchScore)%")
+                            .font(.caption2.weight(.bold))
+                    }
+                    .foregroundStyle(matchColor)
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(.tertiary)
                 }
-                .foregroundStyle(aiColor)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(aiColor.opacity(0.1))
-                .clipShape(.capsule)
             }
             .padding(14)
             .background(Color(.secondarySystemGroupedBackground))

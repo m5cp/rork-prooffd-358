@@ -10,16 +10,20 @@ struct ResultsRevealView: View {
     @State private var confettiTrigger: Int = 0
     @State private var showShareSheet: Bool = false
 
+    private var sortedMatches: [MatchResult] {
+        appState.matchResults.sorted { $0.scorePercentage > $1.scorePercentage }
+    }
+
     private var strongMatches: [MatchResult] {
-        appState.matchResults.filter { $0.businessPath.aiProofRating >= 70 }
+        sortedMatches.filter { $0.scorePercentage >= 50 }
     }
 
     private var targetCount: Int {
         strongMatches.count
     }
 
-    private var topMatch: MatchResult? {
-        strongMatches.first
+    private var topMatches: [MatchResult] {
+        Array(sortedMatches.prefix(3))
     }
 
     var body: some View {
@@ -47,7 +51,7 @@ struct ResultsRevealView: View {
                         .foregroundStyle(Theme.accent)
                         .contentTransition(.numericText(countsDown: false))
 
-                    Text("AI-proof career paths")
+                    Text("career matches found")
                         .font(.subheadline)
                         .foregroundStyle(Theme.textSecondary)
                 }
@@ -58,56 +62,26 @@ struct ResultsRevealView: View {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.body)
                             .foregroundStyle(Theme.accent)
-                        Text("Your matches are ready")
+                        Text("Ranked by your quiz answers")
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(Theme.textSecondary)
                     }
                     .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .bottom)))
                 }
 
-                if showTopMatch, let top = topMatch {
-                    let catColor = Theme.categoryColor(for: top.businessPath.category)
-                    VStack(spacing: 12) {
-                        Text("Your #1 Match")
+                if showTopMatch, !topMatches.isEmpty {
+                    VStack(spacing: 10) {
+                        Text("Your Top Matches")
                             .font(.caption.weight(.bold))
                             .foregroundStyle(Theme.accent)
+                            .frame(maxWidth: .infinity, alignment: .leading)
 
-                        HStack(spacing: 12) {
-                            ZStack {
-                                Circle()
-                                    .fill(catColor.opacity(0.15))
-                                    .frame(width: 48, height: 48)
-                                Image(systemName: top.businessPath.icon)
-                                    .font(.title3)
-                                    .foregroundStyle(catColor)
-                            }
-                            .accessibilityHidden(true)
-
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(top.businessPath.name)
-                                    .font(.headline)
-                                    .foregroundStyle(Theme.textPrimary)
-                                HStack(spacing: 6) {
-                                    Image(systemName: top.businessPath.zone.icon)
-                                        .font(.system(size: 10))
-                                    Text(top.businessPath.zone.label)
-                                        .font(.caption.weight(.semibold))
-                                    Text("\(top.businessPath.aiProofRating)/100")
-                                        .font(.caption.weight(.bold))
-                                }
-                                .foregroundStyle(catColor)
-                            }
-
-                            Spacer()
+                        ForEach(Array(topMatches.enumerated()), id: \.element.id) { index, match in
+                            topMatchCard(match, rank: index + 1)
                         }
-                        .padding(16)
-                        .background(Theme.cardBackground)
-                        .clipShape(.rect(cornerRadius: 14))
                     }
-                    .padding(.horizontal, 32)
+                    .padding(.horizontal, 24)
                     .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .bottom)))
-                    .accessibilityElement(children: .combine)
-                    .accessibilityLabel("Your number 1 match: \(top.businessPath.name), AI Proof \(top.businessPath.aiProofRating) out of 100")
                 }
 
                 Spacer()
@@ -156,6 +130,52 @@ struct ResultsRevealView: View {
         .task {
             await runReveal()
         }
+    }
+
+    private func topMatchCard(_ match: MatchResult, rank: Int) -> some View {
+        let catColor = Theme.categoryColor(for: match.businessPath.category)
+        let scoreColor: Color = match.scorePercentage >= 70 ? Theme.accent : match.scorePercentage >= 50 ? Color(hex: "FBBF24") : Theme.textTertiary
+
+        return HStack(spacing: 12) {
+            Text("#\(rank)")
+                .font(.caption.weight(.heavy))
+                .foregroundStyle(rank == 1 ? Theme.accent : Theme.textTertiary)
+                .frame(width: 28)
+
+            ZStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(catColor.opacity(0.15))
+                    .frame(width: 40, height: 40)
+                Image(systemName: match.businessPath.icon)
+                    .font(.subheadline)
+                    .foregroundStyle(catColor)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(match.businessPath.name)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                    .lineLimit(1)
+                Text(match.businessPath.category.rawValue)
+                    .font(.caption2)
+                    .foregroundStyle(Theme.textSecondary)
+            }
+
+            Spacer(minLength: 4)
+
+            HStack(spacing: 3) {
+                Image(systemName: "target")
+                    .font(.system(size: 10))
+                Text("\(match.scorePercentage)%")
+                    .font(.subheadline.weight(.bold))
+            }
+            .foregroundStyle(scoreColor)
+        }
+        .padding(12)
+        .background(Theme.cardBackground)
+        .clipShape(.rect(cornerRadius: 14))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Number \(rank) match: \(match.businessPath.name), \(match.scorePercentage) percent match")
     }
 
     private func runReveal() async {
