@@ -74,6 +74,8 @@ struct RootView: View {
                 } else {
                     OnboardingView { path, profile in
                         appState.completeOnboardingWithQuiz(path: path, profile: profile)
+                    } onSkip: {
+                        appState.completeOnboarding()
                     }
                     .transition(.move(edge: .trailing).combined(with: .opacity))
                 }

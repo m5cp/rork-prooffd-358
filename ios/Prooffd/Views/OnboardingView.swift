@@ -2,7 +2,9 @@ import SwiftUI
 
 struct OnboardingView: View {
     var onComplete: (ChosenPath, UserProfile) -> Void
+    var onSkip: () -> Void
     @State private var vm = OnboardingViewModel()
+    @State private var showSkipConfirmation: Bool = false
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -44,6 +46,11 @@ struct OnboardingView: View {
                 vm.appeared = true
             }
         }
+        .sheet(isPresented: $showSkipConfirmation) {
+            skipConfirmationSheet
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+        }
     }
 
     // MARK: - Header
@@ -73,10 +80,109 @@ struct OnboardingView: View {
 
             Spacer()
 
-            Color.clear.frame(width: 44, height: 44)
+            Button {
+                showSkipConfirmation = true
+            } label: {
+                Text("Skip")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Theme.textTertiary)
+            }
+            .frame(width: 44, height: 44)
         }
         .padding(.horizontal, 16)
         .animation(.spring(duration: 0.3), value: vm.currentStep)
+    }
+
+    // MARK: - Skip Confirmation
+
+    private var skipConfirmationSheet: some View {
+        VStack(spacing: 24) {
+            VStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(Theme.accent.opacity(0.12))
+                        .frame(width: 72, height: 72)
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 32, weight: .semibold))
+                        .foregroundStyle(Theme.accent)
+                }
+
+                Text("Personalize Your Results?")
+                    .font(.title3.bold())
+                    .foregroundStyle(Theme.textPrimary)
+
+                Text("Completing the quiz takes under 2 minutes and gives you career matches tailored to your skills, budget, and goals.")
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(3)
+            }
+
+            HStack(spacing: 10) {
+                HStack(spacing: 6) {
+                    Image(systemName: "target")
+                        .font(.caption.weight(.semibold))
+                    Text("Better matches")
+                        .font(.caption.weight(.medium))
+                }
+                .foregroundStyle(Theme.accent)
+
+                Circle()
+                    .fill(Theme.textTertiary)
+                    .frame(width: 3, height: 3)
+
+                HStack(spacing: 6) {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .font(.caption.weight(.semibold))
+                    Text("Smarter plans")
+                        .font(.caption.weight(.medium))
+                }
+                .foregroundStyle(Theme.accentBlue)
+
+                Circle()
+                    .fill(Theme.textTertiary)
+                    .frame(width: 3, height: 3)
+
+                HStack(spacing: 6) {
+                    Image(systemName: "bolt.fill")
+                        .font(.caption.weight(.semibold))
+                    Text("Faster results")
+                        .font(.caption.weight(.medium))
+                }
+                .foregroundStyle(Color(hex: "F59E0B"))
+            }
+
+            VStack(spacing: 12) {
+                Button {
+                    showSkipConfirmation = false
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.right")
+                            .font(.subheadline.weight(.bold))
+                        Text("Continue Quiz")
+                            .font(.headline)
+                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Theme.accent)
+                    .clipShape(.capsule)
+                }
+                .sensoryFeedback(.selection, trigger: showSkipConfirmation)
+
+                Button {
+                    showSkipConfirmation = false
+                    onSkip()
+                } label: {
+                    Text("Skip for now")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(Theme.textTertiary)
+                        .padding(.vertical, 8)
+                }
+            }
+        }
+        .padding(.horizontal, 28)
+        .padding(.top, 28)
     }
 
     // MARK: - Progress
