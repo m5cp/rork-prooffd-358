@@ -77,6 +77,14 @@ struct ResultsRevealView: View {
         appState.chosenPath?.color ?? Theme.accent
     }
 
+    private var shareCardContent: ShareCardContent {
+        let top3 = Array(allRevealMatches.prefix(3))
+        return ShareCardContent(
+            type: .quizResults,
+            topMatches: top3.map { (name: $0.name, percent: $0.scorePercentage, icon: $0.icon, zone: AIZone.from(score: $0.scorePercentage)) }
+        )
+    }
+
     var body: some View {
         ZStack {
             backgroundLayer
@@ -109,7 +117,7 @@ struct ResultsRevealView: View {
         .sensoryFeedback(.impact(weight: .heavy), trigger: phase == .counting)
         .sensoryFeedback(.success, trigger: phase == .reveal)
         .sheet(isPresented: $showShareSheet) {
-            ShareCardPresenterSheet(content: .quizResults(from: appState.matchResults))
+            ShareCardPresenterSheet(content: shareCardContent)
         }
         .task {
             generateParticles()
