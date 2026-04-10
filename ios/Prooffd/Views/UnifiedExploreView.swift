@@ -11,6 +11,7 @@ struct UnifiedExploreView: View {
     @State private var showHeroBusinessResult: MatchResult?
     @State private var showHeroEducationPath: CareerPath?
     @State private var showHeroDegreeRecord: DegreeCareerRecord?
+    @State private var showDailyRewardPopup: Bool = false
 
     private var allResults: [MatchResult] { appState.matchResults }
 
@@ -18,6 +19,15 @@ struct UnifiedExploreView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
+                    DailyRewardBanner(
+                        canClaim: appState.dailyRewards.canClaim,
+                        currentDay: appState.dailyRewards.currentDay
+                    ) {
+                        showDailyRewardPopup = true
+                    }
+
+                    DailyMicroActionCard()
+
                     bestMatchHeroCard
 
                     if let build = appState.activeBuild {
@@ -84,6 +94,20 @@ struct UnifiedExploreView: View {
                 Button("Cancel", role: .cancel) {}
             } message: {
                 Text("This will reset your matches and restart the quiz.")
+            }
+            .overlay {
+                if showDailyRewardPopup {
+                    DailyRewardPopup(
+                        reward: appState.dailyRewards.todayReward,
+                        currentDay: appState.dailyRewards.currentDay
+                    ) {
+                        appState.claimDailyReward()
+                        withAnimation(.spring(duration: 0.3)) {
+                            showDailyRewardPopup = false
+                        }
+                    }
+                    .transition(.opacity)
+                }
             }
         }
     }

@@ -145,6 +145,7 @@ class AppState {
         hasCompletedQuiz = true
         runMatching()
         AnalyticsTracker.shared.trackQuizCompletion()
+        NotificationService.shared.refreshRemindersIfNeeded()
         withAnimation(.spring(duration: 0.5)) {
             currentScreen = .resultsReveal
         }
@@ -568,6 +569,11 @@ class AppState {
         NotificationService.shared.recordActivity()
         NotificationService.shared.scheduleStreakReminder(currentStreak: streakTracker.currentStreak)
         syncWidgetData()
+        ReviewPromptService.shared.checkAndPromptIfEligible(
+            streakDays: streakTracker.currentStreak,
+            levelRank: currentLevel.rank,
+            unlockedCount: unlockedAchievementIDs.count
+        )
     }
 
     func completeDailyMicroAction() {
