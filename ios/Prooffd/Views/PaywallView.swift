@@ -218,6 +218,21 @@ struct PaywallView: View {
         }
     }
 
+    private var savingsText: String? {
+        guard let monthly = resolvedMonthlyPackage,
+              let lifetime = resolvedLifetimePackage else { return nil }
+        let monthlyPrice = monthly.storeProduct.price as Decimal
+        let lifetimePrice = lifetime.storeProduct.price as Decimal
+        guard monthlyPrice > 0 else { return nil }
+        let monthsEquivalent: Decimal = 12
+        let annualCost = monthlyPrice * monthsEquivalent
+        guard annualCost > lifetimePrice else { return nil }
+        let saved = ((annualCost - lifetimePrice) / annualCost) * 100
+        let percent = NSDecimalNumber(decimal: saved).intValue
+        guard percent >= 10 else { return nil }
+        return "Save \(percent)% vs 1 year"
+    }
+
     private func lifetimeCard(package: Package?) -> some View {
         let isSelected = selectedPackageType == .lifetime
         let priceString = package?.localizedPriceString ?? "$29.99"
@@ -264,13 +279,15 @@ struct PaywallView: View {
                                 .font(.subheadline.weight(.semibold))
                                 .foregroundStyle(Theme.textPrimary)
 
-                            Text("Save 75%")
-                                .font(.caption2.weight(.bold))
-                                .foregroundStyle(Theme.accent)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 3)
-                                .background(Theme.accent.opacity(0.12))
-                                .clipShape(.capsule)
+                            if let savings = savingsText {
+                                Text(savings)
+                                    .font(.caption2.weight(.bold))
+                                    .foregroundStyle(Theme.accent)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(Theme.accent.opacity(0.12))
+                                    .clipShape(.capsule)
+                            }
                         }
                         Text("One-time purchase \u{2022} Never pay again")
                             .font(.caption)

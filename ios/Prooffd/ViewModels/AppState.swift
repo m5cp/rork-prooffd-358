@@ -229,6 +229,52 @@ class AppState {
         }
     }
 
+    func deleteAllData() {
+        userProfile = UserProfile()
+        matchResults = []
+        educationScores = [:]
+        degreeScores = [:]
+        favoritePathIDs = []
+        favoriteEducationIDs = []
+        favoriteDegreeIDs = []
+        hiddenPathIDs = []
+        hiddenEducationIDs = []
+        hiddenDegreeIDs = []
+        exploredPathIDs = []
+        unlockedAchievementIDs = []
+        builds = []
+        planItems = []
+        chosenPath = nil
+        streakTracker = StreakTracker()
+        momentum = MomentumSystem()
+        dailyRewards = DailyRewardTracker()
+        dailyMicroAction = DailyMicroActionTracker()
+        hasCompletedOnboarding = false
+        hasCompletedQuiz = false
+        hasSeenResultsReveal = false
+        hasSkippedQuiz = false
+        completedFirstStep = false
+        hasBeenPromptedForRating = false
+        savedChosenPath = nil
+        showWelcomeBack = false
+
+        let keysToRemove = [
+            "userProfile", "builds", "planItems",
+            "favoritePathIDs", "favoriteEducationIDs", "favoriteDegreeIDs",
+            "hiddenPathIDs", "hiddenEducationIDs", "hiddenDegreeIDs",
+            "exploredPathIDs", "unlockedAchievementIDs",
+            "hasUsedWhatIf", "hasSharedResult", "completedChallengeWeeks",
+            "lastSessionDate", "prompted_share_25", "prompted_share_50"
+        ]
+        for key in keysToRemove {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
+
+        withAnimation(.spring(duration: 0.5)) {
+            currentScreen = .onboarding
+        }
+    }
+
     func runMatching() {
         matchResults = MatchingEngine.match(profile: userProfile, paths: BusinessPathDatabase.allPaths)
         educationScores = MatchingEngine.scoreEducationPaths(profile: userProfile)

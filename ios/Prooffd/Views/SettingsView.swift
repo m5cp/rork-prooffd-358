@@ -6,6 +6,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showPaywall: Bool = false
     @State private var showRetakeConfirm: Bool = false
+    @State private var showDeleteConfirm: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -217,6 +218,19 @@ struct SettingsView: View {
                     .listRowBackground(Theme.cardBackground)
                 }
 
+                Section("Data") {
+                    Button(role: .destructive) {
+                        showDeleteConfirm = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "trash.fill")
+                            Text("Delete All Data")
+                            Spacer()
+                        }
+                    }
+                    .listRowBackground(Theme.cardBackground)
+                }
+
                 Section {
                     HStack {
                         Spacer()
@@ -257,6 +271,17 @@ struct SettingsView: View {
                 }
             } message: {
                 Text("This will reset your profile and match results. You can retake the quiz to get new matches.")
+            }
+            .alert("Delete All Data?", isPresented: $showDeleteConfirm) {
+                Button("Cancel", role: .cancel) {}
+                Button("Delete Everything", role: .destructive) {
+                    dismiss()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        appState.deleteAllData()
+                    }
+                }
+            } message: {
+                Text("This will permanently erase all your profile data, quiz results, builds, favorites, achievements, and progress. This action cannot be undone.")
             }
         }
         .presentationDetents([.large])
