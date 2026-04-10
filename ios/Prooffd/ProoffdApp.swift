@@ -50,6 +50,7 @@ struct ProoffdApp: App {
 struct RootView: View {
     @Environment(AppState.self) private var appState
     @State private var showLaunch: Bool = true
+    @State private var showWelcomeIntro: Bool = false
 
     var body: some View {
         ZStack {
@@ -63,16 +64,29 @@ struct RootView: View {
                     default:
                         ResultsView()
                     }
+                } else if showWelcomeIntro {
+                    WelcomeIntroView {
+                        withAnimation(.spring(duration: 0.5, bounce: 0.1)) {
+                            showWelcomeIntro = false
+                        }
+                    }
+                    .transition(.opacity)
                 } else {
                     OnboardingView { path, profile in
                         appState.completeOnboardingWithQuiz(path: path, profile: profile)
                     }
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
                 }
             }
             .opacity(showLaunch ? 0 : 1)
 
             if showLaunch {
                 LaunchView {
+                    let needsWelcome = !appState.hasCompletedOnboarding && !UserDefaults.standard.bool(forKey: "hasSeenWelcomeIntro")
+                    if needsWelcome {
+                        showWelcomeIntro = true
+                        UserDefaults.standard.set(true, forKey: "hasSeenWelcomeIntro")
+                    }
                     withAnimation(.easeOut(duration: 0.3)) {
                         showLaunch = false
                     }
