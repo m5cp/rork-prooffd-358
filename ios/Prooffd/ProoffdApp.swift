@@ -49,22 +49,35 @@ struct ProoffdApp: App {
 
 struct RootView: View {
     @Environment(AppState.self) private var appState
+    @State private var showLaunch: Bool = true
 
     var body: some View {
-        Group {
-            if appState.hasCompletedOnboarding {
-                switch appState.currentScreen {
-                case .resultsReveal:
-                    ResultsRevealView()
-                case .analyzing:
-                    AnalyzingView()
-                default:
-                    ResultsView()
+        ZStack {
+            Group {
+                if appState.hasCompletedOnboarding {
+                    switch appState.currentScreen {
+                    case .resultsReveal:
+                        ResultsRevealView()
+                    case .analyzing:
+                        AnalyzingView()
+                    default:
+                        ResultsView()
+                    }
+                } else {
+                    OnboardingView { path, profile in
+                        appState.completeOnboardingWithQuiz(path: path, profile: profile)
+                    }
                 }
-            } else {
-                OnboardingView { path, profile in
-                    appState.completeOnboardingWithQuiz(path: path, profile: profile)
+            }
+            .opacity(showLaunch ? 0 : 1)
+
+            if showLaunch {
+                LaunchView {
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        showLaunch = false
+                    }
                 }
+                .transition(.opacity)
             }
         }
     }
