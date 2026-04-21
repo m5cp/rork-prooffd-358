@@ -101,6 +101,33 @@ struct ProgressTabView: View {
                 .foregroundStyle(Theme.textTertiary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.top, 8)
+
+            streakFreezeNotice
+        }
+    }
+
+    @ViewBuilder
+    private var streakFreezeNotice: some View {
+        if appState.streakTracker.streakFreezeJustUsed {
+            HStack(spacing: 8) {
+                Image(systemName: "snowflake")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.accentBlue)
+                Text("Streak Freeze used — we covered the day you missed this week.")
+                    .font(.caption)
+                    .foregroundStyle(Theme.textSecondary)
+                Spacer(minLength: 0)
+            }
+            .padding(10)
+            .background(Theme.accentBlue.opacity(0.08))
+            .clipShape(.rect(cornerRadius: 10))
+            .padding(.top, 8)
+            .onAppear { appState.streakTracker.acknowledgeFreezeUsed() }
+        } else if !appState.streakTracker.streakFreezeAvailable {
+            Text("Streak freeze already used this week.")
+                .font(.caption2)
+                .foregroundStyle(Theme.textTertiary)
+                .padding(.top, 6)
         }
     }
 

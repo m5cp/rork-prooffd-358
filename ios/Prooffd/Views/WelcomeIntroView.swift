@@ -370,39 +370,33 @@ struct WelcomeIntroView: View {
             glowPulse = true
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(150))
             withAnimation(.spring(duration: 0.7, bounce: 0.35)) {
                 iconScale = 1.0
                 iconOpacity = 1.0
                 iconRotation = 0
             }
-        }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+            try? await Task.sleep(for: .milliseconds(300))
             withAnimation(.spring(duration: 0.6, bounce: 0.15)) {
                 headlineOpacity = 1.0
                 headlineOffset = 0
             }
-        }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-            withAnimation(.easeOut(duration: 1.2)) {
-                shimmerOffset = 250
-            }
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) {
+            try? await Task.sleep(for: .milliseconds(200))
             withAnimation(.spring(duration: 0.5, bounce: 0.1)) {
                 subtitleOpacity = 1.0
                 subtitleOffset = 0
             }
-        }
+            withAnimation(.easeOut(duration: 1.2)) {
+                shimmerOffset = 250
+            }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.85) {
+            try? await Task.sleep(for: .milliseconds(150))
             featureRowsAppeared = true
-        }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.3) {
+            try? await Task.sleep(for: .milliseconds(450))
             withAnimation(.spring(duration: 0.6, bounce: 0.3)) {
                 buttonScale = 1.0
                 buttonOpacity = 1.0

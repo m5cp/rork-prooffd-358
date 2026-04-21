@@ -51,7 +51,8 @@ struct LaunchView: View {
                 iconScale = 1
                 titleOpacity = 1
                 taglineOpacity = 1
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(1))
                     onFinished()
                 }
                 return
@@ -282,8 +283,8 @@ struct LaunchView: View {
     // MARK: - Animation Sequence
 
     private func runSequence() {
-        // Phase 1: Ignite — icon appears with burst
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(200))
             phase = .ignite
             spawnBurstParticles(count: 30)
 
@@ -309,10 +310,8 @@ struct LaunchView: View {
             withAnimation(.easeOut(duration: 0.6).delay(0.05)) {
                 ringOpacity = 0.0
             }
-        }
 
-        // Phase 2: Burst — shockwave + more particles
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+            try? await Task.sleep(for: .milliseconds(350))
             phase = .burst
             spawnBurstParticles(count: 20)
 
@@ -331,10 +330,8 @@ struct LaunchView: View {
             withAnimation(.easeOut(duration: 0.5).delay(0.15)) {
                 secondRingOpacity = 0.0
             }
-        }
 
-        // Phase 3: Reveal — title letters cascade in
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.85) {
+            try? await Task.sleep(for: .milliseconds(300))
             phase = .reveal
 
             withAnimation(.spring(duration: 0.5, bounce: 0.2)) {
@@ -347,10 +344,8 @@ struct LaunchView: View {
             }
 
             spawnAmbientParticles(count: 12)
-        }
 
-        // Phase 4: Tagline + accent line
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.25) {
+            try? await Task.sleep(for: .milliseconds(400))
             withAnimation(.spring(duration: 0.5, bounce: 0.15)) {
                 taglineOpacity = 1.0
                 taglineOffset = 0
@@ -358,14 +353,11 @@ struct LaunchView: View {
             withAnimation(.easeOut(duration: 0.6).delay(0.1)) {
                 accentLineWidth = 120
             }
-        }
 
-        // Phase 5: Hold + exit
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.3) {
+            try? await Task.sleep(for: .seconds(1.05))
             phase = .hold
-        }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.6) {
+            try? await Task.sleep(for: .milliseconds(300))
             phase = .complete
             withAnimation(.spring(duration: 0.5, bounce: 0.0)) {
                 exitScale = 1.08

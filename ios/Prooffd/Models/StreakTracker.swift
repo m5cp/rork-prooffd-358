@@ -5,6 +5,7 @@ class StreakTracker {
     private(set) var currentStreak: Int = 0
     private(set) var longestStreak: Int = 0
     private(set) var totalDaysOpened: Int = 0
+    private(set) var streakFreezeJustUsed: Bool = false
 
     private let defaults = UserDefaults.standard
     private let lastOpenedKey = "streak_lastOpenedDate"
@@ -12,21 +13,26 @@ class StreakTracker {
     private let longestStreakKey = "streak_longest"
     private let totalDaysKey = "streak_totalDays"
     private let openedDatesKey = "streak_openedDates"
+    private let freezeUsedWeekKey = "streak_freezeUsedWeek"
+    private let freezeJustUsedFlagKey = "streak_freezeJustUsedFlag"
 
     init() {
         currentStreak = defaults.integer(forKey: currentStreakKey)
         longestStreak = defaults.integer(forKey: longestStreakKey)
         totalDaysOpened = defaults.integer(forKey: totalDaysKey)
+        streakFreezeJustUsed = defaults.bool(forKey: freezeJustUsedFlagKey)
     }
 
-    private let streakBufferUsedKey = "streak_bufferUsed"
-    private(set) var streakBufferAvailable: Bool = true
+    /// True if the weekly freeze has not yet been used this ISO week.
+    var streakFreezeAvailable: Bool {
+        let thisWeek = Self.currentWeekKey()
+        let usedWeek = defaults.string(forKey: freezeUsedWeekKey) ?? ""
+        return usedWeek != thisWeek
+    }
 
     func recordAppOpen() {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
-
-        streakBufferAvailable = !defaults.bool(forKey: streakBufferUsedKey)
 
         if let lastDateData = defaults.object(forKey: lastOpenedKey) as? Date {
             let lastDate = calendar.startOfDay(for: lastDateData)
@@ -36,13 +42,13 @@ class StreakTracker {
                 return
             } else if daysBetween == 1 {
                 currentStreak += 1
-                resetStreakBuffer()
-            } else if daysBetween == 2 && streakBufferAvailable && currentStreak >= 2 {
+                clearFreezeJustUsed()
+            } else if daysBetween == 2 && streakFreezeAvailable && currentStreak >= 2 {
                 currentStreak += 1
-                useStreakBuffer()
+                useWeeklyFreeze()
             } else {
                 currentStreak = 1
-                resetStreakBuffer()
+                clearFreezeJustUsed()
             }
         } else {
             currentStreak = 1
@@ -60,14 +66,28 @@ class StreakTracker {
         defaults.set(totalDaysOpened, forKey: totalDaysKey)
     }
 
-    private func useStreakBuffer() {
-        streakBufferAvailable = false
-        defaults.set(true, forKey: streakBufferUsedKey)
+    func acknowledgeFreezeUsed() {
+        streakFreezeJustUsed = false
+        defaults.set(false, forKey: freezeJustUsedFlagKey)
     }
 
-    private func resetStreakBuffer() {
-        streakBufferAvailable = true
-        defaults.set(false, forKey: streakBufferUsedKey)
+    private func useWeeklyFreeze() {
+        defaults.set(Self.currentWeekKey(), forKey: freezeUsedWeekKey)
+        defaults.set(true, forKey: freezeJustUsedFlagKey)
+        streakFreezeJustUsed = true
+    }
+
+    private func clearFreezeJustUsed() {
+        if streakFreezeJustUsed {
+            streakFreezeJustUsed = false
+            defaults.set(false, forKey: freezeJustUsedFlagKey)
+        }
+    }
+
+    private static func currentWeekKey() -> String {
+        let cal = Calendar(identifier: .iso8601)
+        let comps = cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())
+        return "\(comps.yearForWeekOfYear ?? 0)-W\(comps.weekOfYear ?? 0)"
     }
 
     var streakEmoji: String {

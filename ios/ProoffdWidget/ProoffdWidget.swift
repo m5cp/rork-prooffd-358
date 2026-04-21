@@ -1,5 +1,6 @@
 import WidgetKit
 import SwiftUI
+import AppIntents
 
 nonisolated struct ProoffdEntry: TimelineEntry {
     let date: Date
@@ -126,6 +127,31 @@ struct MediumWidgetView: View {
                         .font(.caption2.weight(.medium))
                 }
                 .foregroundStyle(.secondary)
+
+                if entry.microActionCompleted {
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.green)
+                        Text("Action done")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.green)
+                    }
+                } else {
+                    Button(intent: CompleteMicroActionIntent()) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "checkmark.circle")
+                                .font(.caption2)
+                            Text("Do today's action")
+                                .font(.caption2.weight(.semibold))
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(.green, in: .capsule)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
 
             Rectangle()
@@ -248,6 +274,20 @@ struct LargeWidgetView: View {
                             .font(.caption.weight(.bold))
                     }
                     .foregroundStyle(.green)
+                } else {
+                    Button(intent: CompleteMicroActionIntent()) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "checkmark.circle")
+                                .font(.caption)
+                            Text("Mark done")
+                                .font(.caption.weight(.bold))
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(.green, in: .capsule)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
 

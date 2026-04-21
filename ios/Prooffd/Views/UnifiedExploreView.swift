@@ -12,6 +12,8 @@ struct UnifiedExploreView: View {
     @State private var showHeroEducationPath: CareerPath?
     @State private var showHeroDegreeRecord: DegreeCareerRecord?
     @State private var showDailyRewardPopup: Bool = false
+    @State private var showWeeklySummary: Bool = WeeklySummaryScheduler.shouldShow
+    @State private var siriTipHidden: Bool = UserDefaults.standard.bool(forKey: "siriTip_dismissed_dailyTip")
 
     private var allResults: [MatchResult] { appState.matchResults }
 
@@ -27,6 +29,17 @@ struct UnifiedExploreView: View {
                     }
 
                     DailyMicroActionCard()
+
+                    if showWeeklySummary {
+                        WeeklySummaryCard(isVisible: $showWeeklySummary)
+                    }
+
+                    if !siriTipHidden {
+                        SiriDailyTipHint {
+                            UserDefaults.standard.set(true, forKey: "siriTip_dismissed_dailyTip")
+                            withAnimation(.spring(duration: 0.3)) { siriTipHidden = true }
+                        }
+                    }
 
                     bestMatchHeroCard
 

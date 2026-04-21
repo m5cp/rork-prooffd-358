@@ -347,6 +347,23 @@ class AppState {
         saveBuilds()
         checkAchievements()
         checkMomentumBadges()
+        refreshLiveActivity()
+    }
+
+    func refreshLiveActivity() {
+        guard let build = activeBuild else {
+            Task { await BuildLiveActivityService.end() }
+            return
+        }
+        let streak = streakTracker.currentStreak
+        Task {
+            await BuildLiveActivityService.update(for: build, streakDays: streak)
+        }
+    }
+
+    func startLiveActivityForActiveBuild() {
+        guard let build = activeBuild else { return }
+        BuildLiveActivityService.start(for: build, streakDays: streakTracker.currentStreak)
     }
 
     func updateStepNotes(buildId: String, stepId: String, notes: String) {
@@ -609,6 +626,7 @@ class AppState {
     func recordAppOpen() {
         streakTracker.recordAppOpen()
         dailyMicroAction.resetIfNewDay()
+        reconcileWidgetMicroAction()
         AnalyticsTracker.shared.trackAppOpen()
         checkAchievements()
         checkMomentumBadges()
@@ -620,6 +638,30 @@ class AppState {
             levelRank: currentLevel.rank,
             unlockedCount: unlockedAchievementIDs.count
         )
+        refreshLiveActivity()
+        Task { @MainActor in
+            let tip = DailyTipDatabase.tipForToday()
+            await PersonalizedTipService.shared.generateIfNeeded(
+                activeBuildName: activeBuild?.pathName,
+                streakDays: streakTracker.currentStreak,
+                category: tip.category
+            )
+            syncWidgetData()
+        }
+    }
+
+    private func reconcileWidgetMicroAction() {
+        guard let shared = UserDefaults(suiteName: SharedDataService.suiteName) else { return }
+        let pending = shared.bool(forKey: "widget_pendingMicroActionSync")
+        guard pending, !dailyMicroAction.completedToday else {
+            if pending { shared.set(false, forKey: "widget_pendingMicroActionSync") }
+            return
+        }
+        let action = dailyMicroAction.todayAction
+        dailyMicroAction.completeAction()
+        momentum.awardPoints(action.points, reason: .dailyUse)
+        shared.set(false, forKey: "widget_pendingMicroActionSync")
+        syncWidgetData()
     }
 
     func completeDailyMicroAction() {
@@ -637,7 +679,7 @@ class AppState {
     }
 
     func syncWidgetData() {
-        let tip = DailyTipDatabase.tipForToday()
+        let tip = PersonalizedTipService.shared.personalizedTip ?? DailyTipDatabase.tipForToday()
         let action = dailyMicroAction.todayAction
         SharedDataService.updateWidgetData(
             streakCount: streakTracker.currentStreak,

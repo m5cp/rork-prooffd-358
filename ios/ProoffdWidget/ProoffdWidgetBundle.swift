@@ -5,5 +5,6 @@ import SwiftUI
 struct ProoffdWidgetBundle: WidgetBundle {
     var body: some Widget {
         ProoffdWidget()
+        BuildLiveActivity()
     }
 }

@@ -238,7 +238,8 @@ struct DiscoverView: View {
 
         return Button {
             showBestOptions = false
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(300))
                 selectedResult = result
                 appState.markPathExplored(result.businessPath.id)
             }

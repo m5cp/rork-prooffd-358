@@ -1,5 +1,30 @@
 import SwiftUI
 
+struct ProooffdLockup: View {
+    var body: some View {
+        HStack(spacing: 8) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color(hex: "059669"), Color(hex: "047857")],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 22, height: 22)
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(.white)
+            }
+            Text("PROOFFD")
+                .font(.system(size: 12, weight: .heavy))
+                .tracking(2)
+                .foregroundStyle(Color.white.opacity(0.85))
+        }
+    }
+}
+
 struct ProgressShareCard: View {
     let buildName: String
     let progressPercent: Int
@@ -10,10 +35,7 @@ struct ProgressShareCard: View {
     var body: some View {
         VStack(spacing: 0) {
             VStack(spacing: 24) {
-                Text("P R O O F F D")
-                    .font(.system(size: 12, weight: .bold))
-                    .tracking(2)
-                    .foregroundStyle(Color.white.opacity(0.4))
+                ProooffdLockup()
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 VStack(alignment: .leading, spacing: 6) {
@@ -149,10 +171,7 @@ struct JobSelectionShareCard: View {
     var body: some View {
         VStack(spacing: 0) {
             VStack(spacing: 24) {
-                Text("P R O O F F D")
-                    .font(.system(size: 12, weight: .bold))
-                    .tracking(2)
-                    .foregroundStyle(Color.white.opacity(0.4))
+                ProooffdLockup()
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 VStack(alignment: .leading, spacing: 6) {
@@ -269,10 +288,7 @@ struct MyPathShareCard: View {
     var body: some View {
         VStack(spacing: 0) {
             VStack(spacing: 20) {
-                Text("P R O O F F D")
-                    .font(.system(size: 12, weight: .bold))
-                    .tracking(2)
-                    .foregroundStyle(Color.white.opacity(0.4))
+                ProooffdLockup()
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 VStack(alignment: .leading, spacing: 6) {

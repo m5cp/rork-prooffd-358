@@ -265,7 +265,8 @@ struct SettingsView: View {
                 Button("Cancel", role: .cancel) {}
                 Button("Retake", role: .destructive) {
                     dismiss()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .milliseconds(300))
                         appState.retakeQuiz()
                     }
                 }
@@ -276,7 +277,8 @@ struct SettingsView: View {
                 Button("Cancel", role: .cancel) {}
                 Button("Delete Everything", role: .destructive) {
                     dismiss()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .milliseconds(300))
                         appState.deleteAllData()
                     }
                 }

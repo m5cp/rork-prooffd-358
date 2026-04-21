@@ -52,7 +52,8 @@ struct ScreenshotShareButton: View {
 
     private func captureAndShow() {
         isCapturing = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(100))
             let image = ScreenshotService.captureScreen()
             capturedImage = image
             isCapturing = false

@@ -75,7 +75,8 @@ struct StartHereSection: View {
             diceRotation += 360
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(600))
             let allResults = appState.matchResults
             guard allResults.count >= 2 else {
                 isRolling = false
