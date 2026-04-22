@@ -271,6 +271,68 @@ nonisolated enum EducationWillingness: String, CaseIterable, Identifiable, Codab
     }
 }
 
+nonisolated enum MotivationGoal: String, CaseIterable, Identifiable, Codable, Sendable {
+    case ownBoss          = "I want to be my own boss"
+    case stableSkill      = "I want a stable skill that always pays"
+    case helpPeople       = "I want to make a difference in people's lives"
+    case professionalStatus = "I want expertise and professional status"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .ownBoss:             return "crown.fill"
+        case .stableSkill:         return "shield.checkered"
+        case .helpPeople:          return "heart.fill"
+        case .professionalStatus:  return "graduationcap.fill"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .ownBoss:
+            return "Control your time, income, and direction"
+        case .stableSkill:
+            return "A reliable trade or career that will always be in demand"
+        case .helpPeople:
+            return "Healthcare, social work, education, or counseling"
+        case .professionalStatus:
+            return "Law, medicine, engineering, or advanced credentials"
+        }
+    }
+}
+
+nonisolated enum SituationGoal: String, CaseIterable, Identifiable, Codable, Sendable {
+    case needsMoneyFast   = "I need income as fast as possible"
+    case willingToTrain   = "I am willing to train for the right opportunity"
+    case highestEarning   = "I want the highest long-term earning potential"
+    case flexibilityFirst = "I want flexibility above everything else"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .needsMoneyFast:   return "bolt.fill"
+        case .willingToTrain:   return "dumbbell.fill"
+        case .highestEarning:   return "chart.line.uptrend.xyaxis"
+        case .flexibilityFirst: return "bird.fill"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .needsMoneyFast:
+            return "Fast starts and quick income paths"
+        case .willingToTrain:
+            return "Best long-term fit regardless of training time"
+        case .highestEarning:
+            return "Prioritize income ceiling over speed"
+        case .flexibilityFirst:
+            return "Work on your terms, your schedule"
+        }
+    }
+}
+
 nonisolated struct UserProfile: Codable, Sendable {
     var firstName: String = ""
     var selectedCategories: [BusinessCategory] = []
@@ -290,6 +352,19 @@ nonisolated struct UserProfile: Codable, Sendable {
     var educationWillingnesses: [EducationWillingness] = []
     var situationTags: [SituationTag] = []
     var avatarId: String = ""
+    var motivationGoal: MotivationGoal? = nil
+    var situationGoal: SituationGoal? = nil
+
+    var derivedChosenPath: ChosenPath {
+        switch motivationGoal {
+        case .ownBoss, .none:
+            return .business
+        case .stableSkill:
+            return .trades
+        case .helpPeople, .professionalStatus:
+            return .degree
+        }
+    }
 
     var avatar: AvatarOption {
         AvatarOption(rawValue: avatarId) ?? .star
