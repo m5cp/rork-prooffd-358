@@ -530,8 +530,6 @@ struct PaywallView: View {
                 return "Start Free Trial"
             }
             return "Continue"
-        default:
-            return "Continue"
         }
     }
 
@@ -628,7 +626,6 @@ struct PaywallView: View {
         switch selectedPackageType {
         case .annual: return resolvedAnnualPackage
         case .monthly: return resolvedMonthlyPackage
-        default: return resolvedAnnualPackage ?? resolvedMonthlyPackage
         }
     }
 }
@@ -636,5 +633,4 @@ struct PaywallView: View {
 nonisolated enum PackageType: String, Sendable {
     case annual
     case monthly
-    case lifetime
 }

@@ -50,8 +50,12 @@ struct SettingsView: View {
                         profileRow(icon: "person.fill", label: "Name", value: appState.userProfile.firstName)
                     }
 
-                    if !appState.userProfile.selectedCategories.isEmpty {
-                        profileRow(icon: "square.grid.2x2.fill", label: "Interests", value: appState.userProfile.selectedCategories.map(\.rawValue).joined(separator: ", "))
+                    if let motivation = appState.userProfile.motivationGoal {
+                        profileRow(icon: "target", label: "Motivation", value: motivation.rawValue)
+                    }
+
+                    if let situation = appState.userProfile.situationGoal {
+                        profileRow(icon: "flag.fill", label: "Situation", value: situation.rawValue)
                     }
 
                     if !appState.userProfile.workEnvironments.isEmpty {
