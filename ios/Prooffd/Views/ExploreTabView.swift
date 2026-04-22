@@ -18,12 +18,15 @@ struct ExploreTabView: View {
     @State private var showComparisonHint = false
     @State private var weeklyPlan: WeeklyActionPlan? = nil
     @State private var showActionPlan = false
+    @State private var showLongQuiz = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
                     bestMatchHeroCard
+                    longQuizRefineCard
+                        .padding(.horizontal, 16)
                     if let plan = weeklyPlan {
                         actionPlanSummaryCard(plan: plan)
                             .padding(.horizontal, 16)
@@ -106,6 +109,63 @@ struct ExploreTabView: View {
                     ))
                 }
             }
+        }
+    }
+
+    private var longQuizRefineCard: some View {
+        let isCompleted = UserDefaults.standard.bool(forKey: "longQuizCompleted")
+        let buttonLabel = isCompleted ? "Retake Precision Quiz" : "Refine Your Matches"
+        let subtitle = isCompleted
+            ? "Retake to update your results anytime"
+            : "Answer 12 more questions for a more precise match score"
+        let icon = isCompleted ? "arrow.clockwise.circle.fill" : "slider.horizontal.3"
+
+        return Button { showLongQuiz = true } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Theme.accentBlue.opacity(0.12))
+                        .frame(width: 40, height: 40)
+                    Image(systemName: icon)
+                        .foregroundStyle(Theme.accentBlue)
+                        .font(.system(size: 18))
+                }
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 6) {
+                        Text(buttonLabel)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.textPrimary)
+                        if !isCompleted {
+                            Text("FREE")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundStyle(Theme.accent)
+                                .padding(.horizontal, 6).padding(.vertical, 2)
+                                .background(Theme.accent.opacity(0.12))
+                                .clipShape(Capsule())
+                        }
+                    }
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundStyle(Theme.textTertiary).font(.caption)
+            }
+            .padding(14)
+            .background(Theme.cardBackground)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14)
+                .stroke(Theme.border, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .sheet(isPresented: $showLongQuiz) {
+            LongQuizView(
+                isPresented: $showLongQuiz,
+                onComplete: {
+                    showLongQuiz = false
+                }
+            )
         }
     }
 

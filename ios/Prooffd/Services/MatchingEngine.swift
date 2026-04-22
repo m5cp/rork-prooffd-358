@@ -14,9 +14,30 @@ enum MatchingEngine {
             var score: Double = 0
             var maxScore: Double = 0
 
-            maxScore += 20
-            if profile.selectedCategories.contains(path.category) {
-                score += 20
+            maxScore += 15
+            if let motivation = profile.motivationGoal {
+                switch motivation {
+                case .ownBoss:
+                    if path.soloFriendly { score += 15 }
+                    else if !path.requiresPhysicalWork { score += 8 }
+                    else { score += 4 }
+                case .stableSkill:
+                    if path.requiresPhysicalWork && path.requiresLicense { score += 13 }
+                    else if path.requiresPhysicalWork { score += 10 }
+                    else if path.requiresLicense { score += 8 }
+                    else { score += 5 }
+                case .helpPeople:
+                    if !path.soloFriendly && path.requiresLicense { score += 11 }
+                    else if !path.soloFriendly { score += 8 }
+                    else { score += 5 }
+                case .professionalStatus:
+                    if path.requiresLicense && path.incomeLevel == .high { score += 13 }
+                    else if path.requiresLicense { score += 9 }
+                    else if path.incomeLevel == .high { score += 7 }
+                    else { score += 4 }
+                }
+            } else {
+                score += 10
             }
 
             maxScore += 15
@@ -121,10 +142,35 @@ enum MatchingEngine {
                 }
             }
 
+            maxScore += 10
+            if let situation = profile.situationGoal {
+                switch situation {
+                case .needsMoneyFast:
+                    if path.isFastStart && path.fastCashPotential { score += 10 }
+                    else if path.isFastStart { score += 7 }
+                    else if path.fastCashPotential { score += 5 }
+                    else { score += 2 }
+                case .willingToTrain:
+                    score += 10
+                case .highestEarning:
+                    switch path.incomeLevel {
+                    case .high: score += 10
+                    case .medium: score += 6
+                    case .low: score += 2
+                    }
+                case .flexibilityFirst:
+                    if path.soloFriendly { score += 10 }
+                    else { score += 4 }
+                }
+            } else {
+                score += 8
+            }
+
             maxScore += 7
-            if !profile.educationWillingnesses.isEmpty {
-                let eduReq = path.educationRequired.lowercased()
+            if let selectedEdu = profile.educationWillingnesses.first {
+                let selectedIndex = EducationWillingness.allCases.firstIndex(of: selectedEdu) ?? 0
                 let requiredLevel: EducationWillingness
+                let eduReq = path.educationRequired.lowercased()
                 if eduReq.contains("4-year") || eduReq.contains("bachelor") || eduReq.contains("degree") {
                     requiredLevel = .fourYear
                 } else if eduReq.contains("2-year") || eduReq.contains("associate") {
@@ -136,13 +182,16 @@ enum MatchingEngine {
                 } else {
                     requiredLevel = .selfTaught
                 }
-                if profile.educationWillingnesses.contains(requiredLevel) {
+                let requiredIndex = EducationWillingness.allCases.firstIndex(of: requiredLevel) ?? 0
+                if selectedIndex >= requiredIndex {
                     score += 7
-                } else if profile.educationWillingnesses.contains(where: { EducationWillingness.allCases.firstIndex(of: $0)! >= EducationWillingness.allCases.firstIndex(of: requiredLevel)! }) {
-                    score += 5
+                } else if selectedIndex >= requiredIndex - 1 {
+                    score += 4
                 } else {
-                    score += 2
+                    score += 1
                 }
+            } else {
+                score += 5
             }
 
             maxScore += 2
@@ -254,17 +303,19 @@ enum MatchingEngine {
             var maxScore: Double = 0
 
             maxScore += 25
-            if !profile.educationWillingnesses.isEmpty {
+            if let selectedEdu = profile.educationWillingnesses.first {
+                let selectedIndex = EducationWillingness.allCases.firstIndex(of: selectedEdu) ?? 0
                 let required = educationLevelForPath(path)
-                if profile.educationWillingnesses.contains(required) {
+                let requiredIndex = EducationWillingness.allCases.firstIndex(of: required) ?? 0
+                if selectedIndex >= requiredIndex {
                     score += 25
-                } else if profile.educationWillingnesses.contains(where: {
-                    EducationWillingness.allCases.firstIndex(of: $0)! >= EducationWillingness.allCases.firstIndex(of: required)!
-                }) {
-                    score += 15
+                } else if selectedIndex >= requiredIndex - 1 {
+                    score += 14
                 } else {
-                    score += 5
+                    score += 4
                 }
+            } else {
+                score += 15
             }
 
             maxScore += 20
@@ -279,6 +330,27 @@ enum MatchingEngine {
                 case .either:
                     score += 20
                 }
+            }
+
+            maxScore += 12
+            if let motivation = profile.motivationGoal {
+                switch motivation {
+                case .stableSkill:
+                    if [.trade, .certification].contains(path.category) { score += 12 }
+                    else { score += 5 }
+                case .helpPeople:
+                    if [.healthcare].contains(path.category) { score += 12 }
+                    else if [.trade, .business].contains(path.category) { score += 5 }
+                    else { score += 8 }
+                case .professionalStatus:
+                    if [.healthcare, .technology, .business].contains(path.category) { score += 10 }
+                    else { score += 6 }
+                case .ownBoss:
+                    if [.business, .creative].contains(path.category) { score += 10 }
+                    else { score += 5 }
+                }
+            } else {
+                score += 8
             }
 
             maxScore += 15
@@ -352,14 +424,42 @@ enum MatchingEngine {
             var maxScore: Double = 0
 
             maxScore += 30
-            if !profile.educationWillingnesses.isEmpty {
-                if profile.educationWillingnesses.contains(.fourYear) {
+            if let selectedEdu = profile.educationWillingnesses.first {
+                let selectedIndex = EducationWillingness.allCases.firstIndex(of: selectedEdu) ?? 0
+                let twoYearIndex = EducationWillingness.allCases.firstIndex(of: .twoYear) ?? 3
+                let fourYearIndex = EducationWillingness.allCases.firstIndex(of: .fourYear) ?? 4
+                if selectedIndex >= fourYearIndex {
                     score += 30
-                } else if profile.educationWillingnesses.contains(.twoYear) {
-                    score += 15
+                } else if selectedIndex >= twoYearIndex {
+                    score += 20
+                } else if selectedIndex >= twoYearIndex - 1 {
+                    score += 10
                 } else {
-                    score += 5
+                    score += 3
                 }
+            } else {
+                score += 15
+            }
+
+            maxScore += 12
+            if let motivation = profile.motivationGoal {
+                switch motivation {
+                case .professionalStatus:
+                    if [.legal, .engineering, .healthcare, .aviation].contains(record.category) {
+                        score += 12
+                    } else { score += 6 }
+                case .helpPeople:
+                    if [.healthcare, .mentalHealth, .education].contains(record.category) {
+                        score += 12
+                    } else { score += 5 }
+                case .stableSkill:
+                    if [.healthcare, .engineering].contains(record.category) { score += 9 }
+                    else { score += 4 }
+                case .ownBoss:
+                    score += 4
+                }
+            } else {
+                score += 7
             }
 
             maxScore += 20

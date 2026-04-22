@@ -281,6 +281,13 @@ class AppState {
         degreeScores = MatchingEngine.scoreDegreeRecords(profile: userProfile)
     }
 
+    func applyLongQuizAnswers(_ vm: LongQuizViewModel) {
+        vm.applyToProfile(&userProfile)
+        saveProfile()
+        UserDefaults.standard.set(true, forKey: "longQuizCompleted")
+        runMatching()
+    }
+
     func educationScore(for id: String) -> Int {
         educationScores[id] ?? 50
     }
