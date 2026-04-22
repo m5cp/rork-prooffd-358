@@ -51,10 +51,6 @@ struct UnifiedExploreView: View {
                     heroCard(path: .trades, subtitle: "\(EducationPathDatabase.all.count) programs")
                     heroCard(path: .degree, subtitle: "\(DegreeCareerDatabase.allRecords.count) careers")
 
-                    if !store.isPremium {
-                        upgradeCard
-                    }
-
                     redoQuizCard
 
                     Color.clear.frame(height: 40)
@@ -66,6 +62,28 @@ struct UnifiedExploreView: View {
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Explore")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                if !store.isPremium {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button {
+                            showPaywall = true
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "crown.fill")
+                                    .font(.caption.weight(.bold))
+                                Text("PRO")
+                                    .font(.caption.weight(.bold))
+                            }
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Theme.accent)
+                            .clipShape(.capsule)
+                        }
+                        .accessibilityLabel("Unlock Pro")
+                    }
+                }
+            }
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "Search careers & businesses")
             .overlay {
                 if !searchText.isEmpty {

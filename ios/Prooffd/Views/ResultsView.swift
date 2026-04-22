@@ -18,11 +18,17 @@ struct ResultsView: View {
                 }
                 .tag(1)
 
+            ToolkitTabView()
+                .tabItem {
+                    Label("Toolkit", systemImage: "wrench.and.screwdriver.fill")
+                }
+                .tag(2)
+
             ProfileTabView()
                 .tabItem {
                     Label("You", systemImage: "person.crop.circle")
                 }
-                .tag(2)
+                .tag(3)
         }
         .tint(Theme.accent)
         .onAppear {
