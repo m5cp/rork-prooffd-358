@@ -16,14 +16,14 @@ struct DocumentVaultView: View {
             VStack(spacing: 0) {
                 categoryPicker
                 ScrollView {
-                    VStack(spacing: 10) {
+                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)], spacing: 14) {
                         ForEach(filteredDocuments) { doc in
-                            documentRow(doc)
+                            heroCard(doc)
                         }
-                        Color.clear.frame(height: 30)
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 12)
+                    .padding(.bottom, 30)
                 }
             }
             .background(Color(.systemGroupedBackground))
@@ -66,54 +66,74 @@ struct DocumentVaultView: View {
         .padding(.vertical, 10)
     }
 
-    private func documentRow(_ doc: VaultDocument) -> some View {
+    private func heroCard(_ doc: VaultDocument) -> some View {
         let isLocked = doc.isPro && !store.isPremium
         return Button {
             if isLocked { showPaywall = true } else { selectedDocument = doc }
         } label: {
-            HStack(spacing: 14) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Theme.accent.opacity(0.15))
-                        .frame(width: 44, height: 44)
-                    Image(systemName: doc.icon)
-                        .font(.body)
-                        .foregroundStyle(Theme.accent)
-                }
-                VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 0) {
+                ZStack(alignment: .topTrailing) {
+                    LinearGradient(
+                        colors: [Theme.accent.opacity(0.28), Theme.accent.opacity(0.08)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    )
+                    .frame(height: 110)
+                    .overlay(alignment: .bottomLeading) {
+                        Image(systemName: doc.icon)
+                            .font(.system(size: 34, weight: .semibold))
+                            .foregroundStyle(Theme.accent)
+                            .padding(14)
+                    }
                     HStack(spacing: 6) {
-                        Text(doc.title).font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
                         if doc.isPro {
                             Text("PRO")
                                 .font(.system(size: 9, weight: .bold))
                                 .foregroundStyle(.black)
-                                .padding(.horizontal, 6).padding(.vertical, 2)
+                                .padding(.horizontal, 7).padding(.vertical, 3)
                                 .background(Theme.accent)
                                 .clipShape(.capsule)
                         } else {
                             Text("FREE")
                                 .font(.system(size: 9, weight: .bold))
                                 .foregroundStyle(Theme.accent)
-                                .padding(.horizontal, 6).padding(.vertical, 2)
-                                .background(Theme.accent.opacity(0.15))
+                                .padding(.horizontal, 7).padding(.vertical, 3)
+                                .background(.ultraThinMaterial)
                                 .clipShape(.capsule)
                         }
+                        if isLocked {
+                            Image(systemName: "lock.fill")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundStyle(.white)
+                                .padding(6)
+                                .background(.black.opacity(0.4))
+                                .clipShape(Circle())
+                        }
                     }
+                    .padding(10)
+                }
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(doc.title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.primary)
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
                     Text(doc.description)
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                        .lineLimit(2)
+                        .lineLimit(3)
                         .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                Spacer()
-                Image(systemName: isLocked ? "lock.fill" : "chevron.right")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
+                .padding(14)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(14)
-            .frame(maxWidth: .infinity)
             .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(.rect(cornerRadius: 14))
+            .clipShape(.rect(cornerRadius: 18))
+            .overlay(
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(Theme.border.opacity(0.5), lineWidth: 1)
+            )
         }
         .buttonStyle(.plain)
     }
@@ -133,12 +153,9 @@ struct DocumentDetailView: View {
                         .foregroundStyle(.secondary)
                         .padding(.bottom, 4)
 
-                    Text(document.content)
-                        .font(.system(.footnote, design: .monospaced))
-                        .foregroundStyle(.primary)
-                        .textSelection(.enabled)
+                    FormattedDocumentContent(raw: document.content)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(14)
+                        .padding(16)
                         .background(Color(.secondarySystemGroupedBackground))
                         .clipShape(.rect(cornerRadius: 14))
 
@@ -161,5 +178,145 @@ struct DocumentDetailView: View {
                 }
             }
         }
+    }
+}
+
+private struct FormattedDocumentContent: View {
+    let raw: String
+
+    private var blocks: [DocBlock] {
+        DocBlock.parse(raw)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
+                switch block {
+                case .title(let text):
+                    Text(text)
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(.primary)
+                        .textSelection(.enabled)
+                case .heading(let text):
+                    Text(text)
+                        .font(.headline)
+                        .foregroundStyle(Theme.accent)
+                        .textSelection(.enabled)
+                        .padding(.top, 4)
+                case .divider:
+                    Rectangle()
+                        .fill(Theme.border.opacity(0.6))
+                        .frame(height: 1)
+                        .padding(.vertical, 2)
+                case .bullet(let text):
+                    HStack(alignment: .top, spacing: 8) {
+                        Text("•")
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.accent)
+                        Text(text)
+                            .font(.subheadline)
+                            .foregroundStyle(.primary)
+                            .textSelection(.enabled)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                case .paragraph(let text):
+                    Text(text)
+                        .font(.subheadline)
+                        .foregroundStyle(.primary)
+                        .textSelection(.enabled)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .lineSpacing(3)
+                }
+            }
+        }
+    }
+}
+
+private enum DocBlock {
+    case title(String)
+    case heading(String)
+    case divider
+    case bullet(String)
+    case paragraph(String)
+
+    static func parse(_ raw: String) -> [DocBlock] {
+        var blocks: [DocBlock] = []
+        var paragraphBuffer: [String] = []
+
+        func flushParagraph() {
+            if !paragraphBuffer.isEmpty {
+                let joined = paragraphBuffer.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+                if !joined.isEmpty {
+                    blocks.append(.paragraph(joined))
+                }
+                paragraphBuffer.removeAll()
+            }
+        }
+
+        let lines = raw.components(separatedBy: "\n")
+        var firstNonEmptyHandled = false
+
+        for (idx, rawLine) in lines.enumerated() {
+            let line = rawLine.trimmingCharacters(in: .whitespaces)
+
+            if line.isEmpty {
+                flushParagraph()
+                continue
+            }
+
+            if line.allSatisfy({ $0 == "-" }) && line.count >= 3 {
+                flushParagraph()
+                blocks.append(.divider)
+                continue
+            }
+
+            if !firstNonEmptyHandled {
+                firstNonEmptyHandled = true
+                if line == line.uppercased() && line.count < 80 && line.rangeOfCharacter(from: .letters) != nil {
+                    blocks.append(.title(line))
+                    continue
+                }
+            }
+
+            let isHeading = isHeadingLine(line, index: idx, lines: lines)
+            if isHeading {
+                flushParagraph()
+                blocks.append(.heading(line))
+                continue
+            }
+
+            if line.hasPrefix("- ") || line.hasPrefix("• ") || line.hasPrefix("* ") {
+                flushParagraph()
+                let content = String(line.dropFirst(2)).trimmingCharacters(in: .whitespaces)
+                blocks.append(.bullet(content))
+                continue
+            }
+
+            if line.hasPrefix("[ ] ") || line.hasPrefix("[] ") {
+                flushParagraph()
+                let content = line.replacingOccurrences(of: "[ ] ", with: "").replacingOccurrences(of: "[] ", with: "")
+                blocks.append(.bullet(content))
+                continue
+            }
+
+            paragraphBuffer.append(line)
+        }
+        flushParagraph()
+        return blocks
+    }
+
+    private static func isHeadingLine(_ line: String, index: Int, lines: [String]) -> Bool {
+        guard line.count < 80 else { return false }
+        let letters = line.unicodeScalars.filter { CharacterSet.letters.contains($0) }
+        guard !letters.isEmpty else { return false }
+        let uppercaseLetters = letters.filter { CharacterSet.uppercaseLetters.contains($0) }
+        let isAllCaps = uppercaseLetters.count == letters.count
+        if isAllCaps && !line.hasSuffix(":") && line.count < 70 {
+            return true
+        }
+        if line.hasPrefix("ARTICLE ") || line.hasPrefix("SECTION ") || line.hasPrefix("STEP ") {
+            return true
+        }
+        return false
     }
 }
