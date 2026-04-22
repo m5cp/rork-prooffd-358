@@ -3,8 +3,9 @@ import RevenueCat
 
 struct PaywallView: View {
     @Environment(StoreViewModel.self) private var store
+    @Environment(AppState.self) private var appState
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedPackageType: PackageType = .annual
+    @State private var selectedPackageType: PackageType = .monthly
     @State private var showTerms: Bool = false
     @State private var showPrivacy: Bool = false
 
@@ -26,6 +27,7 @@ struct PaywallView: View {
                     headerSection
                     beforeAfterVisual
                     benefitsList
+                    transformationHeadline
                     packageSelector
                     purchaseButton
                     restoreAndLinks
@@ -56,6 +58,11 @@ struct PaywallView: View {
         .presentationBackground(Theme.background)
         .presentationContentInteraction(.scrolls)
         .onAppear { pickDefaultPackage() }
+        .onDisappear {
+            if !store.isPremium {
+                UserDefaults.standard.set(true, forKey: "showSecondPaywall")
+            }
+        }
         .sheet(isPresented: $showTerms) {
             NavigationStack {
                 TermsOfServiceView()
@@ -87,13 +94,30 @@ struct PaywallView: View {
     }
 
     private func pickDefaultPackage() {
-        if resolvedAnnualPackage != nil {
-            selectedPackageType = .annual
-        } else if resolvedMonthlyPackage != nil {
+        if resolvedMonthlyPackage != nil {
             selectedPackageType = .monthly
+        } else if resolvedAnnualPackage != nil {
+            selectedPackageType = .annual
         } else if resolvedLifetimePackage != nil {
             selectedPackageType = .lifetime
         }
+    }
+
+    private var transformationHeadline: some View {
+        VStack(spacing: 6) {
+            if let top = appState.matchResults.first {
+                Text("You matched \(top.scorePercentage)% with \(top.businessPath.name)")
+                    .font(.headline)
+                    .foregroundStyle(Theme.textPrimary)
+                    .multilineTextAlignment(.center)
+            }
+            Text("Pro gives you every tool you need to actually start.")
+                .font(.subheadline)
+                .foregroundStyle(Theme.textSecondary)
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 4)
     }
 
     private var headerSection: some View {
@@ -238,10 +262,10 @@ struct PaywallView: View {
 
     private var packageSelector: some View {
         VStack(spacing: 12) {
-            if resolvedAnnualPackage != nil || true {
+            monthlyCard(package: resolvedMonthlyPackage)
+            if resolvedAnnualPackage != nil {
                 annualCard(package: resolvedAnnualPackage)
             }
-            monthlyCard(package: resolvedMonthlyPackage)
             lifetimeCard(package: resolvedLifetimePackage)
         }
     }
