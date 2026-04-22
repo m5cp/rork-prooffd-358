@@ -51,10 +51,10 @@ enum SpotlightService {
         for career in DegreeCareerDatabase.allRecords {
             let attributes = CSSearchableItemAttributeSet(contentType: .content)
             attributes.title = career.title
-            attributes.contentDescription = "Degree-Based Career — \(career.category.rawValue) — \(career.aiProofTier.label)"
+            attributes.contentDescription = "Advanced Education Career — \(career.category.rawValue) — \(career.aiProofTier.label)"
             attributes.keywords = [
                 career.category.rawValue,
-                "Degree",
+                "Advanced Education",
                 "Career",
                 "AI-proof",
                 career.degreeRequired

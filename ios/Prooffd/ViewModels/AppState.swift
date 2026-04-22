@@ -9,7 +9,7 @@ nonisolated enum ChosenPath: String, Codable, Sendable {
         switch self {
         case .business: return "Start a Business"
         case .trades: return "Trades & Certifications"
-        case .degree: return "4-Year Degree Careers"
+        case .degree: return "Advanced Education Careers"
         }
     }
 

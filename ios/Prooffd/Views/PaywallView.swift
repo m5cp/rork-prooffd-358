@@ -50,6 +50,17 @@ struct PaywallView: View {
                     .accessibilityLabel("Close")
                     .frame(minWidth: 44, minHeight: 44)
                 }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        Task { await store.restore() }
+                    } label: {
+                        Text("Restore")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(Theme.accentBlue)
+                    }
+                    .accessibilityLabel("Restore Purchases")
+                    .frame(minWidth: 44, minHeight: 44)
+                }
             }
             .toolbarBackground(Theme.background, for: .navigationBar)
         }
@@ -58,11 +69,6 @@ struct PaywallView: View {
         .presentationBackground(Theme.background)
         .presentationContentInteraction(.scrolls)
         .onAppear { pickDefaultPackage() }
-        .onDisappear {
-            if !store.isPremium {
-                UserDefaults.standard.set(true, forKey: "showSecondPaywall")
-            }
-        }
         .sheet(isPresented: $showTerms) {
             NavigationStack {
                 TermsOfServiceView()
@@ -303,31 +309,30 @@ struct PaywallView: View {
                 HStack(spacing: 14) {
                     selectionDot(isSelected: isSelected)
 
-                    VStack(alignment: .leading, spacing: 3) {
-                        HStack(spacing: 8) {
-                            Text("Annual")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(Theme.textPrimary)
-                            if let badge = savingsBadge {
-                                Text(badge)
-                                    .font(.caption2.weight(.bold))
-                                    .foregroundStyle(Theme.accent)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 3)
-                                    .background(Theme.accent.opacity(0.12))
-                                    .clipShape(.capsule)
-                            }
-                        }
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Annual")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.textPrimary)
                         Text("Billed yearly \u{2022} Cancel anytime")
                             .font(.caption)
                             .foregroundStyle(Theme.textSecondary)
+                        if let badge = savingsBadge {
+                            Text("\(badge) vs monthly")
+                                .font(.caption2.weight(.bold))
+                                .foregroundStyle(Theme.accent)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(Theme.accent.opacity(0.12))
+                                .clipShape(.capsule)
+                                .padding(.top, 2)
+                        }
                     }
 
                     Spacer()
 
                     VStack(alignment: .trailing, spacing: 2) {
                         Text("\(yearlyPrice)/yr")
-                            .font(.title3.weight(.bold))
+                            .font(.title.weight(.heavy))
                             .foregroundStyle(Theme.textPrimary)
                         Text("about \(weeklyPrice)/wk")
                             .font(.caption2)
@@ -595,6 +600,12 @@ struct PaywallView: View {
                     .foregroundStyle(Theme.textTertiary)
             }
             .frame(minHeight: 44)
+
+            Text("Subscriptions auto-renew unless cancelled at least 24 hours before the renewal date. Manage in App Store Settings.")
+                .font(.caption2)
+                .foregroundStyle(Theme.textTertiary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
 
             subscriptionDisclosure
         }

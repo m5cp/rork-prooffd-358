@@ -2,8 +2,6 @@ import SwiftUI
 
 struct ResultsView: View {
     @Environment(AppState.self) private var appState
-    @Environment(StoreViewModel.self) private var store
-    @State private var showSecondPaywall = false
 
     var body: some View {
         @Bindable var state = appState
@@ -29,15 +27,6 @@ struct ResultsView: View {
         .tint(Theme.accent)
         .onAppear {
             appState.recordAppOpen()
-            Task {
-                try? await Task.sleep(for: .seconds(2.5))
-                if UserDefaults.standard.bool(forKey: "showSecondPaywall") && !store.isPremium {
-                    showSecondPaywall = true
-                }
-            }
-        }
-        .sheet(isPresented: $showSecondPaywall) {
-            SecondChancePaywallView()
         }
     }
 }

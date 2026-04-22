@@ -18,7 +18,7 @@ nonisolated enum CareerRequirementType: String, Sendable {
 nonisolated enum CareerTrack: String, Sendable, CaseIterable, Identifiable {
     case startBusiness = "Start a Business"
     case tradeAndCertification = "Trade School & Certifications"
-    case degreeBasedCareer = "Degree-Based Careers"
+    case degreeBasedCareer = "Advanced Education Careers"
 
     var id: String { rawValue }
 
@@ -34,7 +34,7 @@ nonisolated enum CareerTrack: String, Sendable, CaseIterable, Identifiable {
         switch self {
         case .startBusiness: return "Business"
         case .tradeAndCertification: return "Trades & Certs"
-        case .degreeBasedCareer: return "Degree Careers"
+        case .degreeBasedCareer: return "Advanced Education"
         }
     }
 }

@@ -2037,7 +2037,7 @@ struct PathDetailView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "graduationcap.fill")
                         .font(.caption2)
-                    Text("Degree-Based Career")
+                    Text("Advanced Education Career")
                         .font(.caption.weight(.semibold))
                 }
                 .foregroundStyle(Theme.accentBlue)

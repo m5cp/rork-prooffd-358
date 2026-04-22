@@ -236,7 +236,7 @@ nonisolated enum EducationWillingness: String, CaseIterable, Identifiable, Codab
     case shortCert = "Short certification (under 3 months)"
     case tradeSchool = "Trade school / bootcamp (3–12 months)"
     case twoYear = "2-year program"
-    case fourYear = "4-year degree"
+    case fourYear = "Advanced Education (bachelor's or higher)"
 
     var id: String { rawValue }
 

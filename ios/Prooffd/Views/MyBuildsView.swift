@@ -49,7 +49,7 @@ struct MyBuildsView: View {
 
                         let degreeItems = appState.planItems.filter { $0.type == .degree }
                         if !degreeItems.isEmpty {
-                            sectionLabel("Degree Careers", icon: "building.columns.fill", color: Color(hex: "818CF8"))
+                            sectionLabel("Advanced Education Careers", icon: "building.columns.fill", color: Color(hex: "818CF8"))
                             ForEach(degreeItems) { item in
                                 planItemCard(item)
                             }

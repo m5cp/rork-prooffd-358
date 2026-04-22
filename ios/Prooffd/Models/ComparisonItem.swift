@@ -63,7 +63,7 @@ nonisolated enum ComparisonItem: Identifiable, Sendable {
         switch self {
         case .business: return "Business"
         case .trade:    return "Trade"
-        case .degree:   return "Degree"
+        case .degree:   return "Advanced Education"
         }
     }
 }
