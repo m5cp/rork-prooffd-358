@@ -6,6 +6,7 @@ struct ToolkitTabView: View {
     @State private var showTradeToolkits = false
     @State private var showDegreeGuides = false
     @State private var showPaywall = false
+    @State private var showROICalc = false
 
     var body: some View {
         NavigationStack {
@@ -41,10 +42,21 @@ struct ToolkitTabView: View {
                         iconColor: Color(hex: "818CF8"),
                         title: "Education Guides",
                         subtitle: "Test prep, ROI calculator & planning guides",
-                        meta: "SAT, ACT, GRE, GMAT + guides  •  Free + Pro",
+                        meta: "Test prep, planning guides & more",
                         badge: nil
                     ) {
                         showDegreeGuides = true
+                    }
+
+                    toolkitCard(
+                        icon: "chart.line.uptrend.xyaxis",
+                        iconColor: Color.orange,
+                        title: "ROI Calculator",
+                        subtitle: "Is this path worth the time and money?",
+                        meta: "Works for any path  •  Free",
+                        badge: nil
+                    ) {
+                        showROICalc = true
                     }
 
                     Color.clear.frame(height: 40)
@@ -82,6 +94,7 @@ struct ToolkitTabView: View {
             .sheet(isPresented: $showTradeToolkits) { TradeToolkitListView() }
             .sheet(isPresented: $showDegreeGuides) { DegreeGuidesView() }
             .sheet(isPresented: $showPaywall) { PaywallView() }
+            .sheet(isPresented: $showROICalc) { DegreeROICalculatorView() }
         }
     }
 

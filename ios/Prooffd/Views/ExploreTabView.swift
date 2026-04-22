@@ -21,6 +21,7 @@ struct ExploreTabView: View {
     @State private var showLongQuiz = false
     @State private var matchScoresUpdated: Bool = false
     @State private var showScoreUpdateBanner: Bool = false
+    @State private var showROICalcFromExplore = false
 
     var body: some View {
         NavigationStack {
@@ -32,6 +33,8 @@ struct ExploreTabView: View {
                     }
                     bestMatchHeroCard
                     longQuizRefineCard
+                        .padding(.horizontal, 16)
+                    roiCalculatorShortcut
                         .padding(.horizontal, 16)
                     if let plan = weeklyPlan {
                         actionPlanSummaryCard(plan: plan)
@@ -205,6 +208,46 @@ struct ExploreTabView: View {
                     showLongQuiz = false
                 }
             )
+        }
+    }
+
+    private var roiCalculatorShortcut: some View {
+        Button { showROICalcFromExplore = true } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.orange.opacity(0.12))
+                        .frame(width: 40, height: 40)
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .foregroundStyle(Color.orange)
+                        .font(.system(size: 18))
+                }
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Is this path worth it?")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Theme.textPrimary)
+                    Text("Calculate your real ROI before committing — free")
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+                Spacer()
+                Text("Calculate")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Color.orange)
+                    .clipShape(Capsule())
+            }
+            .padding(14)
+            .background(Theme.cardBackground)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14)
+                .stroke(Color.orange.opacity(0.25), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .sheet(isPresented: $showROICalcFromExplore) {
+            DegreeROICalculatorView()
         }
     }
 
