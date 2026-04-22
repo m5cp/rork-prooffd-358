@@ -8,6 +8,7 @@ struct PathDetailView: View {
     @State private var showPaywall: Bool = false
     @State private var showShareSheet: Bool = false
     @State private var showBuildAdded: Bool = false
+    @State private var showSetPathConfirm: Bool = false
 
     private var path: BusinessPath { result.businessPath }
     private var alreadyBuilding: Bool { appState.hasBuild(for: path.id) }
@@ -803,8 +804,61 @@ struct PathDetailView: View {
         }
     }
 
+    private var setAsMyPathButton: some View {
+        let isMyPath = appState.myPath?.id == result.businessPath.id
+        return Button {
+            if isMyPath {
+                appState.clearMyPath()
+            } else {
+                showSetPathConfirm = true
+            }
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: isMyPath ? "flag.fill" : "flag")
+                    .foregroundStyle(isMyPath ? Theme.accent : Theme.textSecondary)
+                Text(isMyPath ? "This Is My Path" : "Set as My Path")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(isMyPath ? Theme.accent : Theme.textPrimary)
+                Spacer()
+                if isMyPath {
+                    Text("Active")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Theme.accent)
+                        .padding(.horizontal, 8).padding(.vertical, 3)
+                        .background(Theme.accent.opacity(0.12))
+                        .clipShape(Capsule())
+                }
+            }
+            .padding(14)
+            .background(isMyPath ? Theme.accent.opacity(0.06) : Theme.cardBackground)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12)
+                .stroke(isMyPath ? Theme.accent.opacity(0.3) : Theme.border, lineWidth: 1))
+        }
+        .confirmationDialog(
+            "Set as My Path?",
+            isPresented: $showSetPathConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Set \(result.businessPath.name) as My Path") {
+                appState.setMyPath(
+                    id: result.businessPath.id,
+                    name: result.businessPath.name,
+                    icon: result.businessPath.icon,
+                    type: .business,
+                    matchScore: result.scorePercentage
+                )
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This focuses your Progress tab on \(result.businessPath.name) and gives you a milestone checklist to track your journey.")
+        }
+    }
+
     private var actionButtons: some View {
         VStack(spacing: 12) {
+            setAsMyPathButton
+
             Button {
                 showShareSheet = true
             } label: {

@@ -892,6 +892,7 @@ struct CareerPathDetailSheet: View {
     @State private var showPaywall: Bool = false
     @State private var showPlanAdded: Bool = false
     @State private var showShareCard: Bool = false
+    @State private var showSetPathConfirm: Bool = false
 
     private var isFav: Bool { appState.isEducationFavorite(career.id) }
     private var isHidden: Bool { appState.isEducationHidden(career.id) }
@@ -904,6 +905,7 @@ struct CareerPathDetailSheet: View {
                     deliveryBadge
                     statsBar
                     addToPlanButton
+                    setAsMyPathButton
                     favHideBar
                     overviewCard
                     firstStepsCard
@@ -954,6 +956,57 @@ struct CareerPathDetailSheet: View {
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         .presentationBackground(Theme.background)
+    }
+
+    private var setAsMyPathButton: some View {
+        let isMyPath = appState.myPath?.id == career.id
+        return Button {
+            if isMyPath {
+                appState.clearMyPath()
+            } else {
+                showSetPathConfirm = true
+            }
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: isMyPath ? "flag.fill" : "flag")
+                    .foregroundStyle(isMyPath ? Theme.accent : Theme.textSecondary)
+                Text(isMyPath ? "This Is My Path" : "Set as My Path")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(isMyPath ? Theme.accent : Theme.textPrimary)
+                Spacer()
+                if isMyPath {
+                    Text("Active")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Theme.accent)
+                        .padding(.horizontal, 8).padding(.vertical, 3)
+                        .background(Theme.accent.opacity(0.12))
+                        .clipShape(Capsule())
+                }
+            }
+            .padding(14)
+            .background(isMyPath ? Theme.accent.opacity(0.06) : Theme.cardBackground)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12)
+                .stroke(isMyPath ? Theme.accent.opacity(0.3) : Theme.border, lineWidth: 1))
+        }
+        .confirmationDialog(
+            "Set as My Path?",
+            isPresented: $showSetPathConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Set \(career.title) as My Path") {
+                appState.setMyPath(
+                    id: career.id,
+                    name: career.title,
+                    icon: career.icon,
+                    type: .trade,
+                    matchScore: appState.educationScore(for: career.id)
+                )
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This focuses your Progress tab on \(career.title) and gives you a milestone checklist to track your journey.")
+        }
     }
 
     private var addToPlanButton: some View {
