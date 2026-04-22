@@ -232,9 +232,9 @@ struct OnboardingView: View {
     private var stepContent: some View {
         Group {
             switch vm.currentStep {
-            case 0: pathSelectionStep
+            case 0: motivationStep
             case 1: workPreferenceStep
-            case 2: workEnvironmentStep
+            case 2: situationGoalStep
             case 3: workConditionsStep
             case 4: budgetStep
             case 5: hoursStep
@@ -251,54 +251,105 @@ struct OnboardingView: View {
         .animation(.spring(duration: 0.4, bounce: 0.1), value: vm.currentStep)
     }
 
-    // MARK: - Step 0: Path Selection
+    // MARK: - Step 0: Motivation
 
-    private var pathSelectionStep: some View {
-        VStack(spacing: 14) {
-            ForEach([ChosenPath.business, .trades, .degree], id: \.rawValue) { path in
-                let isSelected = vm.chosenPath == path
+    private var motivationStep: some View {
+        VStack(spacing: 12) {
+            ForEach(MotivationGoal.allCases) { goal in
+                let isSelected = vm.motivationGoal == goal
                 Button {
                     withAnimation(.spring(duration: 0.35)) {
-                        vm.chosenPath = path
+                        vm.motivationGoal = goal
                     }
                 } label: {
                     HStack(spacing: 16) {
                         ZStack {
                             RoundedRectangle(cornerRadius: 14)
-                                .fill(isSelected ? path.color : path.color.opacity(0.12))
+                                .fill(isSelected ? Theme.accent : Theme.accent.opacity(0.12))
                                 .frame(width: 56, height: 56)
-                            Image(systemName: path.icon)
+                            Image(systemName: goal.icon)
                                 .font(.title2)
-                                .foregroundStyle(isSelected ? .white : path.color)
+                                .foregroundStyle(isSelected ? .black : Theme.accent)
                         }
-
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(path.title)
+                            Text(goal.rawValue)
                                 .font(.headline)
                                 .foregroundStyle(Theme.textPrimary)
-                            Text(path.subtitle)
+                            Text(goal.subtitle)
                                 .font(.caption)
                                 .foregroundStyle(Theme.textSecondary)
                                 .lineLimit(2)
                         }
-
                         Spacer(minLength: 4)
-
                         if isSelected {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.title2)
-                                .foregroundStyle(path.color)
+                                .foregroundStyle(Theme.accent)
                                 .transition(.scale.combined(with: .opacity))
                         }
                     }
                     .padding(16)
-                    .background(isSelected ? path.color.opacity(0.08) : Theme.cardBackground)
+                    .background(isSelected ? Theme.accent.opacity(0.08) : Theme.cardBackground)
                     .clipShape(.rect(cornerRadius: 18))
                     .overlay(
                         RoundedRectangle(cornerRadius: 18)
-                            .stroke(isSelected ? path.color : Theme.border, lineWidth: isSelected ? 2 : 0.5)
+                            .stroke(isSelected ? Theme.accent : Theme.border,
+                                    lineWidth: isSelected ? 2 : 0.5)
                     )
-                    .shadow(color: isSelected ? path.color.opacity(0.15) : .clear, radius: 12, y: 4)
+                    .shadow(color: isSelected ? Theme.accent.opacity(0.15) : .clear,
+                            radius: 12, y: 4)
+                }
+                .buttonStyle(.plain)
+                .sensoryFeedback(.selection, trigger: isSelected)
+            }
+        }
+    }
+
+    // MARK: - Step 2: Situation Goal
+
+    private var situationGoalStep: some View {
+        VStack(spacing: 12) {
+            ForEach(SituationGoal.allCases) { goal in
+                let isSelected = vm.situationGoal == goal
+                Button {
+                    withAnimation(.spring(duration: 0.35)) {
+                        vm.situationGoal = goal
+                    }
+                } label: {
+                    HStack(spacing: 16) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 14)
+                                .fill(isSelected ? Theme.accent : Theme.accent.opacity(0.12))
+                                .frame(width: 56, height: 56)
+                            Image(systemName: goal.icon)
+                                .font(.title2)
+                                .foregroundStyle(isSelected ? .black : Theme.accent)
+                        }
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(goal.rawValue)
+                                .font(.headline)
+                                .foregroundStyle(Theme.textPrimary)
+                            Text(goal.subtitle)
+                                .font(.caption)
+                                .foregroundStyle(Theme.textSecondary)
+                                .lineLimit(2)
+                        }
+                        Spacer(minLength: 4)
+                        if isSelected {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.title2)
+                                .foregroundStyle(Theme.accent)
+                                .transition(.scale.combined(with: .opacity))
+                        }
+                    }
+                    .padding(16)
+                    .background(isSelected ? Theme.accent.opacity(0.08) : Theme.cardBackground)
+                    .clipShape(.rect(cornerRadius: 18))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 18)
+                            .stroke(isSelected ? Theme.accent : Theme.border,
+                                    lineWidth: isSelected ? 2 : 0.5)
+                    )
                 }
                 .buttonStyle(.plain)
                 .sensoryFeedback(.selection, trigger: isSelected)
@@ -546,13 +597,13 @@ struct OnboardingView: View {
                 let isSelected = vm.educationWillingnesses.contains(edu)
                 Button {
                     withAnimation(.spring(duration: 0.3)) {
-                        vm.toggleEducation(edu)
+                        vm.selectEducation(edu)
                     }
                 } label: {
                     HStack(spacing: 14) {
                         Image(systemName: edu.icon)
                             .font(.body)
-                            .foregroundStyle(isSelected ? .white : Theme.accent)
+                            .foregroundStyle(isSelected ? .black : Theme.accent)
                             .frame(width: 40, height: 40)
                             .background(isSelected ? Theme.accent : Theme.accent.opacity(0.12))
                             .clipShape(.rect(cornerRadius: 10))
@@ -569,7 +620,7 @@ struct OnboardingView: View {
 
                         Spacer(minLength: 4)
 
-                        Image(systemName: isSelected ? "checkmark.square.fill" : "square")
+                        Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                             .font(.title3)
                             .foregroundStyle(isSelected ? Theme.accent : Theme.textTertiary)
                     }
@@ -642,9 +693,8 @@ struct OnboardingView: View {
             VStack(spacing: 12) {
                 if vm.currentStep == vm.totalSteps - 1 {
                     Button {
-                        guard let path = vm.chosenPath else { return }
                         let profile = vm.buildProfile()
-                        onComplete(path, profile)
+                        onComplete(profile.derivedChosenPath, profile)
                     } label: {
                         HStack(spacing: 8) {
                             Text("See My Matches")

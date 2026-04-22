@@ -6,7 +6,8 @@ class OnboardingViewModel {
     var direction: Edge = .trailing
     var appeared: Bool = false
 
-    var chosenPath: ChosenPath?
+    var motivationGoal: MotivationGoal?
+    var situationGoal: SituationGoal?
     var workPreference: WorkPreference?
     var workEnvironments: [WorkEnvironment] = []
     var workConditions: [WorkCondition] = []
@@ -24,9 +25,9 @@ class OnboardingViewModel {
 
     var canAdvance: Bool {
         switch currentStep {
-        case 0: return chosenPath != nil
+        case 0: return motivationGoal != nil
         case 1: return workPreference != nil
-        case 2: return !workEnvironments.isEmpty
+        case 2: return situationGoal != nil
         case 3: return !workConditions.isEmpty
         case 4: return budget != nil
         case 5: return hoursPerDay != nil
@@ -38,28 +39,28 @@ class OnboardingViewModel {
 
     var stepTitle: String {
         switch currentStep {
-        case 0: return "What's your path?"
+        case 0: return "What matters most to you?"
         case 1: return "What kind of work?"
-        case 2: return "Where do you work best?"
+        case 2: return "What sounds most like your situation?"
         case 3: return "What are you okay with?"
         case 4: return "What can you invest?"
         case 5: return "How much time per day?"
         case 6: return "How fast do you need income?"
-        case 7: return "Training you're open to?"
+        case 7: return "How much training would you consider?"
         default: return ""
         }
     }
 
     var stepSubtitle: String {
         switch currentStep {
-        case 0: return "Choose the direction that fits you best.\nYou can explore the others later."
-        case 1: return "Are you more hands-on or screen-based?"
-        case 2: return "Pick all that appeal to you."
-        case 3: return "Select everything you're comfortable with."
+        case 0: return "This helps us understand what kind of path fits your life."
+        case 1: return "Pick the style that fits you best."
+        case 2: return "Choose the one that describes you right now."
+        case 3: return "Select everything you are comfortable with."
         case 4: return "Your upfront budget to get started."
-        case 5: return "Be realistic — consistency beats long hours."
-        case 6: return "This helps us prioritize fast-start options."
-        case 7: return "Select all levels you'd consider."
+        case 5: return "Be realistic — consistency matters more than long hours."
+        case 6: return "This helps us prioritize the right options for you."
+        case 7: return "Choose the highest level of training you would consider."
         default: return ""
         }
     }
@@ -96,16 +97,14 @@ class OnboardingViewModel {
         }
     }
 
-    func toggleEducation(_ edu: EducationWillingness) {
-        if educationWillingnesses.contains(edu) {
-            educationWillingnesses.removeAll { $0 == edu }
-        } else {
-            educationWillingnesses.append(edu)
-        }
+    func selectEducation(_ edu: EducationWillingness) {
+        educationWillingnesses = [edu]
     }
 
     func buildProfile() -> UserProfile {
         var profile = UserProfile()
+        profile.motivationGoal = motivationGoal
+        profile.situationGoal = situationGoal
         profile.workPreference = workPreference
         profile.workEnvironments = workEnvironments
         profile.workConditions = workConditions
