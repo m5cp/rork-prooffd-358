@@ -67,6 +67,12 @@ class AppState {
     var pendingSharePrompt: SharePromptType?
     var dailyRewards: DailyRewardTracker = DailyRewardTracker()
     var dailyMicroAction: DailyMicroActionTracker = DailyMicroActionTracker()
+    var myPath: MyPath? = nil {
+        didSet { saveMyPath() }
+    }
+    var realWorldWins: [RealWorldWin] = [] {
+        didSet { saveRealWorldWins() }
+    }
 
     var hasUsedWhatIf: Bool {
         get { UserDefaults.standard.bool(forKey: "hasUsedWhatIf") }
@@ -115,6 +121,8 @@ class AppState {
         loadUnlockedAchievements()
         loadBuilds()
         loadPlanItems()
+        loadMyPath()
+        loadRealWorldWins()
         assignAvatarIfNeeded()
         if let raw = savedChosenPath, let path = ChosenPath(rawValue: raw) {
             chosenPath = path
@@ -290,6 +298,70 @@ class AppState {
             name: Notification.Name("MatchScoresUpdated"),
             object: nil
         )
+    }
+
+    // MARK: - My Path
+
+    func setMyPath(id: String, name: String, icon: String,
+                   type: CommittedPathType, matchScore: Int) {
+        let milestones = MilestoneGenerator.milestones(for: type,
+                                                       pathName: name)
+        myPath = MyPath(id: id, name: name, icon: icon, type: type,
+                       matchScore: matchScore, dateSet: Date(),
+                       milestones: milestones)
+    }
+
+    func clearMyPath() {
+        myPath = nil
+    }
+
+    func completeMilestone(id: String) {
+        guard var path = myPath else { return }
+        if let index = path.milestones.firstIndex(where: { $0.id == id }) {
+            path.milestones[index].isCompleted = true
+            path.milestones[index].dateCompleted = Date()
+        }
+        myPath = path
+    }
+
+    func logRealWorldWin(type: WinType, note: String = "") {
+        let win = RealWorldWin(id: UUID().uuidString,
+                               title: type.rawValue,
+                               date: Date(),
+                               note: note)
+        realWorldWins.insert(win, at: 0)
+    }
+
+    func deleteRealWorldWin(id: String) {
+        realWorldWins.removeAll { $0.id == id }
+    }
+
+    private func saveMyPath() {
+        if let path = myPath,
+           let data = try? JSONEncoder().encode(path) {
+            UserDefaults.standard.set(data, forKey: "myCommittedPath")
+        } else {
+            UserDefaults.standard.removeObject(forKey: "myCommittedPath")
+        }
+    }
+
+    private func loadMyPath() {
+        guard let data = UserDefaults.standard.data(forKey: "myCommittedPath"),
+              let saved = try? JSONDecoder().decode(MyPath.self, from: data) else { return }
+        myPath = saved
+    }
+
+    private func saveRealWorldWins() {
+        if let data = try? JSONEncoder().encode(realWorldWins) {
+            UserDefaults.standard.set(data, forKey: "realWorldWins")
+        }
+    }
+
+    private func loadRealWorldWins() {
+        if let data = UserDefaults.standard.data(forKey: "realWorldWins"),
+           let saved = try? JSONDecoder().decode([RealWorldWin].self, from: data) {
+            realWorldWins = saved
+        }
     }
 
     func educationScore(for id: String) -> Int {
