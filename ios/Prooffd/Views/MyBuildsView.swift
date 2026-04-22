@@ -11,6 +11,8 @@ struct MyBuildsView: View {
     @State private var showProgressShare: Bool = false
     @State private var selectedEducationPath: CareerPath?
     @State private var selectedDegreeRecord: DegreeCareerRecord?
+    @State private var weeklyPlan: WeeklyActionPlan? = nil
+    @State private var showActionPlan = false
 
     private var isEmpty: Bool {
         appState.builds.isEmpty && appState.planItems.isEmpty
@@ -20,6 +22,9 @@ struct MyBuildsView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
+                    if let plan = weeklyPlan {
+                        actionPlanSummaryCard(plan: plan)
+                    }
                     if isEmpty {
                         emptyState
                     } else {
@@ -77,6 +82,20 @@ struct MyBuildsView: View {
             .sheet(item: $selectedDegreeRecord) { record in
                 DegreeCareerDetailSheet(record: record)
             }
+            .sheet(isPresented: $showActionPlan) {
+                if weeklyPlan != nil {
+                    WeeklyActionPlanView(plan: Binding(
+                        get: { self.weeklyPlan! },
+                        set: { self.weeklyPlan = $0; ActionPlanGenerator.save($0) }
+                    ))
+                }
+            }
+            .onAppear {
+                if let topResult = appState.matchResults.first {
+                    weeklyPlan = ActionPlanGenerator.load(for: topResult.businessPath.id)
+                        ?? ActionPlanGenerator.generate(from: topResult)
+                }
+            }
             .overlay {
                 if showStepCelebration {
                     StepCompletionOverlay(
@@ -98,6 +117,32 @@ struct MyBuildsView: View {
             }
             .animation(.spring(duration: 0.4), value: showStepCelebration)
         }
+    }
+
+    private func actionPlanSummaryCard(plan: WeeklyActionPlan) -> some View {
+        let completed = plan.actions.filter { $0.isCompleted }.count
+        return Button { showActionPlan = true } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Theme.accent.opacity(0.12)).frame(width: 40, height: 40)
+                    Image(systemName: "calendar.badge.checkmark")
+                        .foregroundStyle(Theme.accent).font(.system(size: 18))
+                }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Your Week 1 Plan").font(.subheadline.weight(.semibold)).foregroundStyle(Theme.textPrimary)
+                    Text("\(completed)/7 days complete").font(.caption).foregroundStyle(Theme.textSecondary)
+                    ProgressView(value: Double(completed), total: 7).tint(Theme.accent).frame(height: 4)
+                }
+                Spacer()
+                Image(systemName: "chevron.right").foregroundStyle(Theme.textTertiary).font(.caption)
+            }
+            .padding(14)
+            .background(Theme.cardBackground)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.border, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
     }
 
     private func sectionLabel(_ title: String, icon: String, color: Color) -> some View {
