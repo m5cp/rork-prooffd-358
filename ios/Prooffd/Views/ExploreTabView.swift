@@ -13,6 +13,9 @@ struct ExploreTabView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var showShareEditor: Bool = false
     @State private var shareScreenImage: UIImage?
+    @State private var comparisonSelections: [ComparisonItem] = []
+    @State private var showComparison = false
+    @State private var showComparisonHint = false
 
     var body: some View {
         NavigationStack {
@@ -21,6 +24,7 @@ struct ExploreTabView: View {
                     bestMatchHeroCard
                     filterBar
                     educationOverviewSection
+                    CommunityProofWallView().padding(.top, 12)
                     shareLoopSection
                     Color.clear.frame(height: 40)
                 }
@@ -31,6 +35,33 @@ struct ExploreTabView: View {
             .navigationTitle("Explore")
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(Theme.background, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        if comparisonSelections.count == 2 { showComparison = true }
+                        else { showComparisonHint = true }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "arrow.left.arrow.right")
+                            if comparisonSelections.count > 0 {
+                                Text("\(comparisonSelections.count)/2").font(.caption.weight(.bold))
+                            }
+                        }
+                        .foregroundStyle(comparisonSelections.count == 2 ? Theme.accent : Theme.textSecondary)
+                    }
+                }
+            }
+            .sheet(isPresented: $showComparison) {
+                if comparisonSelections.count == 2 {
+                    CareerComparisonView(itemA: comparisonSelections[0], itemB: comparisonSelections[1])
+                        .onDisappear { comparisonSelections = [] }
+                }
+            }
+            .alert("Select Two Paths to Compare", isPresented: $showComparisonHint) {
+                Button("Got It") {}
+            } message: {
+                Text("Tap the compare icon on any career card to select it, then tap a second to compare them side by side.")
+            }
             .sheet(item: $selectedResult) { result in
                 PathDetailView(result: result)
             }
