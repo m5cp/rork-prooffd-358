@@ -286,6 +286,10 @@ class AppState {
         saveProfile()
         UserDefaults.standard.set(true, forKey: "longQuizCompleted")
         runMatching()
+        NotificationCenter.default.post(
+            name: Notification.Name("MatchScoresUpdated"),
+            object: nil
+        )
     }
 
     func educationScore(for id: String) -> Int {

@@ -19,11 +19,17 @@ struct ExploreTabView: View {
     @State private var weeklyPlan: WeeklyActionPlan? = nil
     @State private var showActionPlan = false
     @State private var showLongQuiz = false
+    @State private var matchScoresUpdated: Bool = false
+    @State private var showScoreUpdateBanner: Bool = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
+                    if showScoreUpdateBanner {
+                        scoreUpdateBanner
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                    }
                     bestMatchHeroCard
                     longQuizRefineCard
                         .padding(.horizontal, 16)
@@ -101,6 +107,20 @@ struct ExploreTabView: View {
                         ?? ActionPlanGenerator.generate(from: topResult)
                 }
             }
+            .onReceive(NotificationCenter.default.publisher(
+                for: Notification.Name("MatchScoresUpdated")
+            )) { _ in
+                withAnimation(.spring(response: 0.5)) {
+                    matchScoresUpdated.toggle()
+                    showScoreUpdateBanner = true
+                }
+                Task {
+                    try? await Task.sleep(for: .seconds(3))
+                    withAnimation(.easeOut(duration: 0.4)) {
+                        showScoreUpdateBanner = false
+                    }
+                }
+            }
             .sheet(isPresented: $showActionPlan) {
                 if weeklyPlan != nil {
                     WeeklyActionPlanView(plan: Binding(
@@ -110,6 +130,25 @@ struct ExploreTabView: View {
                 }
             }
         }
+    }
+
+    private var scoreUpdateBanner: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "arrow.up.circle.fill")
+                .foregroundStyle(Theme.accent)
+            Text("Match scores updated")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Theme.textPrimary)
+            Spacer()
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(Theme.accent)
+        }
+        .padding(14)
+        .background(Theme.cardBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12)
+            .stroke(Theme.accent.opacity(0.3), lineWidth: 1))
+        .padding(.horizontal, 16)
     }
 
     private var longQuizRefineCard: some View {
@@ -458,6 +497,9 @@ struct ExploreTabView: View {
             Text("\(score)%")
                 .font(.title2.weight(.bold))
                 .foregroundStyle(color)
+                .contentTransition(.numericText(countsDown: false))
+                .animation(.spring(response: 0.6, dampingFraction: 0.7),
+                           value: matchScoresUpdated)
             Text("match")
                 .font(.caption2.weight(.medium))
                 .foregroundStyle(Theme.textTertiary)
@@ -588,6 +630,9 @@ struct ExploreTabView: View {
                         .font(.system(size: 9))
                     Text("\(result.businessPath.aiProofRating)/100")
                         .font(.caption2.weight(.semibold))
+                        .contentTransition(.numericText(countsDown: false))
+                        .animation(.spring(response: 0.6, dampingFraction: 0.7),
+                                   value: matchScoresUpdated)
                 }
                 .foregroundStyle(catColor)
 
