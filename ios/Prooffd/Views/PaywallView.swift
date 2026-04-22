@@ -294,7 +294,7 @@ struct PaywallView: View {
                                     .clipShape(.capsule)
                             }
                         }
-                        Text("\(yearlyPrice)/year \u{2022} Cancel anytime")
+                        Text("Billed yearly \u{2022} Cancel anytime")
                             .font(.caption)
                             .foregroundStyle(Theme.textSecondary)
                     }
@@ -302,10 +302,10 @@ struct PaywallView: View {
                     Spacer()
 
                     VStack(alignment: .trailing, spacing: 2) {
-                        Text(weeklyPrice)
+                        Text("\(yearlyPrice)/yr")
                             .font(.title3.weight(.bold))
                             .foregroundStyle(Theme.textPrimary)
-                        Text("per week")
+                        Text("about \(weeklyPrice)/wk")
                             .font(.caption2)
                             .foregroundStyle(Theme.textTertiary)
                     }
