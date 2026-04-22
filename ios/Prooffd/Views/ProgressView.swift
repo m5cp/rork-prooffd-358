@@ -3,13 +3,17 @@ import SwiftUI
 struct ProgressTabView: View {
     @Environment(AppState.self) private var appState
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @State private var showLogWin = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
-                    streakSection
+                    myPathHeroSection
+                    milestoneSection
+                    realWorldWinsSection
                     readinessSection
+                    streakSection
                     achievementsSection
                     Color.clear.frame(height: 20)
                 }
@@ -287,6 +291,260 @@ struct ProgressTabView: View {
         case 26...50: return Theme.accentBlue
         case 51...75: return Color(hex: "34D399")
         default: return Theme.accent
+        }
+    }
+
+    private var myPathHeroSection: some View {
+        Group {
+            if let path = appState.myPath {
+                VStack(spacing: 0) {
+                    HStack(spacing: 12) {
+                        Text(path.icon).font(.title)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("My Path")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Theme.textSecondary)
+                            Text(path.name)
+                                .font(.headline)
+                                .foregroundStyle(Theme.textPrimary)
+                        }
+                        Spacer()
+                        VStack(alignment: .trailing, spacing: 3) {
+                            Text("\(path.matchScore)%")
+                                .font(.title2.weight(.bold))
+                                .foregroundStyle(Theme.accent)
+                            Text("match")
+                                .font(.caption2)
+                                .foregroundStyle(Theme.textSecondary)
+                        }
+                    }
+                    .padding(16)
+
+                    Divider().background(Theme.border).padding(.horizontal, 16)
+
+                    let completed = path.milestones.filter { $0.isCompleted }.count
+                    let total = max(path.milestones.count, 1)
+
+                    VStack(spacing: 8) {
+                        HStack {
+                            Text("\(completed) of \(total) milestones complete")
+                                .font(.caption)
+                                .foregroundStyle(Theme.textSecondary)
+                            Spacer()
+                            Text("\(Int(Double(completed) / Double(total) * 100))%")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(Theme.accent)
+                        }
+                        ProgressView(value: Double(completed), total: Double(total))
+                            .tint(Theme.accent)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 16)
+                }
+                .background(
+                    LinearGradient(
+                        colors: [Theme.accent.opacity(0.06), Theme.cardBackground],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .overlay(RoundedRectangle(cornerRadius: 14)
+                    .stroke(Theme.accent.opacity(0.2), lineWidth: 1))
+            } else {
+                Button {
+                    appState.selectedTab = 0
+                } label: {
+                    HStack(spacing: 14) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Theme.accent.opacity(0.12))
+                                .frame(width: 40, height: 40)
+                            Image(systemName: "flag.fill")
+                                .foregroundStyle(Theme.accent)
+                                .font(.system(size: 18))
+                        }
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Set Your Path")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Theme.textPrimary)
+                            Text("Commit to a career and unlock your milestone checklist")
+                                .font(.caption)
+                                .foregroundStyle(Theme.textSecondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .foregroundStyle(Theme.textTertiary)
+                            .font(.caption)
+                    }
+                    .padding(14)
+                    .background(Theme.cardBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .overlay(RoundedRectangle(cornerRadius: 14)
+                        .stroke(Theme.border, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var milestoneSection: some View {
+        if let path = appState.myPath {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack {
+                    Image(systemName: "checklist")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(Theme.accent)
+                    Text("Milestones")
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(Theme.textPrimary)
+                    Spacer()
+                }
+
+                VStack(spacing: 8) {
+                    ForEach(path.milestones) { milestone in
+                        Button {
+                            if !milestone.isCompleted {
+                                withAnimation(.spring(response: 0.3)) {
+                                    appState.completeMilestone(id: milestone.id)
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 12) {
+                                ZStack {
+                                    Circle()
+                                        .fill(milestone.isCompleted ? Theme.accent : Theme.cardBackgroundLight)
+                                        .frame(width: 28, height: 28)
+                                    if milestone.isCompleted {
+                                        Image(systemName: "checkmark")
+                                            .font(.caption.weight(.bold))
+                                            .foregroundStyle(.black)
+                                    } else {
+                                        Image(systemName: milestone.category.icon)
+                                            .font(.system(size: 11))
+                                            .foregroundStyle(Theme.textTertiary)
+                                    }
+                                }
+                                Text(milestone.title)
+                                    .font(.subheadline)
+                                    .foregroundStyle(milestone.isCompleted ? Theme.textSecondary : Theme.textPrimary)
+                                    .strikethrough(milestone.isCompleted, color: Theme.textTertiary)
+                                    .multilineTextAlignment(.leading)
+                                Spacer()
+                                if let date = milestone.dateCompleted {
+                                    Text(date.formatted(.relative(presentation: .named)))
+                                        .font(.caption2)
+                                        .foregroundStyle(Theme.textTertiary)
+                                }
+                            }
+                            .padding(12)
+                            .background(milestone.isCompleted ? Theme.cardBackgroundLight : Theme.cardBackground)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .overlay(RoundedRectangle(cornerRadius: 10)
+                                .stroke(milestone.isCompleted ? Theme.accent.opacity(0.15) : Theme.border, lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+    }
+
+    private var realWorldWinsSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                Image(systemName: "trophy.fill")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(Color(hex: "FBBF24"))
+                Text("Real-World Wins")
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(Theme.textPrimary)
+                Spacer()
+                Button {
+                    showLogWin = true
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "plus")
+                            .font(.caption.weight(.bold))
+                        Text("Log Win")
+                            .font(.caption.weight(.bold))
+                    }
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 12).padding(.vertical, 6)
+                    .background(Theme.accent)
+                    .clipShape(Capsule())
+                }
+            }
+
+            if appState.realWorldWins.isEmpty {
+                HStack(spacing: 12) {
+                    Image(systemName: "flag.fill")
+                        .foregroundStyle(Theme.textTertiary)
+                        .font(.title3)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Log your first real-world win")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.textPrimary)
+                        Text("Made a call, sent an email, bought a tool \u{2014} it all counts")
+                            .font(.caption)
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding(14)
+                .background(Theme.cardBackground)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12)
+                    .stroke(Theme.border, lineWidth: 1))
+            } else {
+                VStack(spacing: 8) {
+                    ForEach(appState.realWorldWins.prefix(10)) { win in
+                        HStack(spacing: 12) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color(hex: "FBBF24").opacity(0.15))
+                                    .frame(width: 36, height: 36)
+                                Image(systemName: WinType.allCases.first {
+                                    $0.rawValue == win.title
+                                }?.icon ?? "star.fill")
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(Color(hex: "FBBF24"))
+                            }
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(win.title)
+                                    .font(.subheadline)
+                                    .foregroundStyle(Theme.textPrimary)
+                                if !win.note.isEmpty {
+                                    Text(win.note)
+                                        .font(.caption)
+                                        .foregroundStyle(Theme.textSecondary)
+                                        .lineLimit(1)
+                                }
+                            }
+                            Spacer()
+                            Text(win.date.formatted(.relative(presentation: .named)))
+                                .font(.caption2)
+                                .foregroundStyle(Theme.textTertiary)
+                        }
+                        .padding(12)
+                        .background(Theme.cardBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .overlay(RoundedRectangle(cornerRadius: 10)
+                            .stroke(Theme.border, lineWidth: 1))
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                appState.deleteRealWorldWin(id: win.id)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showLogWin) {
+            LogWinView()
         }
     }
 

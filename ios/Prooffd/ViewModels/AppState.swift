@@ -782,31 +782,35 @@ class AppState {
 
     var profileReadinessScore: Int {
         var score = 0
-        if !userProfile.selectedCategories.isEmpty { score += 12 }
-        if !userProfile.workEnvironments.isEmpty { score += 12 }
+        if userProfile.motivationGoal != nil { score += 12 }
         if !userProfile.workConditions.isEmpty { score += 12 }
-        if userProfile.budget != nil { score += 7 }
-        if userProfile.hoursPerDay != nil { score += 7 }
+        if userProfile.budget != nil { score += 10 }
+        if userProfile.hoursPerDay != nil { score += 8 }
+        if userProfile.incomeTimeline != nil { score += 8 }
         return min(score, 50)
     }
 
     var actionReadinessScore: Int {
         var score = 0
+
         if hasCompletedQuiz { score += 5 }
-        if exploredPathIDs.count >= 5 { score += 5 }
-        if exploredPathIDs.count >= 10 { score += 5 }
-        if favoritePathIDs.count >= 3 { score += 3 }
-        if !builds.isEmpty { score += 5 }
-        let totalCompleted = builds.flatMap(\.steps).filter(\.isCompleted).count
-        if totalCompleted >= 5 { score += 5 }
-        if totalCompleted >= 10 { score += 5 }
-        if hasUsedWhatIf { score += 3 }
-        if hasSharedResult { score += 3 }
-        if streakTracker.currentStreak >= 3 { score += 3 }
+        if UserDefaults.standard.bool(forKey: "longQuizCompleted") {
+            score += 8
+        }
+
+        if myPath != nil { score += 10 }
+
+        if let path = myPath {
+            let completed = path.milestones.filter { $0.isCompleted }.count
+            score += min(completed * 3, 15)
+        }
+
+        score += min(realWorldWins.count * 5, 15)
+
+        if exploredPathIDs.count >= 5 { score += 2 }
+        if !builds.isEmpty { score += 2 }
         if streakTracker.currentStreak >= 7 { score += 3 }
-        let hasEditedPlan = builds.contains { !$0.businessName.isEmpty || !$0.pricingNotes.isEmpty || !$0.strategyNotes.isEmpty || !$0.serviceNotes.isEmpty }
-        if hasEditedPlan { score += 2 }
-        if !completedChallengeWeeks.isEmpty { score += 3 }
+
         return min(score, 50)
     }
 
@@ -826,28 +830,27 @@ class AppState {
     var readinessTips: [String] {
         var tips: [String] = []
         if !hasCompletedQuiz {
-            tips.append("Complete the profile quiz to boost your score")
+            tips.append("Complete the quiz to personalize your matches")
         }
-        if exploredPathIDs.count < 5 {
-            tips.append("Explore more paths to increase readiness (+5 at 5 paths)")
+        if myPath == nil {
+            tips.append("Set a path on the Explore tab to unlock your milestone checklist")
         }
-        if builds.isEmpty {
-            tips.append("Start a build to add to your readiness score")
+        if let path = myPath {
+            let remaining = path.milestones.filter { !$0.isCompleted }
+            if let next = remaining.first {
+                tips.append("Next milestone: \(next.title)")
+            }
         }
-
-        if streakTracker.currentStreak < 3 {
-            tips.append("Build a 3-day streak for +3 readiness points")
+        if !UserDefaults.standard.bool(forKey: "longQuizCompleted") {
+            tips.append("Take the Precision Quiz on Explore for a more accurate match")
         }
-        if favoritePathIDs.count < 3 {
-            tips.append("Save 3 favorites to earn readiness points")
-        }
-        if !hasUsedWhatIf {
-            tips.append("Try What If mode to explore different scenarios")
+        if realWorldWins.isEmpty {
+            tips.append("Log your first real-world win to boost your score")
         }
         if tips.isEmpty {
-            tips.append("You're well-positioned \u{2014} explore your top matches!")
+            tips.append("You are making real progress \u{2014} keep going")
         }
-        return Array(tips.prefix(4))
+        return Array(tips.prefix(3))
     }
 
     // MARK: - Achievements
