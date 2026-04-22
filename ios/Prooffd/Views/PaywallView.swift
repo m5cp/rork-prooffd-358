@@ -5,7 +5,7 @@ struct PaywallView: View {
     @Environment(StoreViewModel.self) private var store
     @Environment(AppState.self) private var appState
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedPackageType: PackageType = .monthly
+    @State private var selectedPackageType: PackageType = .annual
     @State private var showTerms: Bool = false
     @State private var showPrivacy: Bool = false
 
@@ -100,12 +100,10 @@ struct PaywallView: View {
     }
 
     private func pickDefaultPackage() {
-        if resolvedMonthlyPackage != nil {
-            selectedPackageType = .monthly
-        } else if resolvedAnnualPackage != nil {
+        if resolvedAnnualPackage != nil {
             selectedPackageType = .annual
-        } else if resolvedLifetimePackage != nil {
-            selectedPackageType = .lifetime
+        } else if resolvedMonthlyPackage != nil {
+            selectedPackageType = .monthly
         }
     }
 
@@ -268,11 +266,10 @@ struct PaywallView: View {
 
     private var packageSelector: some View {
         VStack(spacing: 12) {
-            monthlyCard(package: resolvedMonthlyPackage)
             if resolvedAnnualPackage != nil {
                 annualCard(package: resolvedAnnualPackage)
             }
-            lifetimeCard(package: resolvedLifetimePackage)
+            monthlyCard(package: resolvedMonthlyPackage)
         }
     }
 
@@ -427,58 +424,6 @@ struct PaywallView: View {
         .sensoryFeedback(.selection, trigger: selectedPackageType)
     }
 
-    private func lifetimeCard(package: Package?) -> some View {
-        let isSelected = selectedPackageType == .lifetime
-        let priceString = package?.localizedPriceString ?? "$29.99"
-
-        return Button {
-            withAnimation(.spring(duration: 0.25)) {
-                selectedPackageType = .lifetime
-            }
-        } label: {
-            HStack(spacing: 14) {
-                selectionDot(isSelected: isSelected)
-
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("Lifetime")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Theme.textPrimary)
-                    Text("One-time purchase \u{2022} Never pay again")
-                        .font(.caption)
-                        .foregroundStyle(Theme.textSecondary)
-                }
-
-                Spacer()
-
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(priceString)
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(Theme.textPrimary)
-                    Text("one time")
-                        .font(.caption2)
-                        .foregroundStyle(Theme.textTertiary)
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
-            .background(
-                isSelected
-                    ? AnyShapeStyle(LinearGradient(
-                        colors: [Theme.accent.opacity(0.08), Theme.cardBackground],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                      ))
-                    : AnyShapeStyle(Theme.cardBackground)
-            )
-            .clipShape(.rect(cornerRadius: 14))
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(isSelected ? Theme.accent : Theme.border, lineWidth: isSelected ? 2 : 1)
-            )
-        }
-        .sensoryFeedback(.selection, trigger: selectedPackageType)
-    }
-
     private func selectionDot(isSelected: Bool) -> some View {
         ZStack {
             Circle()
@@ -571,8 +516,6 @@ struct PaywallView: View {
 
     private var purchaseButtonTitle: String {
         switch selectedPackageType {
-        case .lifetime:
-            return "Get Lifetime Access"
         case .monthly:
             if let pkg = resolvedMonthlyPackage,
                let intro = pkg.storeProduct.introductoryDiscount,
@@ -586,6 +529,8 @@ struct PaywallView: View {
                intro.paymentMode == .freeTrial {
                 return "Start Free Trial"
             }
+            return "Continue"
+        default:
             return "Continue"
         }
     }
@@ -621,13 +566,7 @@ struct PaywallView: View {
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(Theme.textSecondary)
 
-            Group {
-                if selectedPackageType == .lifetime {
-                    Text("One-time purchase. Lifetime access to all Pro features. No recurring charges. Payment will be charged to your Apple ID account at confirmation of purchase.")
-                } else {
-                    Text("Auto-renewable subscription. Payment will be charged to your Apple ID account at confirmation of purchase. Subscription automatically renews unless cancelled at least 24 hours before the end of the current period. You can manage and cancel your subscription in your Apple ID Account Settings.")
-                }
-            }
+            Text("Auto-renewable subscription. Payment will be charged to your Apple ID account at confirmation of purchase. Subscription automatically renews unless cancelled at least 24 hours before the end of the current period. You can manage and cancel your subscription in your Apple ID Account Settings.")
             .font(.caption2)
             .foregroundStyle(Theme.textTertiary)
             .multilineTextAlignment(.center)
@@ -685,18 +624,11 @@ struct PaywallView: View {
         })
     }
 
-    private var resolvedLifetimePackage: Package? {
-        guard let offering = store.offerings?.current else { return nil }
-        return offering.lifetime ?? offering.availablePackages.first(where: {
-            $0.storeProduct.subscriptionPeriod == nil
-        })
-    }
-
     private var selectedPackage: Package? {
         switch selectedPackageType {
         case .annual: return resolvedAnnualPackage
         case .monthly: return resolvedMonthlyPackage
-        case .lifetime: return resolvedLifetimePackage
+        default: return resolvedAnnualPackage ?? resolvedMonthlyPackage
         }
     }
 }

@@ -59,7 +59,7 @@ struct DegreeExplorePage: View {
         }
         .scrollIndicators(.hidden)
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("4-Year Degree Careers")
+        .navigationTitle("Advanced Education Careers")
         .navigationBarTitleDisplayMode(.large)
         .searchable(text: $searchText, prompt: "Search degree careers...")
         .sheet(item: $selectedCategory) { category in
