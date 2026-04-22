@@ -622,6 +622,353 @@ Never argue publicly. One gracious response to a negative review builds more tru
 
     static let guides: [VaultDocument] = [
         VaultDocument(
+            id: "how-to-form-llc",
+            title: "How to Form an LLC",
+            icon: "building.2.crop.circle.fill",
+            category: .guides,
+            description: "Step-by-step walkthrough — real costs, no surprises",
+            content: """
+HOW TO FORM AN LLC — A PLAIN-ENGLISH GUIDE
+What to expect, what it costs, and what to watch out for.
+
+⚠ IMPORTANT DISCLAIMER
+All fees and costs in this guide are general estimates
+based on typical ranges. Actual costs vary significantly
+by state, county, and city and change over time.
+Always verify current fees and requirements directly
+with your state's official Secretary of State website
+and your local city or county offices before filing
+anything. This guide is for educational purposes only
+and is not legal or financial advice.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WHAT YOU ARE ACTUALLY SETTING UP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+An LLC (Limited Liability Company) is a legal entity
+that separates you from your business. It is created
+by filing a document called Articles of Organization
+with your state government and paying a filing fee.
+
+Once formed, your business exists as its own legal
+entity. This means:
+  - Business debts are generally the business's
+    responsibility, not yours personally
+  - Contracts are signed in the company's name
+  - The business has its own tax ID (EIN)
+  - Business and personal finances are kept separate
+
+An LLC does not manage itself. You have to maintain
+it properly or the protections it offers can be lost.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THE REAL COST BREAKDOWN (ESTIMATES ONLY)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+The costs below are general estimates. Your actual
+costs depend entirely on your state, county, and city.
+Check all fees with official government sources before
+budgeting — do not rely solely on what any third-party
+service quotes you.
+
+ONE-TIME SETUP COSTS:
+
+  State filing fee (Articles of Organization)
+    → Estimated range: $50–$500
+    → Varies widely by state
+    → This fee is paid directly to your state
+    → See the state table below for rough estimates
+    → Always verify the current amount at your state's
+      official Secretary of State website
+
+  Registered agent
+    → Every LLC is required to have a registered agent
+      in its state of formation
+    → A registered agent receives official legal and
+      government documents on behalf of your business
+    → You can serve as your own registered agent if
+      you have a physical street address (not a P.O.
+      Box) in your state and are available during
+      normal business hours
+    → If you prefer not to serve as your own, you can
+      hire a registered agent service — fees vary
+    → This is not optional — every LLC must have one
+
+  EIN (Employer Identification Number)
+    → This is always free — apply at IRS.gov
+    → Takes approximately 5 minutes online
+    → You need this to open a business bank account
+      and to file taxes
+
+  Operating Agreement
+    → A written document outlining how your LLC is
+      managed and owned
+    → Some states legally require it — others do not
+    → Even where not required, it is strongly
+      recommended for your own protection
+    → See the LLC Operating Agreement template in
+      this Document Vault (Documents → Legal)
+    → Cost ranges from free (template) to several
+      hundred dollars (attorney-drafted)
+
+  Business bank account
+    → Required to keep business and personal
+      finances properly separated
+    → Fees vary by bank and account type
+    → Shop around — many banks offer business
+      checking options at various price points
+
+  Business license (city or county)
+    → Many cities and counties require one even for
+      home-based businesses
+    → Cost varies by location — typically $20–$100
+      per year in many areas but can be higher
+    → Check your city hall or county clerk website
+      for your specific requirements
+
+TOTAL ONE-TIME SETUP (rough estimate):
+  Do-it-yourself minimum: $50–$200 in most states
+  With professional assistance: $300–$1,500+
+  Actual cost depends entirely on your state and
+  what services you choose to use
+
+ANNUAL ONGOING COSTS (estimates):
+
+  State annual report or renewal fee
+    → Most states require a yearly or biennial
+      filing to keep your LLC active
+    → Estimated range: $0–$500+ per year
+    → Some states charge very little or nothing
+    → Some states are significantly more expensive
+    → Missing this filing can result in your LLC
+      being administratively dissolved
+
+  Registered agent renewal (if using a service)
+    → Varies by provider
+
+  Business license renewal
+    → Varies by city and county
+
+  Tax preparation
+    → Varies depending on complexity and whether
+      you use a CPA or file yourself
+
+TOTAL ANNUAL ONGOING (rough estimate):
+  Low: $0–$100 per year in low-fee states
+  Typical: $100–$300 per year
+  High-cost states: $500–$1,000+ per year
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STATE FILING FEE ESTIMATES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+These are rough estimates only. Fees change and
+vary. Always verify the current amount at your
+state's official Secretary of State website before
+filing. Searching "[YOUR STATE] LLC formation" or
+"[YOUR STATE] Secretary of State" will get you there.
+
+⚠ These numbers are approximate and may be outdated.
+Do not use them for budgeting without verifying.
+
+GENERALLY LOWER FEES (roughly $50–$100):
+  Arizona, Colorado, Hawaii, Iowa, Kentucky,
+  Mississippi, Missouri, Montana, New Mexico,
+  Michigan, Ohio
+
+MID-RANGE FEES (roughly $100–$200):
+  Alabama, Alaska, Connecticut, Florida, Georgia,
+  Idaho, Illinois, Indiana, Kansas, Louisiana,
+  Maine, Maryland, Minnesota, Nevada, New Hampshire,
+  New Jersey, New York, North Carolina, North Dakota,
+  Pennsylvania, Rhode Island, South Carolina,
+  South Dakota, Utah, Vermont, Virginia, Washington,
+  West Virginia, Wisconsin, Wyoming
+
+HIGHER FEES (roughly $200–$500+):
+  California, Delaware, Massachusetts, Tennessee,
+  Texas
+
+SPECIAL SITUATIONS:
+  California: Has a minimum $800 per year franchise
+    tax regardless of revenue — important to know
+    before forming here
+  New York: Requires new LLCs to publish a formation
+    notice in local newspapers — this can add
+    significant cost depending on the county
+  Nevada: Requires a state business license in
+    addition to the filing fee
+
+Again — these are rough estimates only. Verify
+everything with your state before filing.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP-BY-STEP: HOW TO FORM YOUR LLC
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 1: CHOOSE YOUR STATE
+Form your LLC in the state where you live and do
+business. Forming in a different state typically
+adds complexity and cost for small local businesses.
+Research your specific state's requirements before
+deciding otherwise.
+
+STEP 2: CHOOSE YOUR BUSINESS NAME
+  - Must include "LLC," "L.L.C.," or "Limited
+    Liability Company"
+  - Must be unique in your state — check availability
+    on your Secretary of State website
+  - Cannot include certain restricted words like
+    "Bank" or "Insurance" without special approval
+  - Check that a matching domain name and social
+    handles are available at the same time
+
+STEP 3: DECIDE ON YOUR REGISTERED AGENT
+  - Every LLC must designate a registered agent
+  - You can serve as your own if you have a
+    physical in-state address and are consistently
+    available during business hours
+  - If you prefer privacy or travel frequently,
+    registered agent services are available at
+    various price points — research your options
+  - This is a legal requirement, not optional
+
+STEP 4: FILE YOUR ARTICLES OF ORGANIZATION
+  - Go to your state's official Secretary of State
+    website and locate the LLC formation section
+  - Complete the online or paper form — typically
+    asks for your LLC name, registered agent
+    information, organizer details, and business
+    address
+  - Pay the state filing fee
+  - Processing times vary by state — from same
+    day to several weeks
+
+STEP 5: GET YOUR EIN
+  - Apply at IRS.gov at no cost
+  - Available immediately upon completion online
+  - You will need this to open a business bank
+    account and for tax purposes
+
+STEP 6: CREATE YOUR OPERATING AGREEMENT
+  - Use the LLC Operating Agreement template
+    in this Document Vault under Documents → Legal
+  - Keep it with your business records
+  - Bring it when opening a business bank account
+  - Some states legally require this document
+
+STEP 7: OPEN A BUSINESS BANK ACCOUNT
+  - Bring your EIN confirmation, Articles of
+    Organization, Operating Agreement, and ID
+  - Never mix personal and business funds — this
+    is critical for maintaining liability protection
+  - Compare business checking options at your
+    bank or credit union
+
+STEP 8: GET ANY REQUIRED BUSINESS LICENSES
+  - Check with your city hall and county clerk
+  - Some industries require additional state
+    licenses — see the Licenses & Permits Guide
+    in this vault
+
+STEP 9: SET UP BASIC BOOKKEEPING
+  - Track income and expenses from day one
+  - Set aside a portion of every payment for taxes
+    — as a self-employed LLC owner you are
+    responsible for self-employment tax in addition
+    to income tax
+  - Consult a CPA or tax professional before your
+    first tax season
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THINGS THAT OFTEN SURPRISE NEW LLC OWNERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. FORMATION SERVICES ADD THEIR OWN FEES
+   Many LLC formation services advertise at a low
+   price but do not prominently display the state
+   filing fee on top. The total cost is their
+   service fee plus the state fee. Ask for the
+   complete total before proceeding with any service.
+
+2. ANNUAL REPORTS ARE NOT OPTIONAL
+   Most states require an annual or biennial report
+   with a fee to keep your LLC active. Missing it
+   can result in your LLC being dissolved by the
+   state. Set a calendar reminder for your due date
+   and verify it with your Secretary of State.
+
+3. AN LLC DOES NOT AUTOMATICALLY PROTECT YOU
+   Liability protection only works if you maintain
+   proper separation between personal and business.
+   Mixing funds, signing personal guarantees, or
+   operating improperly can allow courts to hold
+   you personally liable regardless of the LLC.
+   Keep accounts separate. Always sign contracts
+   as a representative of the LLC, not personally.
+
+4. YOU STILL PAY SELF-EMPLOYMENT TAX
+   A single-member LLC taxed as a disregarded
+   entity does not reduce self-employment tax on
+   its own. You still pay SE tax on net profit.
+   An S-Corp election may reduce this once your
+   income reaches a certain level — see the
+   LLC vs Sole Prop vs S-Corp guide in this vault.
+
+5. FORMATION SERVICES ARE NOT ATTORNEYS
+   LLC formation and registered agent services
+   prepare and file documents — they do not
+   provide legal advice. If your business has
+   partners, investors, employees, or intellectual
+   property, consult a licensed attorney for your
+   specific situation.
+
+6. CALIFORNIA AND NEW YORK HAVE SPECIAL RULES
+   California has a minimum annual franchise tax
+   that applies regardless of revenue. New York
+   has a publication requirement that adds cost.
+   If you are in either state, research these
+   requirements specifically before forming.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+USING A FORMATION SERVICE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LLC formation services can be a convenient option
+if you prefer to have the filing handled for you.
+They vary in price, speed, and what is included.
+
+If you use one, ask these questions first:
+  - What is the total cost including the state fee?
+  - Is registered agent service included and for
+    how long?
+  - What happens after the first year — are there
+    renewal charges?
+  - Do they notify you about annual report deadlines?
+
+You can also file directly through your state's
+Secretary of State website without using any
+service. The process is the same — you fill out
+the form and pay the filing fee directly.
+
+Both approaches are valid. The right choice depends
+on how much time you want to spend and whether you
+prefer hands-on or hands-off.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NEXT STEPS AFTER FORMING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1. Complete the LLC Operating Agreement template
+     (Documents → Legal in this vault)
+  2. Review the Licenses & Permits Guide
+     (Documents → Guides) for what else you may need
+  3. Open a business bank account as soon as possible
+  4. Set up basic bookkeeping before your first invoice
+  5. Speak with a CPA before your first tax season
+
+Remember: forming the LLC is just the beginning.
+Maintaining it properly — keeping finances separate,
+filing annual reports on time, and operating in the
+company's name — is what actually protects you.
+""",
+            isPro: false
+        ),
+        VaultDocument(
             id: "llc-vs-sole-prop",
             title: "LLC vs Sole Prop vs S-Corp",
             icon: "building.columns.fill",
