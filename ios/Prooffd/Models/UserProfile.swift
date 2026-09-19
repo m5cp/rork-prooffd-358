@@ -362,6 +362,15 @@ nonisolated struct UserProfile: Codable, Sendable {
     var learningStyle: LearningStyle? = nil
     var incomeTarget: IncomeTarget? = nil
 
+    // Extended Precision Quiz answers (Q13–Q18). Optional so older saved
+    // profiles decode unchanged.
+    var aiConcern: AIConcern? = nil
+    var riskTolerance: RiskTolerance? = nil
+    var growthAmbition: GrowthAmbition? = nil
+    var credentialAppetite: CredentialAppetite? = nil
+    var scheduleShape: ScheduleShape? = nil
+    var clientType: ClientType? = nil
+
     /// Filename of a user-supplied profile photo, if they picked one.
     var profilePhotoFilename: String? = nil
 

@@ -298,6 +298,130 @@ enum MatchingEngine {
                 score += 7
             }
 
+            // MARK: Extended Precision Quiz (Q13–Q18)
+
+            // AI concern scales how heavily a path's AI-resistance rating counts.
+            // Someone who says it's their main worry gets hands-on, human-required
+            // work pushed up; someone who wants to use AI isn't penalised for it.
+            maxScore += 14
+            if let concern = profile.aiConcern {
+                let resistance = Double(path.aiProofRating) / 100.0
+                switch concern {
+                case .wantToUseIt:
+                    // Reward AI-augmented, digital paths instead of resistant ones.
+                    score += path.isDigital ? 14 : 8
+                default:
+                    let weight = concern.weight
+                    let resistanceScore = 14 * resistance
+                    let neutralScore = 14 * 0.65
+                    score += resistanceScore * weight + neutralScore * (1 - weight)
+                }
+            } else {
+                score += 10
+            }
+
+            maxScore += 8
+            if let risk = profile.riskTolerance {
+                switch risk {
+                case .steady:
+                    if path.requiresLicense && path.demandLevel == .high { score += 8 }
+                    else if path.requiresLicense { score += 6 }
+                    else if path.incomeLevel == .low { score += 3 }
+                    else { score += 4 }
+                case .balanced:
+                    score += 6
+                case .upside:
+                    if path.isScalable && path.incomeLevel == .high { score += 8 }
+                    else if path.isScalable { score += 6 }
+                    else if path.incomeLevel == .high { score += 5 }
+                    else { score += 2 }
+                }
+            } else {
+                score += 6
+            }
+
+            maxScore += 8
+            if let growth = profile.growthAmbition {
+                switch growth {
+                case .justMe:
+                    if path.soloFriendly && !path.isScalable { score += 8 }
+                    else if path.soloFriendly { score += 6 }
+                    else { score += 2 }
+                case .smallCrew:
+                    if path.isScalable && path.requiresPhysicalWork { score += 8 }
+                    else if path.isScalable { score += 6 }
+                    else { score += 4 }
+                case .realCompany:
+                    if path.isScalable { score += 8 }
+                    else { score += 2 }
+                }
+            } else {
+                score += 6
+            }
+
+            maxScore += 8
+            if let appetite = profile.credentialAppetite {
+                switch appetite {
+                case .happyTo:
+                    if path.requiresLicense { score += 8 }
+                    else { score += 5 }
+                case .ifWorthIt:
+                    if path.requiresLicense && path.incomeLevel == .high { score += 8 }
+                    else if path.requiresLicense { score += 5 }
+                    else { score += 6 }
+                case .ratherNot:
+                    if path.requiresLicense { score += 1 }
+                    else { score += 8 }
+                }
+            } else {
+                score += 6
+            }
+
+            maxScore += 8
+            if let schedule = profile.scheduleShape {
+                switch schedule {
+                case .weekdays:
+                    // Most trade and B2B work is inherently weekday work.
+                    score += 8
+                case .eveningsWeekends:
+                    if path.isDigital || path.soloFriendly { score += 8 }
+                    else if path.minHoursPerDay <= 2 { score += 6 }
+                    else { score += 2 }
+                case .flexible:
+                    score += 8
+                case .unpredictable:
+                    if path.soloFriendly && path.minHoursPerDay <= 3 { score += 8 }
+                    else if path.soloFriendly { score += 5 }
+                    else { score += 2 }
+                }
+            } else {
+                score += 6
+            }
+
+            maxScore += 6
+            if let client = profile.clientType {
+                let customer = path.customerType.lowercased()
+                let servesBusinesses = customer.contains("business") || customer.contains("commercial")
+                    || customer.contains("b2b") || customer.contains("compan") || customer.contains("office")
+                let servesPeople = customer.contains("homeowner") || customer.contains("individual")
+                    || customer.contains("consumer") || customer.contains("resident")
+                    || customer.contains("famil") || customer.contains("people") || customer.contains("client")
+                switch client {
+                case .individuals:
+                    if servesPeople { score += 6 }
+                    else if servesBusinesses { score += 2 }
+                    else { score += 4 }
+                case .businesses:
+                    if servesBusinesses { score += 6 }
+                    else if servesPeople { score += 2 }
+                    else { score += 4 }
+                case .noPreference:
+                    score += 6
+                }
+            } else {
+                score += 4
+            }
+
             let userMatchScore = maxScore > 0 ? max(0, score / maxScore) * 100 : 0
 
             let userInterests = Self.deriveInterests(from: profile)

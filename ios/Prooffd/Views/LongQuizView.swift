@@ -127,6 +127,12 @@ struct LongQuizView: View {
             case .physicalLimitation:  physicalLimitationStep
             case .learningStyle:       learningStep
             case .incomeTarget:        incomeTargetStep
+            case .aiConcern:           aiConcernStep
+            case .riskTolerance:       riskStep
+            case .growthAmbition:      growthStep
+            case .credentialAppetite:  credentialStep
+            case .scheduleShape:       scheduleStep
+            case .clientType:          clientTypeStep
             }
         }
         .id(vm.currentQuestion)
@@ -404,6 +410,78 @@ struct LongQuizView: View {
                 singleSelectCard(icon: target.icon, title: target.rawValue, subtitle: "",
                                  isSelected: vm.incomeTarget == target) {
                     vm.incomeTarget = target
+                }
+            }
+        }
+    }
+
+    private var aiConcernStep: some View {
+        VStack(spacing: 12) {
+            ForEach(AIConcern.allCases) { option in
+                singleSelectCard(icon: option.icon, title: option.rawValue,
+                                 subtitle: option.subtitle,
+                                 isSelected: vm.aiConcern == option) {
+                    vm.aiConcern = option
+                }
+            }
+        }
+    }
+
+    private var riskStep: some View {
+        VStack(spacing: 12) {
+            ForEach(RiskTolerance.allCases) { option in
+                singleSelectCard(icon: option.icon, title: option.rawValue,
+                                 subtitle: option.subtitle,
+                                 isSelected: vm.riskTolerance == option) {
+                    vm.riskTolerance = option
+                }
+            }
+        }
+    }
+
+    private var growthStep: some View {
+        VStack(spacing: 12) {
+            ForEach(GrowthAmbition.allCases) { option in
+                singleSelectCard(icon: option.icon, title: option.rawValue,
+                                 subtitle: option.subtitle,
+                                 isSelected: vm.growthAmbition == option) {
+                    vm.growthAmbition = option
+                }
+            }
+        }
+    }
+
+    private var credentialStep: some View {
+        VStack(spacing: 12) {
+            ForEach(CredentialAppetite.allCases) { option in
+                singleSelectCard(icon: option.icon, title: option.rawValue,
+                                 subtitle: option.subtitle,
+                                 isSelected: vm.credentialAppetite == option) {
+                    vm.credentialAppetite = option
+                }
+            }
+        }
+    }
+
+    private var scheduleStep: some View {
+        VStack(spacing: 12) {
+            ForEach(ScheduleShape.allCases) { option in
+                singleSelectCard(icon: option.icon, title: option.rawValue,
+                                 subtitle: option.subtitle,
+                                 isSelected: vm.scheduleShape == option) {
+                    vm.scheduleShape = option
+                }
+            }
+        }
+    }
+
+    private var clientTypeStep: some View {
+        VStack(spacing: 12) {
+            ForEach(ClientType.allCases) { option in
+                singleSelectCard(icon: option.icon, title: option.rawValue,
+                                 subtitle: option.subtitle,
+                                 isSelected: vm.clientType == option) {
+                    vm.clientType = option
                 }
             }
         }
