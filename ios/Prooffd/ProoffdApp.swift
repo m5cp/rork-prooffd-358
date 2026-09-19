@@ -51,6 +51,7 @@ struct RootView: View {
     @Environment(AppState.self) private var appState
     @State private var showLaunch: Bool = true
     @State private var showWelcomeIntro: Bool = false
+    @State private var showSplash: Bool = true
 
     var body: some View {
         ZStack {
@@ -94,6 +95,16 @@ struct RootView: View {
                     }
                 }
                 .transition(.opacity)
+            }
+
+            if showSplash {
+                SplashVideoView {
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        showSplash = false
+                    }
+                }
+                .transition(.opacity)
+                .zIndex(2)
             }
         }
     }
