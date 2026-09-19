@@ -1,77 +1,68 @@
 import SwiftUI
 
-/// Dimensional icon treatments that match the app's glossy 3D render art direction.
+/// Icon treatments for small UI chrome (reward banner, daily action, Siri hint,
+/// avatars, stat cells, settings rows).
 ///
-/// The bundled renders can't cover small UI chrome (reward gift, daily action,
-/// Siri hint, avatars, stat cells) — those need real symbols. These wrappers give
-/// those symbols the same depth language as the renders: a radial-lit body, a
-/// specular top highlight, a rim light, and an outer color glow, so nothing in
-/// the app reads as a flat circle with a symbol dropped in it.
+/// The primary treatment is `RenderedIcon`, which draws an actual bundled 3D
+/// render — a gradient behind an SF Symbol is still a flat icon, so anywhere a
+/// render exists we use the render. `GlossyIconTile` remains only for the
+/// settings list, where the rows are utility affordances with no matching
+/// artwork.
 
-// MARK: - GlossyIconOrb
+// MARK: - IconArtwork
 
-/// Spherical, studio-lit icon badge. Use for circular accents.
-struct GlossyIconOrb: View {
-    let symbol: String
+/// Maps UI slots to their bundled 3D render asset names.
+enum IconArtwork {
+    static let gift = "gift_box_ribbon"
+    static let target = "dart_target_bullseye"
+    static let microphone = "microphone_studio"
+    static let flame = "flame_icon"
+    static let hammer = "claw_hammer"
+    static let trophy = "trophy_cup_gold"
+}
+
+// MARK: - RenderedIcon
+
+/// A bundled glossy 3D render used as an icon, with a soft colored glow behind
+/// it so it sits on dark surfaces with depth.
+struct RenderedIcon: View {
+    let name: String
     var size: CGFloat = 44
-    var tint: Color = Theme.accent
-    /// Secondary color for the body gradient. Defaults to a deepened `tint`.
-    var shade: Color?
-    var pulses: Bool = false
-
-    private var deepTint: Color { shade ?? tint.opacity(0.55) }
+    /// Glow color behind the render. Keep close to the render's own hue.
+    var glow: Color = Theme.accent
+    /// Renders are generated with generous margins; scale up so the subject
+    /// fills the slot at small sizes.
+    var zoom: CGFloat = 1.18
 
     var body: some View {
         ZStack {
             Circle()
                 .fill(
                     RadialGradient(
-                        colors: [tint, deepTint],
-                        center: .init(x: 0.32, y: 0.24),
+                        colors: [glow.opacity(0.35), glow.opacity(0.10), .clear],
+                        center: .center,
                         startRadius: 0,
-                        endRadius: size * 0.92
+                        endRadius: size * 0.62
                     )
                 )
+                .blur(radius: size * 0.08)
 
-            // Specular highlight — the "lit from upper-left" cue.
-            Ellipse()
-                .fill(
-                    LinearGradient(
-                        colors: [.white.opacity(0.55), .white.opacity(0.04)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .frame(width: size * 0.62, height: size * 0.36)
-                .offset(y: -size * 0.24)
-                .blur(radius: size * 0.045)
-
-            Circle()
-                .strokeBorder(
-                    LinearGradient(
-                        colors: [.white.opacity(0.65), .white.opacity(0.05), tint.opacity(0.5)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1
-                )
-
-            Image(systemName: symbol)
-                .font(.system(size: size * 0.42, weight: .semibold))
-                .foregroundStyle(.white)
-                .shadow(color: .black.opacity(0.35), radius: 2, y: 1)
-                .symbolEffect(.pulse.wholeSymbol, isActive: pulses)
+            Image(name)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .scaleEffect(zoom)
+                .shadow(color: .black.opacity(0.45), radius: size * 0.07, y: size * 0.05)
+                .shadow(color: glow.opacity(0.4), radius: size * 0.14)
         }
         .frame(width: size, height: size)
-        .shadow(color: tint.opacity(0.45), radius: size * 0.22, y: size * 0.09)
-        .shadow(color: .black.opacity(0.3), radius: 3, y: 2)
+        .accessibilityHidden(true)
     }
 }
 
 // MARK: - GlossyIconTile
 
-/// Rounded-square sibling of `GlossyIconOrb`, for icons that sit in list rows
-/// alongside square artwork thumbnails.
+/// Rounded-square icon chip for the settings list, where rows are utility
+/// affordances with no matching 3D render.
 struct GlossyIconTile: View {
     let symbol: String
     var size: CGFloat = 44

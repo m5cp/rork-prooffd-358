@@ -59,6 +59,32 @@ nonisolated enum AvatarOption: String, CaseIterable, Identifiable, Codable, Send
         }
     }
 
+    /// Bundled glossy 3D render for this avatar.
+    var artwork: String {
+        switch self {
+        case .hare: return "rabbit_head_3d"
+        case .tortoise: return "tortoise_3d_icon"
+        case .bird: return "bird_3d_icon"
+        case .fish: return "fish_3d"
+        case .cat: return "cat_head_3d"
+        case .dog: return "dog_head_3d"
+        case .ladybug: return "ladybug_icon"
+        case .ant: return "ant_3d_icon"
+        case .leaf: return "leaf_3d_glossy"
+        case .star: return "star_five_pointed_3d"
+        case .bolt: return "lightning_bolt"
+        case .flame: return "flame_icon"
+        case .drop: return "water_droplet_3d"
+        case .snowflake: return "snowflake_3d"
+        case .moon: return "crescent_moon_3d"
+        case .sun: return "sun_rays_3d"
+        case .cloud: return "cloud_fluffy_3d"
+        case .mountain: return "mountain_peaks_snow"
+        case .pawprint: return "paw_print"
+        case .heart: return "heart_3d_glossy"
+        }
+    }
+
     static func random() -> AvatarOption {
         AvatarOption.allCases.randomElement() ?? .star
     }
@@ -69,7 +95,7 @@ struct AvatarView: View {
     var size: CGFloat = 50
 
     var body: some View {
-        GlossyIconOrb(symbol: avatar.symbol, size: size, tint: avatar.color)
+        RenderedIcon(name: avatar.artwork, size: size, glow: avatar.color, zoom: 1.0)
     }
 }
 

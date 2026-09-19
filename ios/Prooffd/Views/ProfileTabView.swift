@@ -137,14 +137,14 @@ struct ProfileTabView: View {
             statCell(
                 value: "\(appState.streakTracker.currentStreak)",
                 label: "Streak",
-                icon: "flame.fill",
-                color: appState.streakTracker.currentStreak > 0 ? .orange : .secondary
+                icon: IconArtwork.flame,
+                color: appState.streakTracker.currentStreak > 0 ? .orange : .gray
             )
 
             statCell(
                 value: "\(appState.builds.count)",
                 label: "Plans",
-                icon: "hammer.fill",
+                icon: IconArtwork.hammer,
                 color: Theme.accent
             )
 
@@ -155,7 +155,7 @@ struct ProfileTabView: View {
                 statCellContent(
                     value: "\(totalEarned)",
                     label: "Badges",
-                    icon: "trophy.fill",
+                    icon: IconArtwork.trophy,
                     color: Color(hex: "FBBF24")
                 )
             }
@@ -169,7 +169,7 @@ struct ProfileTabView: View {
 
     private func statCellContent(value: String, label: String, icon: String, color: Color) -> some View {
         VStack(spacing: 8) {
-            GlossyIconOrb(symbol: icon, size: 38, tint: color)
+            RenderedIcon(name: icon, size: 44, glow: color)
             Text(value)
                 .font(.title3.weight(.bold))
                 .foregroundStyle(.primary)

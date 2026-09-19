@@ -1,0 +1,12 @@
+{
+  "images": [
+    {
+      "filename": "dart_target_bullseye.png",
+      "idiom": "universal"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

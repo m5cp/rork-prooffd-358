@@ -45,11 +45,20 @@ struct DailyMicroActionCard: View {
             }
 
             HStack(spacing: 14) {
-                GlossyIconTile(
-                    symbol: isCompleted ? "checkmark.circle.fill" : action.icon,
-                    size: 46,
-                    tint: isCompleted ? Theme.accent : Color(hex: "F472B6")
+                RenderedIcon(
+                    name: IconArtwork.target,
+                    size: 52,
+                    glow: isCompleted ? Theme.accent : Color(hex: "F472B6")
                 )
+                .opacity(isCompleted ? 0.5 : 1)
+                .overlay {
+                    if isCompleted {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(Theme.accent)
+                            .shadow(color: .black.opacity(0.6), radius: 4)
+                    }
+                }
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(action.title)

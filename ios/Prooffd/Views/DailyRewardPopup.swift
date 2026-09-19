@@ -149,12 +149,10 @@ struct DailyRewardBanner: View {
         if canClaim {
             Button(action: onClaim) {
                 HStack(spacing: 12) {
-                    GlossyIconOrb(
-                        symbol: "gift.fill",
-                        size: 46,
-                        tint: Color(hex: "FBBF24"),
-                        shade: Color(hex: "F97316"),
-                        pulses: true
+                    RenderedIcon(
+                        name: IconArtwork.gift,
+                        size: 52,
+                        glow: Color(hex: "FBBF24")
                     )
 
                     VStack(alignment: .leading, spacing: 3) {
