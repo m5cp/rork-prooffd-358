@@ -31,13 +31,17 @@ struct LongQuizView: View {
                                 questionContent
                                     .padding(.horizontal, 20)
                             }
-                            .padding(.bottom, 140)
+                            .padding(.bottom, 24)
                         }
                         .scrollIndicators(.hidden)
                     }
-
-                    VStack {
-                        Spacer()
+                    // The button lives in a safe-area inset rather than a
+                    // Spacer-pushed overlay. The old overlay sat inside a ZStack
+                    // whose backdrop ignores the safe area, so on devices with a
+                    // home indicator the button was laid out past the bottom edge
+                    // and taps never reached it — the quiz looked frozen on the
+                    // last question.
+                    .safeAreaInset(edge: .bottom, spacing: 0) {
                         bottomButton
                     }
                 }
@@ -148,10 +152,13 @@ struct LongQuizView: View {
             .allowsHitTesting(false)
 
             Button {
+                let wasLast = vm.currentQuestion == vm.totalQuestions - 1
                 withAnimation(.spring(duration: 0.35)) {
                     vm.next()
                 }
-                if vm.isComplete {
+                // Persist on the last question even if `isComplete` didn't flip,
+                // so answers can never be silently discarded.
+                if vm.isComplete || wasLast {
                     appState.applyLongQuizAnswers(vm)
                 }
             } label: {
@@ -165,7 +172,9 @@ struct LongQuizView: View {
                         : AnyShapeStyle(Theme.accent.opacity(0.4)))
                     .clipShape(.capsule)
                     .shadow(color: vm.canAdvance ? Theme.accent.opacity(0.35) : .clear, radius: 10, y: 4)
+                    .contentShape(.capsule)
             }
+            .buttonStyle(.plain)
             .disabled(!vm.canAdvance)
             .padding(.horizontal, 20)
             .padding(.bottom, 16)
@@ -204,6 +213,9 @@ struct LongQuizView: View {
             }
             Spacer()
             Button {
+                // Answers are already applied; this just closes the sheet.
+                appState.applyLongQuizAnswers(vm)
+                isPresented = false
                 onComplete()
                 dismiss()
             } label: {
@@ -215,7 +227,9 @@ struct LongQuizView: View {
                     .background(Theme.electricGradient)
                     .clipShape(.capsule)
                     .shadow(color: Theme.accent.opacity(0.35), radius: 10, y: 4)
+                    .contentShape(.capsule)
             }
+            .buttonStyle(.plain)
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
         }

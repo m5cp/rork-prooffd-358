@@ -11,6 +11,9 @@ struct PathDetailView: View {
     @State private var showSetPathConfirm: Bool = false
 
     private var path: BusinessPath { result.businessPath }
+    private var matchReasons: [MatchReason] {
+        MatchReasons.reasons(for: path, profile: appState.userProfile)
+    }
     private var alreadyBuilding: Bool { appState.hasBuild(for: path.id) }
     private var track: CareerTrack { SmartCareerBrain.careerTrack(for: path) }
     private var linkedEducation: EducationPath? {
@@ -27,6 +30,7 @@ struct PathDetailView: View {
                     VStack(spacing: 24) {
                         trackBadge
                         quickStats
+                        whyThisMatchedSection
                         favHideBar
                         startBuildSection
                         overviewSection
@@ -223,6 +227,54 @@ struct PathDetailView: View {
         .padding(.vertical, 16)
         .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 14))
+    }
+
+    /// Explains the score in the user's own answers, so the number isn't a
+    /// black box. Hidden entirely when we have nothing honest to say.
+    @ViewBuilder
+    private var whyThisMatchedSection: some View {
+        let reasons = matchReasons
+        if !reasons.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 8) {
+                    Image(systemName: "sparkles")
+                        .font(.caption)
+                        .foregroundStyle(Theme.accent)
+                    Text("Why this matched you")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(Theme.textPrimary)
+                    Spacer()
+                    Text("\(result.scorePercentage)%")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(Theme.accent)
+                        .monospacedDigit()
+                }
+
+                ForEach(reasons) { reason in
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: reason.icon)
+                            .font(.caption)
+                            .foregroundStyle(reason.isPositive ? Theme.accent : Color(hex: "FBBF24"))
+                            .frame(width: 16)
+                            .padding(.top, 2)
+                            .accessibilityHidden(true)
+                        Text(reason.text)
+                            .font(.footnote)
+                            .foregroundStyle(reason.isPositive ? Theme.textSecondary : Theme.textPrimary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 0)
+                    }
+                }
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.cardBackground)
+            .clipShape(.rect(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Theme.accent.opacity(0.18), lineWidth: 1)
+            )
+        }
     }
 
     private var divider: some View {

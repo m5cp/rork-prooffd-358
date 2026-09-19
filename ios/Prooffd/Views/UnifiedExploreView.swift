@@ -161,8 +161,8 @@ struct UnifiedExploreView: View {
         let isCompleted = UserDefaults.standard.bool(forKey: "longQuizCompleted")
         let title = isCompleted ? "Retake the Precision Quiz" : "Extended Precision Quiz"
         let subtitle = isCompleted
-            ? "12 deeper questions — retake anytime to sharpen your results"
-            : "Answer 12 more questions for noticeably sharper match scores"
+            ? "18 deeper questions, including how much AI worries you — retake anytime"
+            : "18 questions, including how much AI worries you, for sharper match scores"
 
         return Button { showLongQuiz = true } label: {
             VStack(alignment: .leading, spacing: 12) {

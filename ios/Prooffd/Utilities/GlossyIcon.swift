@@ -19,6 +19,19 @@ enum IconArtwork {
     static let flame = "flame_icon"
     static let hammer = "claw_hammer"
     static let trophy = "trophy_cup_gold"
+
+    // Settings / profile rows. These reuse existing renders rather than flat
+    // symbols — a gradient behind a glyph is still a flat icon.
+    static let profile = "crystal_star_podium"
+    static let motivation = "dart_target_bullseye"
+    static let situation = "mountain_peak_flag_milestone"
+    static let workEnvironment = "house_with_tools_floating"
+    static let conditions = "hard_hat_tools_staircase"
+    static let vehicle = "car_detailing_tools_render"
+    static let selling = "microphone_studio"
+    static let fastCash = "lightning_bolt"
+    static let help = "question_mark_glowing"
+    static let retake = "glowing_path_journey"
 }
 
 // MARK: - RenderedIcon

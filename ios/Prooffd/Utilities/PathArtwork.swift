@@ -166,23 +166,29 @@ struct ParallaxHeroHeader: View {
 /// behind an electric gradient so question text stays crisp.
 struct QuizArtworkBackdrop: View {
     var body: some View {
-        ZStack(alignment: .top) {
-            Theme.background
-            ArtworkImage(name: PathArtwork.quizBackdrop)
-                .frame(maxWidth: .infinity)
-                .frame(height: 430)
-                .clipped()
-                .opacity(0.4)
-                .overlay(
-                    LinearGradient(
-                        colors: [Theme.background.opacity(0.12), Theme.background],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
+        // The render is anchored to a full-screen Color so its `.fill` crop can
+        // never widen the layout. Previously it was a hard 430pt band, which
+        // left the entire lower half of every quiz as a flat black slab.
+        Theme.background
+            .overlay {
+                ArtworkImage(name: PathArtwork.quizBackdrop, lift: false)
+                    .opacity(0.22)
                     .allowsHitTesting(false)
+            }
+            .overlay {
+                LinearGradient(
+                    colors: [
+                        Theme.background.opacity(0.35),
+                        Theme.background.opacity(0.82),
+                        Theme.background.opacity(0.95)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
                 )
-        }
-        .ignoresSafeArea()
+                .allowsHitTesting(false)
+            }
+            .clipped()
+            .ignoresSafeArea()
     }
 }
 

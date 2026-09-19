@@ -443,23 +443,6 @@ struct OnboardingView: View {
         .sensoryFeedback(.selection, trigger: isSelected)
     }
 
-    // MARK: - Step 2: Work Environment
-
-    private var workEnvironmentStep: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-            ForEach(WorkEnvironment.allCases) { env in
-                chipToggle(
-                    icon: env.icon,
-                    label: env.rawValue,
-                    isSelected: vm.workEnvironments.contains(env),
-                    color: Theme.accentBlue
-                ) {
-                    vm.toggleEnvironment(env)
-                }
-            }
-        }
-    }
-
     // MARK: - Step 3: Work Conditions
 
     private var workConditionsStep: some View {

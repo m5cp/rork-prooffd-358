@@ -121,21 +121,53 @@ struct MyBuildsView: View {
 
     private func actionPlanSummaryCard(plan: WeeklyActionPlan) -> some View {
         let completed = plan.actions.filter { $0.isCompleted }.count
+        // Full-bleed hero card: the render fills the whole card instead of
+        // sitting in a cropped 52pt chip that cut the artwork in half.
         return Button { showActionPlan = true } label: {
-            HStack(spacing: 14) {
-                ArtworkThumbnail(name: PathArtwork.milestone, size: 52, accent: Theme.accent)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Your Week 1 Plan").font(.subheadline.weight(.semibold)).foregroundStyle(Theme.textPrimary)
-                    Text("\(completed)/7 days complete").font(.caption).foregroundStyle(Theme.textSecondary)
-                    ProgressView(value: Double(completed), total: 7).tint(Theme.accent).frame(height: 4)
+            Color(hex: "0B0F14")
+                .frame(height: 170)
+                .frame(maxWidth: .infinity)
+                .overlay {
+                    ArtworkImage(name: PathArtwork.milestone)
+                        .allowsHitTesting(false)
                 }
-                Spacer()
-                Image(systemName: "chevron.right").foregroundStyle(Theme.textTertiary).font(.caption)
-            }
-            .padding(14)
-            .background(Theme.cardBackground)
-            .clipShape(RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.border, lineWidth: 1))
+                .overlay {
+                    LinearGradient(
+                        colors: [
+                            Color(hex: "0B0F14").opacity(0.0),
+                            Color(hex: "0B0F14").opacity(0.55),
+                            Color(hex: "0B0F14").opacity(0.93)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .allowsHitTesting(false)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .overlay(alignment: .bottomLeading) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Your Week 1 Plan")
+                            .font(.headline.weight(.bold))
+                            .foregroundStyle(.white)
+                        Text("\(completed)/7 days complete")
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(.white.opacity(0.85))
+                        ProgressView(value: Double(completed), total: 7)
+                            .tint(Theme.accent)
+                            .frame(height: 4)
+                    }
+                    .padding(16)
+                }
+                .overlay(alignment: .topTrailing) {
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.white.opacity(0.9))
+                        .padding(14)
+                }
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .stroke(Theme.accent.opacity(0.25), lineWidth: 1)
+                )
         }
         .buttonStyle(.plain)
     }
@@ -339,10 +371,11 @@ struct MyBuildsView: View {
 
     private var emptyState: some View {
         VStack(spacing: 20) {
-            ArtworkImage(name: PathArtwork.emptyState)
-                .frame(height: 150)
+            // `.fit` so the whole render is visible. The default `.fill` was
+            // cropping the sprout in half inside this short frame.
+            ArtworkImage(name: PathArtwork.emptyState, contentMode: .fit)
+                .frame(height: 200)
                 .frame(maxWidth: .infinity)
-                .clipped()
                 .accessibilityHidden(true)
 
             VStack(spacing: 6) {

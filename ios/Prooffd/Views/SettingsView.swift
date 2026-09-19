@@ -47,23 +47,23 @@ struct SettingsView: View {
 
                 Section("Your Profile") {
                     if !appState.userProfile.firstName.isEmpty {
-                        profileRow(icon: "person.fill", label: "Name", value: appState.userProfile.firstName)
+                        profileRow(icon: "person.fill", artwork: IconArtwork.profile, label: "Name", value: appState.userProfile.firstName)
                     }
 
                     if let motivation = appState.userProfile.motivationGoal {
-                        profileRow(icon: "target", label: "Motivation", value: motivation.rawValue)
+                        profileRow(icon: "target", artwork: IconArtwork.motivation, label: "Motivation", value: motivation.rawValue)
                     }
 
                     if let situation = appState.userProfile.situationGoal {
-                        profileRow(icon: "flag.fill", label: "Situation", value: situation.rawValue)
+                        profileRow(icon: "flag.fill", artwork: IconArtwork.situation, label: "Situation", value: situation.rawValue)
                     }
 
                     if !appState.userProfile.workEnvironments.isEmpty {
-                        profileRow(icon: "building.2.fill", label: "Work Environment", value: appState.userProfile.workEnvironments.map(\.rawValue).joined(separator: ", "))
+                        profileRow(icon: "building.2.fill", artwork: IconArtwork.workEnvironment, label: "Work Environment", value: appState.userProfile.workEnvironments.map(\.rawValue).joined(separator: ", "))
                     }
 
                     if !appState.userProfile.workConditions.isEmpty {
-                        profileRow(icon: "exclamationmark.triangle.fill", label: "Conditions OK", value: appState.userProfile.workConditions.map(\.rawValue).joined(separator: ", "))
+                        profileRow(icon: "exclamationmark.triangle.fill", artwork: IconArtwork.conditions, label: "Conditions OK", value: appState.userProfile.workConditions.map(\.rawValue).joined(separator: ", "))
                     }
 
                     if !appState.userProfile.situationTags.isEmpty {
@@ -71,15 +71,15 @@ struct SettingsView: View {
                     }
 
                     if let hasCar = appState.userProfile.hasCar {
-                        profileRow(icon: "car.fill", label: "Has Vehicle", value: hasCar ? "Yes" : "No")
+                        profileRow(icon: "car.fill", artwork: IconArtwork.vehicle, label: "Has Vehicle", value: hasCar ? "Yes" : "No")
                     }
 
                     if let selling = appState.userProfile.sellingComfort {
-                        profileRow(icon: "tag.fill", label: "Selling Comfort", value: selling.rawValue)
+                        profileRow(icon: "tag.fill", artwork: IconArtwork.selling, label: "Selling Comfort", value: selling.rawValue)
                     }
 
                     if let fastCash = appState.userProfile.needsFastCash {
-                        profileRow(icon: "bolt.fill", label: "Needs Fast Cash", value: fastCash ? "Yes" : "No")
+                        profileRow(icon: "bolt.fill", artwork: IconArtwork.fastCash, label: "Needs Fast Cash", value: fastCash ? "Yes" : "No")
                     }
 
                     Button {
@@ -295,12 +295,21 @@ struct SettingsView: View {
         .presentationBackground(Theme.background)
     }
 
-    private func profileRow(icon: String, label: String, value: String) -> some View {
+    /// `artwork` is a bundled 3D render name; rows fall back to the symbol only
+    /// when no render fits the row.
+    private func profileRow(icon: String, artwork: String? = nil, label: String, value: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
-            Image(systemName: icon)
-                .font(.subheadline)
-                .foregroundStyle(Theme.accent)
-                .frame(width: 22)
+            Group {
+                if let artwork {
+                    RenderedIcon(name: artwork, size: 30, glow: Theme.accent)
+                } else {
+                    Image(systemName: icon)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.accent)
+                        .frame(width: 22)
+                }
+            }
+            .frame(width: 30)
             VStack(alignment: .leading, spacing: 2) {
                 Text(label)
                     .font(.caption)
