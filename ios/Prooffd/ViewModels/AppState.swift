@@ -76,6 +76,8 @@ class AppState {
     var futurePlan: FuturePlan? = nil {
         didSet { saveFuturePlan() }
     }
+    /// Founder-authored business plans built in the Business Plan Builder.
+    var venturePlans: [VenturePlan] = []
 
     var hasUsedWhatIf: Bool {
         get { UserDefaults.standard.bool(forKey: "hasUsedWhatIf") }
@@ -127,6 +129,7 @@ class AppState {
         loadMyPath()
         loadRealWorldWins()
         loadFuturePlan()
+        loadVenturePlans()
         assignAvatarIfNeeded()
         if let raw = savedChosenPath, let path = ChosenPath(rawValue: raw) {
             chosenPath = path
@@ -607,6 +610,39 @@ class AppState {
         }
     }
 
+    // MARK: - Venture Plans
+
+    func addVenturePlan(_ plan: VenturePlan) {
+        venturePlans.append(plan)
+        saveVenturePlans()
+    }
+
+    func updateVenturePlan(_ plan: VenturePlan) {
+        guard let index = venturePlans.firstIndex(where: { $0.id == plan.id }) else { return }
+        var updated = plan
+        updated.updatedAt = Date()
+        venturePlans[index] = updated
+        saveVenturePlans()
+    }
+
+    func deleteVenturePlan(_ id: UUID) {
+        venturePlans.removeAll { $0.id == id }
+        saveVenturePlans()
+    }
+
+    private func saveVenturePlans() {
+        if let data = try? JSONEncoder().encode(venturePlans) {
+            UserDefaults.standard.set(data, forKey: "venturePlans")
+        }
+    }
+
+    private func loadVenturePlans() {
+        if let data = UserDefaults.standard.data(forKey: "venturePlans"),
+           let saved = try? JSONDecoder().decode([VenturePlan].self, from: data) {
+            venturePlans = saved
+        }
+    }
+
     // MARK: - Profile
 
     func saveProfile() {
@@ -638,6 +674,26 @@ class AppState {
 
     func updateName(_ name: String) {
         userProfile.firstName = name
+        saveProfile()
+    }
+
+    // MARK: - Profile Photo
+
+    /// Saves a user-picked photo and points the profile at it.
+    func updateProfilePhoto(_ image: UIImage) {
+        let previous = userProfile.profilePhotoFilename
+        guard let filename = ProfilePhotoStore.save(image) else { return }
+        userProfile.profilePhotoFilename = filename
+        saveProfile()
+        if let previous { ProfilePhotoStore.delete(previous) }
+    }
+
+    /// Reverts to the illustrated avatar.
+    func removeProfilePhoto() {
+        if let existing = userProfile.profilePhotoFilename {
+            ProfilePhotoStore.delete(existing)
+        }
+        userProfile.profilePhotoFilename = nil
         saveProfile()
     }
 

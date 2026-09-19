@@ -93,9 +93,45 @@ nonisolated enum AvatarOption: String, CaseIterable, Identifiable, Codable, Send
 struct AvatarView: View {
     let avatar: AvatarOption
     var size: CGFloat = 50
+    /// When set, the user's own photo replaces the illustrated avatar.
+    var photoFilename: String? = nil
+
+    @State private var photo: UIImage? = nil
 
     var body: some View {
-        RenderedIcon(name: avatar.artwork, size: size, glow: avatar.color, zoom: 1.0)
+        Group {
+            if let photo {
+                Color(.secondarySystemBackground)
+                    .frame(width: size, height: size)
+                    .overlay {
+                        Image(uiImage: photo)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .allowsHitTesting(false)
+                    }
+                    .clipShape(.circle)
+                    .overlay {
+                        Circle().strokeBorder(
+                            LinearGradient(
+                                colors: [Theme.accent.opacity(0.9), Theme.accentBlue.opacity(0.5)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: max(1.5, size * 0.035)
+                        )
+                    }
+                    .shadow(color: Theme.accent.opacity(0.3), radius: size * 0.12)
+            } else {
+                RenderedIcon(name: avatar.artwork, size: size, glow: avatar.color, zoom: 1.0)
+            }
+        }
+        .task(id: photoFilename) {
+            guard let photoFilename else {
+                photo = nil
+                return
+            }
+            photo = ProfilePhotoStore.load(photoFilename)
+        }
     }
 }
 

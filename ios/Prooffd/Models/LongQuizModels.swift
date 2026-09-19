@@ -56,6 +56,17 @@ nonisolated enum LearningStyle: String, CaseIterable, Identifiable, Codable, Sen
     case mentored   = "Mentored — I need someone to show me"
 
     var id: String { rawValue }
+
+    /// Education commitment this learner is naturally suited to.
+    var preferredEducation: EducationWillingness {
+        switch self {
+        case .handson:    return .tradeSchool
+        case .structured: return .twoYear
+        case .selftaught: return .selfTaught
+        case .mentored:   return .tradeSchool
+        }
+    }
+
     var icon: String {
         switch self {
         case .handson:    return "wrench.and.screwdriver.fill"
@@ -67,6 +78,17 @@ nonisolated enum LearningStyle: String, CaseIterable, Identifiable, Codable, Sen
 }
 
 nonisolated enum IncomeTarget: String, CaseIterable, Identifiable, Codable, Sendable {
+    /// Midpoint annual figure used to compare a target against a path's income level.
+    var midpoint: Int {
+        switch self {
+        case .under40k: return 32_000
+        case .k40to60:  return 50_000
+        case .k60to80:  return 70_000
+        case .k80to100: return 90_000
+        case .over100k: return 130_000
+        }
+    }
+
     case under40k  = "Under $40,000"
     case k40to60   = "$40,000 – $60,000"
     case k60to80   = "$60,000 – $80,000"
@@ -100,8 +122,8 @@ nonisolated enum ThingToAvoid: String, CaseIterable, Identifiable, Codable, Send
         switch self {
         case .physicalHazards: return "exclamationmark.triangle.fill"
         case .longHours:       return "clock.badge.exclamationmark.fill"
-        case .selling:         return "megaphone.slash.fill"
-        case .screenTime:      return "display.slash"
+        case .selling:         return "megaphone.fill"
+        case .screenTime:      return "desktopcomputer"
         case .emotionalDrain:  return "heart.slash.fill"
         case .instability:     return "waveform.path.ecg"
         case .longEducation:   return "calendar.badge.minus"

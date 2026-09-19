@@ -69,6 +69,22 @@ class LongQuizViewModel {
         if let v = experienceLevel     { profile.experienceLevel = v }
         if let v = customerInteraction { profile.customerInteraction = v }
         if let v = needsFastCash       { profile.needsFastCash = v }
+        if !thingsToAvoid.isEmpty      { profile.thingsToAvoid = thingsToAvoid }
+        if let v = hasPhysicalLimitation { profile.hasPhysicalLimitation = v }
+        if let v = learningStyle       { profile.learningStyle = v }
+        if let v = incomeTarget        { profile.incomeTarget = v }
+
+        // Keep education willingness in sync with how this person actually
+        // learns, so the matcher's education term reflects the long quiz.
+        if let style = learningStyle, profile.educationWillingnesses.isEmpty {
+            profile.educationWillingnesses = [style.preferredEducation]
+        }
+        if thingsToAvoid.contains(.longEducation) {
+            profile.educationWillingnesses.removeAll { $0 == .fourYear || $0 == .twoYear }
+            if profile.educationWillingnesses.isEmpty {
+                profile.educationWillingnesses = [.shortCert]
+            }
+        }
     }
 
     func loadFromProfile(_ profile: UserProfile) {
@@ -80,5 +96,9 @@ class LongQuizViewModel {
         experienceLevel = profile.experienceLevel
         customerInteraction = profile.customerInteraction
         needsFastCash = profile.needsFastCash
+        thingsToAvoid = profile.thingsToAvoid
+        hasPhysicalLimitation = profile.hasPhysicalLimitation
+        learningStyle = profile.learningStyle
+        incomeTarget = profile.incomeTarget
     }
 }

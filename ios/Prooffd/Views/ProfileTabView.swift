@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 struct ProfileTabView: View {
     @Environment(AppState.self) private var appState
@@ -10,6 +11,9 @@ struct ProfileTabView: View {
     @State private var showNameEdit: Bool = false
     @State private var editingName: String = ""
     @State private var showMyPathShare: Bool = false
+    @State private var photoItem: PhotosPickerItem? = nil
+    @State private var showPhotoOptions: Bool = false
+    @State private var showPhotoPicker: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -40,6 +44,32 @@ struct ProfileTabView: View {
                     ShareCardPresenterSheet(content: .topMatch(from: topMatch))
                 }
             }
+            .photosPicker(
+                isPresented: $showPhotoPicker,
+                selection: $photoItem,
+                matching: .images,
+                photoLibrary: .shared()
+            )
+            .onChange(of: photoItem) { _, newItem in
+                guard let newItem else { return }
+                Task {
+                    if let data = try? await newItem.loadTransferable(type: Data.self),
+                       let image = UIImage(data: data) {
+                        appState.updateProfilePhoto(image)
+                    }
+                    photoItem = nil
+                }
+            }
+            .confirmationDialog("Profile Picture", isPresented: $showPhotoOptions, titleVisibility: .visible) {
+                Button("Upload a Photo") { showPhotoPicker = true }
+                Button("Choose an Avatar") { showAvatarPicker = true }
+                if appState.userProfile.profilePhotoFilename != nil {
+                    Button("Remove Photo", role: .destructive) {
+                        appState.removeProfilePhoto()
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            }
             .sheet(isPresented: $showAvatarPicker) {
                 AvatarPickerView(selectedAvatar: Binding(
                     get: { appState.userProfile.avatar },
@@ -65,12 +95,16 @@ struct ProfileTabView: View {
     private var profileHeader: some View {
         HStack(spacing: 16) {
             Button {
-                showAvatarPicker = true
+                showPhotoOptions = true
             } label: {
                 ZStack(alignment: .bottomTrailing) {
-                    AvatarView(avatar: appState.userProfile.avatar, size: 64)
-                    Image(systemName: "pencil.circle.fill")
-                        .font(.system(size: 18))
+                    AvatarView(
+                        avatar: appState.userProfile.avatar,
+                        size: 64,
+                        photoFilename: appState.userProfile.profilePhotoFilename
+                    )
+                    Image(systemName: "camera.circle.fill")
+                        .font(.system(size: 20))
                         .foregroundStyle(.white, Theme.accent)
                 }
             }

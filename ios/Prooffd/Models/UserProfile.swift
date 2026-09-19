@@ -355,6 +355,16 @@ nonisolated struct UserProfile: Codable, Sendable {
     var motivationGoal: MotivationGoal? = nil
     var situationGoal: SituationGoal? = nil
 
+    // Extended Precision Quiz answers (Q9–Q12). Optional so older saved
+    // profiles decode unchanged.
+    var thingsToAvoid: [ThingToAvoid] = []
+    var hasPhysicalLimitation: Bool? = nil
+    var learningStyle: LearningStyle? = nil
+    var incomeTarget: IncomeTarget? = nil
+
+    /// Filename of a user-supplied profile photo, if they picked one.
+    var profilePhotoFilename: String? = nil
+
     var derivedChosenPath: ChosenPath {
         switch motivationGoal {
         case .ownBoss, .none:

@@ -408,6 +408,15 @@ nonisolated enum LLCRequirement: String, Codable, Sendable {
 }
 
 extension BusinessPath {
+    /// True when this path needs a multi-year program before you can earn.
+    var requiresLongEducation: Bool {
+        let edu = educationRequired.lowercased()
+        return edu.contains("4-year") || edu.contains("bachelor")
+            || edu.contains("master") || edu.contains("doctor")
+            || edu.contains("2-year") || edu.contains("associate")
+            || edu.contains("degree")
+    }
+
     static func generateDegreeRequirement(educationRequired: String, category: BusinessCategory) -> String {
         let edu = educationRequired.lowercased()
         if edu.contains("apprenticeship") {

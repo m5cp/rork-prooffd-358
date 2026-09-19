@@ -201,7 +201,104 @@ enum MatchingEngine {
                 else { score += 1 }
             }
 
-            let userMatchScore = maxScore > 0 ? (score / maxScore) * 100 : 0
+            // MARK: Extended Precision Quiz (Q9–Q12)
+
+            maxScore += 12
+            if profile.thingsToAvoid.isEmpty {
+                score += 12
+            } else {
+                var avoidScore: Double = 12
+                for avoid in profile.thingsToAvoid {
+                    switch avoid {
+                    case .physicalHazards:
+                        if path.requiresPhysicalWork { avoidScore -= 4 }
+                        if path.workConditions.contains(where: {
+                            $0 == .heights || $0 == .chemicals || $0 == .heavyLifting
+                        }) { avoidScore -= 3 }
+                    case .longHours:
+                        if path.minHoursPerDay >= 4 { avoidScore -= 3 }
+                        if path.workConditions.contains(.longShifts) { avoidScore -= 3 }
+                    case .selling:
+                        if path.requiresSelling { avoidScore -= 5 }
+                    case .screenTime:
+                        if path.isDigital && !path.requiresPhysicalWork { avoidScore -= 5 }
+                        if path.workConditions.contains(.officeDesk) { avoidScore -= 2 }
+                    case .emotionalDrain:
+                        if path.workConditions.contains(where: {
+                            $0 == .emotionalSituations || $0 == .patientCare || $0 == .highStakes
+                        }) { avoidScore -= 5 }
+                    case .instability:
+                        if path.fastCashPotential && path.incomeLevel == .low { avoidScore -= 3 }
+                        if !path.requiresLicense && path.soloFriendly { avoidScore -= 2 }
+                    case .longEducation:
+                        if path.requiresLongEducation { avoidScore -= 6 }
+                    case .publicExposure:
+                        if path.workConditions.contains(.publicSpeaking) { avoidScore -= 4 }
+                        if path.customerInteractionLevel.lowercased().contains("high") { avoidScore -= 2 }
+                    }
+                }
+                score += max(0, avoidScore)
+            }
+
+            maxScore += 6
+            if let limited = profile.hasPhysicalLimitation {
+                if limited {
+                    if path.requiresPhysicalWork { score += 1 }
+                    else { score += 6 }
+                    if path.workConditions.contains(where: {
+                        $0 == .heavyLifting || $0 == .heights || $0 == .tightSpaces
+                    }) { score -= 1 }
+                } else {
+                    score += 6
+                }
+            } else {
+                score += 5
+            }
+
+            maxScore += 6
+            if let style = profile.learningStyle {
+                switch style {
+                case .handson:
+                    if path.requiresPhysicalWork { score += 6 }
+                    else if !path.isDigital { score += 4 }
+                    else { score += 2 }
+                case .structured:
+                    if path.requiresLicense { score += 6 }
+                    else if path.requiresLongEducation { score += 5 }
+                    else { score += 3 }
+                case .selftaught:
+                    if path.isDigital { score += 6 }
+                    else if !path.requiresLicense { score += 5 }
+                    else { score += 2 }
+                case .mentored:
+                    if path.requiresLicense && path.requiresPhysicalWork { score += 6 }
+                    else if !path.soloFriendly { score += 5 }
+                    else { score += 3 }
+                }
+            } else {
+                score += 5
+            }
+
+            maxScore += 10
+            if let target = profile.incomeTarget {
+                let reachable: Int
+                switch path.incomeLevel {
+                case .high:   reachable = 120_000
+                case .medium: reachable = 70_000
+                case .low:    reachable = 40_000
+                }
+                if reachable >= target.midpoint {
+                    score += 10
+                } else if Double(reachable) >= Double(target.midpoint) * 0.75 {
+                    score += 6
+                } else if Double(reachable) >= Double(target.midpoint) * 0.5 {
+                    score += 3
+                }
+            } else {
+                score += 7
+            }
+
+            let userMatchScore = maxScore > 0 ? max(0, score / maxScore) * 100 : 0
 
             let userInterests = Self.deriveInterests(from: profile)
 

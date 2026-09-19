@@ -7,12 +7,25 @@ struct ToolkitTabView: View {
     @State private var showDegreeGuides = false
     @State private var showPaywall = false
     @State private var showROICalc = false
+    @State private var showPlanBuilder = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 14) {
                     header
+
+                    toolkitCard(
+                        artwork: PathArtwork.milestone,
+                        icon: "lightbulb.fill",
+                        iconColor: Color(hex: "FBBF24"),
+                        title: "Business Plan Builder",
+                        subtitle: "Idea, problem, customers, pricing, expenses & logo",
+                        meta: "8 guided steps  \u{2022}  Free",
+                        badge: "NEW"
+                    ) {
+                        showPlanBuilder = true
+                    }
 
                     toolkitCard(
                         artwork: PathArtwork.image(for: .business),
@@ -99,6 +112,7 @@ struct ToolkitTabView: View {
             .sheet(isPresented: $showDegreeGuides) { DegreeGuidesView() }
             .sheet(isPresented: $showPaywall) { PaywallView() }
             .sheet(isPresented: $showROICalc) { DegreeROICalculatorView() }
+            .sheet(isPresented: $showPlanBuilder) { VenturePlanListView() }
         }
     }
 
