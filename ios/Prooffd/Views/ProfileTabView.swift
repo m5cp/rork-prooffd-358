@@ -109,7 +109,26 @@ struct ProfileTabView: View {
             Spacer()
         }
         .padding(20)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(
+            ZStack {
+                Color(.secondarySystemGroupedBackground)
+                ArtworkImage(name: PathArtwork.celebration)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .clipped()
+                    .opacity(0.22)
+                    .overlay(
+                        LinearGradient(
+                            colors: [
+                                Color(.secondarySystemGroupedBackground).opacity(0.1),
+                                Color(.secondarySystemGroupedBackground).opacity(0.85)
+                            ],
+                            startPoint: .topTrailing,
+                            endPoint: .bottomLeading
+                        )
+                        .allowsHitTesting(false)
+                    )
+            }
+        )
         .clipShape(.rect(cornerRadius: 18))
     }
 

@@ -15,6 +15,7 @@ struct ToolkitTabView: View {
                     header
 
                     toolkitCard(
+                        artwork: PathArtwork.image(for: .business),
                         icon: "doc.text.fill",
                         iconColor: Theme.accent,
                         title: "Document Vault",
@@ -26,6 +27,7 @@ struct ToolkitTabView: View {
                     }
 
                     toolkitCard(
+                        artwork: PathArtwork.tradesEducation,
                         icon: "wrench.and.screwdriver.fill",
                         iconColor: Theme.accentBlue,
                         title: "Trade Toolkits",
@@ -38,6 +40,7 @@ struct ToolkitTabView: View {
                     }
 
                     toolkitCard(
+                        artwork: PathArtwork.collegeDegree,
                         icon: "graduationcap.fill",
                         iconColor: Color(hex: "818CF8"),
                         title: "Education Guides",
@@ -49,6 +52,7 @@ struct ToolkitTabView: View {
                     }
 
                     toolkitCard(
+                        artwork: PathArtwork.milestone,
                         icon: "chart.line.uptrend.xyaxis",
                         iconColor: Color.orange,
                         title: "ROI Calculator",
@@ -115,6 +119,7 @@ struct ToolkitTabView: View {
     }
 
     private func toolkitCard(
+        artwork: String,
         icon: String,
         iconColor: Color,
         title: String,
@@ -125,14 +130,14 @@ struct ToolkitTabView: View {
     ) -> some View {
         Button(action: action) {
             HStack(spacing: 14) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(iconColor.opacity(0.15))
-                        .frame(width: 52, height: 52)
-                    Image(systemName: icon)
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(iconColor)
-                }
+                ArtworkImage(name: artwork)
+                    .frame(width: 60, height: 60)
+                    .clipped()
+                    .clipShape(.rect(cornerRadius: 14))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .strokeBorder(iconColor.opacity(0.35), lineWidth: 1)
+                    )
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(title)

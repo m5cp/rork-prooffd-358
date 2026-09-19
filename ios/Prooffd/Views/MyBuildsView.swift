@@ -123,12 +123,14 @@ struct MyBuildsView: View {
         let completed = plan.actions.filter { $0.isCompleted }.count
         return Button { showActionPlan = true } label: {
             HStack(spacing: 14) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Theme.accent.opacity(0.12)).frame(width: 40, height: 40)
-                    Image(systemName: "calendar.badge.checkmark")
-                        .foregroundStyle(Theme.accent).font(.system(size: 18))
-                }
+                ArtworkImage(name: PathArtwork.milestone)
+                    .frame(width: 48, height: 48)
+                    .clipped()
+                    .clipShape(.rect(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(Theme.accent.opacity(0.35), lineWidth: 1)
+                    )
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Your Week 1 Plan").font(.subheadline.weight(.semibold)).foregroundStyle(Theme.textPrimary)
                     Text("\(completed)/7 days complete").font(.caption).foregroundStyle(Theme.textSecondary)
