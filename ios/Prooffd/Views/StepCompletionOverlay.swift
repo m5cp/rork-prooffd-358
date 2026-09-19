@@ -15,10 +15,11 @@ struct StepCompletionOverlay: View {
                 .onTapGesture { onDismiss() }
 
             VStack(spacing: 20) {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 56))
-                    .foregroundStyle(Theme.accent)
-                    .symbolEffect(.bounce, value: animateIn)
+                ArtworkImage(name: PathArtwork.celebration)
+                    .frame(height: 150)
+                    .frame(maxWidth: .infinity)
+                    .clipped()
+                    .clipShape(.rect(cornerRadius: 18))
 
                 Text(title)
                     .font(.title2.bold())

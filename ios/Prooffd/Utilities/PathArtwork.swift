@@ -51,6 +51,15 @@ enum PathArtwork {
     static func image(for record: DegreeCareerRecord) -> String {
         collegeDegree
     }
+
+    /// Thumbnail render for a top-level browse category.
+    static func image(for path: ChosenPath) -> String {
+        switch path {
+        case .business: return "house_with_tools_floating"
+        case .trades: return tradesEducation
+        case .degree: return collegeDegree
+        }
+    }
 }
 
 // MARK: - ArtworkImage
