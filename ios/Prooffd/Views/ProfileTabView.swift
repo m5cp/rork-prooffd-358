@@ -22,6 +22,7 @@ struct ProfileTabView: View {
                     profileHeader
                     statsRow
                     settingsSection
+                    versionFooter
                     Color.clear.frame(height: 96)
                 }
                 .padding(.horizontal, 16)
@@ -299,6 +300,19 @@ struct ProfileTabView: View {
         }
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(.rect(cornerRadius: 16))
+    }
+
+    /// Shows the running version and build. Without this there is no way to tell
+    /// a shipped fix from a stale install on device, which made several rounds of
+    /// bug reports impossible to interpret.
+    private var versionFooter: some View {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
+        return Text("Prooffd \(version) (Build \(build))")
+            .font(.caption2)
+            .foregroundStyle(.tertiary)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 4)
     }
 
     private var themeRow: some View {
