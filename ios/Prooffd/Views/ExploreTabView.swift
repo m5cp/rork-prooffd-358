@@ -159,49 +159,65 @@ struct ExploreTabView: View {
 
     private var longQuizRefineCard: some View {
         let isCompleted = UserDefaults.standard.bool(forKey: "longQuizCompleted")
-        let buttonLabel = isCompleted ? "Retake Precision Quiz" : "Refine Your Matches"
+        let title = isCompleted ? "Retake the Precision Quiz" : "Extended Precision Quiz"
         let subtitle = isCompleted
-            ? "Retake to update your results anytime"
-            : "Answer 12 more questions for a more precise match score"
-        let icon = isCompleted ? "arrow.clockwise.circle.fill" : "slider.horizontal.3"
+            ? "12 deeper questions — retake anytime to sharpen your results"
+            : "Answer 12 more questions for noticeably sharper match scores"
 
         return Button { showLongQuiz = true } label: {
-            HStack(spacing: 14) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Theme.accentBlue.opacity(0.12))
-                        .frame(width: 40, height: 40)
-                    Image(systemName: icon)
-                        .foregroundStyle(Theme.accentBlue)
-                        .font(.system(size: 18))
-                }
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 6) {
-                        Text(buttonLabel)
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(Theme.textPrimary)
-                        if !isCompleted {
-                            Text("FREE")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundStyle(Theme.accent)
-                                .padding(.horizontal, 6).padding(.vertical, 2)
-                                .background(Theme.accent.opacity(0.12))
-                                .clipShape(Capsule())
-                        }
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 10) {
+                    Image(systemName: "slider.horizontal.3")
+                        .font(.body.weight(.bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 38, height: 38)
+                        .background(.white.opacity(0.18))
+                        .clipShape(.rect(cornerRadius: 10))
+                    Text("GO DEEPER")
+                        .font(.caption2.weight(.bold))
+                        .tracking(1.5)
+                        .foregroundStyle(.white.opacity(0.75))
+                    Spacer()
+                    if !isCompleted {
+                        Text("FREE")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(Color(hex: "059669"))
+                            .padding(.horizontal, 8).padding(.vertical, 3)
+                            .background(.white)
+                            .clipShape(Capsule())
                     }
-                    Text(subtitle)
-                        .font(.caption)
-                        .foregroundStyle(Theme.textSecondary)
                 }
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .foregroundStyle(Theme.textTertiary).font(.caption)
+                Text(title)
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(.white)
+                Text(subtitle)
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.85))
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 6) {
+                    Text(isCompleted ? "Retake now" : "Take the quiz")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(Color(hex: "059669"))
+                    Image(systemName: "arrow.right")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(Color(hex: "059669"))
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(.white)
+                .clipShape(Capsule())
             }
-            .padding(14)
-            .background(Theme.cardBackground)
-            .clipShape(RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14)
-                .stroke(Theme.border, lineWidth: 1))
+            .padding(18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                LinearGradient(
+                    colors: [Color(hex: "059669"), Color(hex: "0891B2")],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(.rect(cornerRadius: 20))
+            .shadow(color: Color(hex: "059669").opacity(0.35), radius: 14, y: 6)
         }
         .buttonStyle(.plain)
         .sheet(isPresented: $showLongQuiz) {

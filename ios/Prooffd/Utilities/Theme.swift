@@ -14,21 +14,31 @@ enum Theme {
             : UIColor(hex6: 0x2563EB)
     })
 
+    /// Electric cyan companion accent for the dark immersive redesign.
+    static let accentCyan = Color(hex: "22D3EE")
+
+    /// Signature green→cyan gradient used for progress bars, rings, and CTAs.
+    static let electricGradient = LinearGradient(
+        colors: [Color(hex: "34D399"), Color(hex: "22D3EE")],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+
     static let background = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
-            ? UIColor(hex6: 0x0F1117)
+            ? UIColor(hex6: 0x0B0F14)
             : UIColor(hex6: 0xF5F5F7)
     })
 
     static let cardBackground = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
-            ? UIColor(hex6: 0x1C1E27)
+            ? UIColor(hex6: 0x161C24)
             : UIColor(hex6: 0xFFFFFF)
     })
 
     static let cardBackgroundLight = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
-            ? UIColor(hex6: 0x262933)
+            ? UIColor(hex6: 0x1F2731)
             : UIColor(hex6: 0xEFEFF1)
     })
 
@@ -52,7 +62,7 @@ enum Theme {
 
     static let border = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
-            ? UIColor(hex6: 0x2A2D38)
+            ? UIColor(hex6: 0x2A3442)
             : UIColor(hex6: 0xE5E5EA)
     })
 

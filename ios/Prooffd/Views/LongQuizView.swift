@@ -11,7 +11,7 @@ struct LongQuizView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Theme.background.ignoresSafeArea()
+                ElectricBackdrop()
 
                 if vm.isComplete {
                     completionContent
@@ -74,7 +74,8 @@ struct LongQuizView: View {
                     }
                 }
             }
-            .toolbarBackground(Theme.background, for: .navigationBar)
+            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            .preferredColorScheme(.dark)
             .onAppear {
                 vm.loadFromProfile(appState.userProfile)
             }
@@ -84,13 +85,15 @@ struct LongQuizView: View {
     private var progressBar: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                Capsule().fill(Theme.cardBackgroundLight).frame(height: 4)
-                Capsule().fill(Theme.accent)
-                    .frame(width: geo.size.width * vm.progress, height: 4)
+                Capsule().fill(Theme.cardBackgroundLight).frame(height: 5)
+                Capsule()
+                    .fill(Theme.electricGradient)
+                    .frame(width: geo.size.width * vm.progress, height: 5)
+                    .shadow(color: Theme.accent.opacity(0.6), radius: 4)
                     .animation(.spring(duration: 0.4), value: vm.progress)
             }
         }
-        .frame(height: 4)
+        .frame(height: 5)
     }
 
     private var header: some View {
@@ -151,8 +154,11 @@ struct LongQuizView: View {
                     .foregroundStyle(.black)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(vm.canAdvance ? Theme.accent : Theme.accent.opacity(0.4))
+                    .background(vm.canAdvance
+                        ? AnyShapeStyle(Theme.electricGradient)
+                        : AnyShapeStyle(Theme.accent.opacity(0.4)))
                     .clipShape(.capsule)
+                    .shadow(color: vm.canAdvance ? Theme.accent.opacity(0.35) : .clear, radius: 10, y: 4)
             }
             .disabled(!vm.canAdvance)
             .padding(.horizontal, 20)
@@ -166,7 +172,14 @@ struct LongQuizView: View {
             Spacer()
             ZStack {
                 Circle()
-                    .fill(Theme.accent.opacity(0.15))
+                    .fill(
+                        RadialGradient(
+                            colors: [Theme.accent.opacity(0.35), Theme.accent.opacity(0.04)],
+                            center: .center,
+                            startRadius: 5,
+                            endRadius: 60
+                        )
+                    )
                     .frame(width: 120, height: 120)
                 Image(systemName: "sparkles")
                     .font(.system(size: 56))
@@ -193,8 +206,9 @@ struct LongQuizView: View {
                     .foregroundStyle(.black)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Theme.accent)
+                    .background(Theme.electricGradient)
                     .clipShape(.capsule)
+                    .shadow(color: Theme.accent.opacity(0.35), radius: 10, y: 4)
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
@@ -431,6 +445,7 @@ struct LongQuizView: View {
                     .stroke(isSelected ? Theme.accent : Theme.border,
                             lineWidth: isSelected ? 1.5 : 0.5)
             )
+            .shadow(color: isSelected ? Theme.accent.opacity(0.28) : .clear, radius: 10, y: 3)
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: isSelected)
@@ -469,6 +484,7 @@ struct LongQuizView: View {
                     .stroke(isSelected ? Theme.accent : Theme.border,
                             lineWidth: isSelected ? 2 : 0.5)
             )
+            .shadow(color: isSelected ? Theme.accent.opacity(0.28) : .clear, radius: 10, y: 3)
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: isSelected)
@@ -502,6 +518,7 @@ struct LongQuizView: View {
                     .stroke(isSelected ? color : Theme.border,
                             lineWidth: isSelected ? 1.5 : 0.5)
             )
+            .shadow(color: isSelected ? color.opacity(0.28) : .clear, radius: 10, y: 3)
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: isSelected)

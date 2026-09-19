@@ -21,10 +21,11 @@ struct ProgressTabView: View {
                 .padding(.top, 8)
             }
             .scrollIndicators(.hidden)
-            .background(Theme.background)
+            .background(ElectricBackdrop())
             .navigationTitle("Progress")
             .navigationBarTitleDisplayMode(.large)
-            .toolbarBackground(Theme.background, for: .navigationBar)
+            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            .preferredColorScheme(.dark)
         }
     }
 
@@ -87,18 +88,9 @@ struct ProgressTabView: View {
                 }
             }
             .padding(16)
-            .background(
-                LinearGradient(
-                    colors: [Color.orange.opacity(0.08), Theme.cardBackground],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
-            .clipShape(.rect(cornerRadius: 14))
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(Color.orange.opacity(0.15), lineWidth: 1)
-            )
+            .background(Color.orange.opacity(0.05))
+            .electricCard(cornerRadius: 16)
+            .shadow(color: Color.orange.opacity(0.12), radius: 16, y: 8)
 
             Text(appState.streakTracker.streakMessage)
                 .font(.caption)
@@ -238,18 +230,9 @@ struct ProgressTabView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(20)
-            .background(
-                LinearGradient(
-                    colors: [Theme.accent.opacity(0.06), Theme.cardBackground],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
-            .clipShape(.rect(cornerRadius: 14))
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(Theme.accent.opacity(0.15), lineWidth: 1)
-            )
+            .background(Theme.accent.opacity(0.05))
+            .electricCard(cornerRadius: 16)
+            .shadow(color: Theme.accent.opacity(0.12), radius: 16, y: 8)
         }
     }
 
@@ -278,7 +261,7 @@ struct ProgressTabView: View {
 
     private var readinessGradient: AngularGradient {
         AngularGradient(
-            colors: [Theme.accent, Theme.accentBlue, Theme.accent],
+            colors: [Theme.accent, Theme.accentCyan, Theme.accent],
             center: .center,
             startAngle: .degrees(-90),
             endAngle: .degrees(270)
@@ -341,16 +324,9 @@ struct ProgressTabView: View {
                     .padding(.horizontal, 16)
                     .padding(.bottom, 16)
                 }
-                .background(
-                    LinearGradient(
-                        colors: [Theme.accent.opacity(0.06), Theme.cardBackground],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 14))
-                .overlay(RoundedRectangle(cornerRadius: 14)
-                    .stroke(Theme.accent.opacity(0.2), lineWidth: 1))
+                .background(Theme.accent.opacity(0.06))
+                .electricCard(cornerRadius: 18)
+                .shadow(color: Theme.accent.opacity(0.18), radius: 18, y: 8)
             } else {
                 Button {
                     appState.selectedTab = 0

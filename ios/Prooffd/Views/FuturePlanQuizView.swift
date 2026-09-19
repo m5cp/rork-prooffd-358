@@ -12,7 +12,7 @@ struct FuturePlanQuizView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Theme.background.ignoresSafeArea()
+                ElectricBackdrop()
 
                 if vm.isComplete {
                     resultsContent
@@ -56,7 +56,8 @@ struct FuturePlanQuizView: View {
                     }
                 }
             }
-            .toolbarBackground(Theme.background, for: .navigationBar)
+            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            .preferredColorScheme(.dark)
             .onAppear {
                 vm.loadPartial()
                 if let path = appState.myPath, let plan = appState.futurePlan,
@@ -99,13 +100,15 @@ struct FuturePlanQuizView: View {
     private var progressBar: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                Capsule().fill(Theme.cardBackgroundLight).frame(height: 4)
-                Capsule().fill(Theme.accent)
-                    .frame(width: geo.size.width * vm.progress, height: 4)
+                Capsule().fill(Theme.cardBackgroundLight).frame(height: 5)
+                Capsule()
+                    .fill(Theme.electricGradient)
+                    .frame(width: geo.size.width * vm.progress, height: 5)
+                    .shadow(color: Theme.accent.opacity(0.6), radius: 4)
                     .animation(.spring(duration: 0.4), value: vm.progress)
             }
         }
-        .frame(height: 4)
+        .frame(height: 5)
     }
 
     private var header: some View {
@@ -164,8 +167,11 @@ struct FuturePlanQuizView: View {
                     .foregroundStyle(.black)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(vm.canAdvance ? Theme.accent : Theme.accent.opacity(0.4))
+                    .background(vm.canAdvance
+                        ? AnyShapeStyle(Theme.electricGradient)
+                        : AnyShapeStyle(Theme.accent.opacity(0.4)))
                     .clipShape(.capsule)
+                    .shadow(color: vm.canAdvance ? Theme.accent.opacity(0.35) : .clear, radius: 10, y: 4)
             }
             .disabled(!vm.canAdvance)
             .padding(.horizontal, 20)
@@ -375,12 +381,9 @@ struct FuturePlanQuizView: View {
             }
         }
         .padding(20)
-        .background(Theme.cardBackground)
-        .clipShape(.rect(cornerRadius: 20))
-        .overlay(
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(Theme.accent.opacity(0.25), lineWidth: 1)
-        )
+        .background(Theme.accent.opacity(0.06))
+        .electricCard(cornerRadius: 20)
+        .shadow(color: Theme.accent.opacity(0.18), radius: 18, y: 8)
     }
 
     private func confidenceRing(confidence: Int) -> some View {
@@ -389,8 +392,9 @@ struct FuturePlanQuizView: View {
                 .stroke(Theme.cardBackgroundLight, lineWidth: 8)
             Circle()
                 .trim(from: 0, to: Double(confidence) / 100)
-                .stroke(Theme.accent, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                .stroke(Theme.electricGradient, style: StrokeStyle(lineWidth: 8, lineCap: .round))
                 .rotationEffect(.degrees(-90))
+                .shadow(color: Theme.accent.opacity(0.5), radius: 4)
         }
         .frame(width: 64, height: 64)
     }
@@ -416,12 +420,7 @@ struct FuturePlanQuizView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(Theme.cardBackground)
-        .clipShape(.rect(cornerRadius: 16))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Theme.border, lineWidth: 0.5)
-        )
+        .electricCard(cornerRadius: 16)
     }
 
     private func roadmapCard(plan: FuturePlan) -> some View {
@@ -475,12 +474,7 @@ struct FuturePlanQuizView: View {
             }
         }
         .padding(16)
-        .background(Theme.cardBackground)
-        .clipShape(.rect(cornerRadius: 16))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Theme.border, lineWidth: 0.5)
-        )
+        .electricCard(cornerRadius: 16)
     }
 
     private func outlookSection(plan: FuturePlan) -> some View {
@@ -514,12 +508,7 @@ struct FuturePlanQuizView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(14)
-                .background(Theme.cardBackground)
-                .clipShape(.rect(cornerRadius: 14))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14)
-                        .stroke(Theme.border, lineWidth: 0.5)
-                )
+                .electricCard(cornerRadius: 14)
             }
         }
     }
@@ -540,8 +529,11 @@ struct FuturePlanQuizView: View {
                 .foregroundStyle(.black)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(addedToMyPath ? Theme.accent.opacity(0.85) : Theme.accent)
+                .background(addedToMyPath
+                    ? AnyShapeStyle(Theme.accent.opacity(0.85))
+                    : AnyShapeStyle(Theme.electricGradient))
                 .clipShape(.capsule)
+                .shadow(color: addedToMyPath ? .clear : Theme.accent.opacity(0.35), radius: 10, y: 4)
             }
             .disabled(addedToMyPath)
             .sensoryFeedback(.success, trigger: addedToMyPath)
@@ -608,6 +600,7 @@ struct FuturePlanQuizView: View {
                     .stroke(isSelected ? color : Theme.border,
                             lineWidth: isSelected ? 1.5 : 0.5)
             )
+            .shadow(color: isSelected ? color.opacity(0.28) : .clear, radius: 10, y: 3)
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: isSelected)
@@ -651,6 +644,7 @@ struct FuturePlanQuizView: View {
                     .stroke(isSelected ? Theme.accent : Theme.border,
                             lineWidth: isSelected ? 1.5 : 0.5)
             )
+            .shadow(color: isSelected ? Theme.accent.opacity(0.28) : .clear, radius: 10, y: 3)
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: isSelected)
