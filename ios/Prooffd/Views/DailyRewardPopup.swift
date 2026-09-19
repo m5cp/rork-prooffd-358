@@ -149,22 +149,13 @@ struct DailyRewardBanner: View {
         if canClaim {
             Button(action: onClaim) {
                 HStack(spacing: 12) {
-                    ZStack {
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color(hex: "FBBF24"), Color(hex: "FB923C")],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .frame(width: 44, height: 44)
-
-                        Image(systemName: "gift.fill")
-                            .font(.body)
-                            .foregroundStyle(.white)
-                            .symbolEffect(.pulse.wholeSymbol)
-                    }
+                    GlossyIconOrb(
+                        symbol: "gift.fill",
+                        size: 46,
+                        tint: Color(hex: "FBBF24"),
+                        shade: Color(hex: "F97316"),
+                        pulses: true
+                    )
 
                     VStack(alignment: .leading, spacing: 3) {
                         Text("Daily Reward Ready!")

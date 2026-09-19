@@ -169,9 +169,7 @@ struct ProfileTabView: View {
 
     private func statCellContent(value: String, label: String, icon: String, color: Color) -> some View {
         VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.body)
-                .foregroundStyle(color)
+            GlossyIconOrb(symbol: icon, size: 38, tint: color)
             Text(value)
                 .font(.title3.weight(.bold))
                 .foregroundStyle(.primary)
@@ -271,9 +269,7 @@ struct ProfileTabView: View {
 
     private var themeRow: some View {
         HStack(spacing: 12) {
-            Image(systemName: themeManager.mode.icon)
-                .foregroundStyle(Theme.accent)
-                .frame(width: 22)
+            GlossyIconTile(symbol: themeManager.mode.icon, size: 30, tint: Theme.accent)
             Text("Theme")
                 .foregroundStyle(.primary)
             Spacer()
@@ -295,9 +291,7 @@ struct ProfileTabView: View {
     private func settingsLink(icon: String, color: Color, title: String, external: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 12) {
-                Image(systemName: icon)
-                    .foregroundStyle(color)
-                    .frame(width: 22)
+                GlossyIconTile(symbol: icon, size: 30, tint: color)
                 Text(title)
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.primary)
@@ -313,9 +307,7 @@ struct ProfileTabView: View {
 
     private func settingsRowContent(icon: String, color: Color, title: String) -> some View {
         HStack(spacing: 12) {
-            Image(systemName: icon)
-                .foregroundStyle(color)
-                .frame(width: 22)
+            GlossyIconTile(symbol: icon, size: 30, tint: color)
             Text(title)
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(.primary)
@@ -332,6 +324,6 @@ struct ProfileTabView: View {
         Rectangle()
             .fill(Color(.separator).opacity(0.3))
             .frame(height: 0.5)
-            .padding(.leading, 50)
+            .padding(.leading, 58)
     }
 }

@@ -6,14 +6,7 @@ struct SiriDailyTipHint: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(Theme.accentBlue.opacity(0.15))
-                    .frame(width: 36, height: 36)
-                Image(systemName: "mic.fill")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Theme.accentBlue)
-            }
+            GlossyIconOrb(symbol: "mic.fill", size: 38, tint: Theme.accentBlue)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("Try Siri")

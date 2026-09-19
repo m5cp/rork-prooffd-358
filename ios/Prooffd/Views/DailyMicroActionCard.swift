@@ -45,14 +45,11 @@ struct DailyMicroActionCard: View {
             }
 
             HStack(spacing: 14) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(isCompleted ? Theme.accent.opacity(0.12) : Theme.cardBackgroundLight)
-                        .frame(width: 44, height: 44)
-                    Image(systemName: isCompleted ? "checkmark.circle.fill" : action.icon)
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(isCompleted ? Theme.accent : Theme.textSecondary)
-                }
+                GlossyIconTile(
+                    symbol: isCompleted ? "checkmark.circle.fill" : action.icon,
+                    size: 46,
+                    tint: isCompleted ? Theme.accent : Color(hex: "F472B6")
+                )
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(action.title)

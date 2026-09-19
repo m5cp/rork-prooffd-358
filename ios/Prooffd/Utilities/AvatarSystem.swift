@@ -69,20 +69,7 @@ struct AvatarView: View {
     var size: CGFloat = 50
 
     var body: some View {
-        ZStack {
-            Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [avatar.color, avatar.color.opacity(0.7)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .frame(width: size, height: size)
-            Image(systemName: avatar.symbol)
-                .font(.system(size: size * 0.4))
-                .foregroundStyle(.white)
-        }
+        GlossyIconOrb(symbol: avatar.symbol, size: size, tint: avatar.color)
     }
 }
 
