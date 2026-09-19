@@ -115,13 +115,21 @@ struct VenturePlanBuilderView: View {
             openStage = stage
         } label: {
             HStack(spacing: 14) {
-                ZStack {
-                    Circle()
-                        .fill(done ? stage.accent : stage.accent.opacity(0.15))
-                        .frame(width: 44, height: 44)
-                    Image(systemName: done ? "checkmark" : stage.icon)
-                        .font(.body.weight(.bold))
-                        .foregroundStyle(done ? .black : stage.accent)
+                RenderedIcon(
+                    name: IconArtwork.planStage(stage),
+                    size: 46,
+                    glow: stage.accent
+                )
+                .opacity(done ? 1 : 0.92)
+                .overlay(alignment: .bottomTrailing) {
+                    if done {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 10, weight: .heavy))
+                            .foregroundStyle(.black)
+                            .frame(width: 18, height: 18)
+                            .background(stage.accent, in: Circle())
+                            .overlay(Circle().strokeBorder(Color(.secondarySystemGroupedBackground), lineWidth: 2))
+                    }
                 }
 
                 VStack(alignment: .leading, spacing: 2) {

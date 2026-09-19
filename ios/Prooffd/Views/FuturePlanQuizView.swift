@@ -34,15 +34,19 @@ struct FuturePlanQuizView: View {
                     }
                 }
                 ToolbarItem(placement: .principal) {
-                    if !vm.isComplete {
-                        Text("Q\(vm.currentQuestionIndex + 1) of \(vm.totalQuestions)")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(Theme.textTertiary)
-                            .monospacedDigit()
-                    } else {
-                        Text("Future Plan")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(Theme.textTertiary)
+                    // Name the quiz. Two different quizzes both showed a bare
+                    // "Q2 of 6", so opening the Future Planner read as the
+                    // Precision Quiz having lost its extra questions.
+                    VStack(spacing: 1) {
+                        Text("Future Planner")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(Theme.textPrimary)
+                        if !vm.isComplete {
+                            Text("Q\(vm.currentQuestionIndex + 1) of \(vm.totalQuestions)")
+                                .font(.caption2)
+                                .foregroundStyle(Theme.textTertiary)
+                                .monospacedDigit()
+                        }
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -86,14 +90,17 @@ struct FuturePlanQuizView: View {
                     questionContent
                         .padding(.horizontal, 20)
                 }
-                .padding(.bottom, 140)
+                .padding(.bottom, 24)
             }
             .scrollIndicators(.hidden)
-
-            VStack {
-                Spacer()
-                bottomButton
-            }
+        }
+        // The button must be a safe-area inset, not a Spacer-pushed VStack after
+        // the ScrollView. The old `VStack { Spacer(); bottomButton }` was a
+        // sibling that claimed all remaining height, squeezing the ScrollView
+        // into the top half of the screen and leaving a dead black slab below —
+        // so every question had to be scrolled even when it would have fit.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            bottomButton
         }
     }
 
@@ -171,8 +178,10 @@ struct FuturePlanQuizView: View {
                         ? AnyShapeStyle(Theme.electricGradient)
                         : AnyShapeStyle(Theme.accent.opacity(0.4)))
                     .clipShape(.capsule)
+                    .contentShape(.capsule)
                     .shadow(color: vm.canAdvance ? Theme.accent.opacity(0.35) : .clear, radius: 10, y: 4)
             }
+            .buttonStyle(.plain)
             .disabled(!vm.canAdvance)
             .padding(.horizontal, 20)
             .padding(.bottom, 16)

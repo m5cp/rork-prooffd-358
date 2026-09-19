@@ -32,6 +32,21 @@ enum IconArtwork {
     static let fastCash = "lightning_bolt"
     static let help = "question_mark_glowing"
     static let retake = "glowing_path_journey"
+
+    /// Business Plan Builder stages. These were flat SF Symbols in colored
+    /// circles — the exact pattern this app replaced everywhere else.
+    static func planStage(_ stage: PlanStage) -> String {
+        switch stage {
+        case .idea:     return "lightning_bolt"
+        case .problem:  return "question_mark_glowing"
+        case .customer: return "dart_target_bullseye"
+        case .offer:    return "gift_box_ribbon"
+        case .pricing:  return "crystal_star_podium"
+        case .money:    return "trophy_cup_gold"
+        case .brand:    return "craft_supplies_floating"
+        case .launch:   return "mountain_peak_flag_milestone"
+        }
+    }
 }
 
 // MARK: - RenderedIcon

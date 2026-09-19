@@ -60,11 +60,16 @@ struct LongQuizView: View {
                     }
                 }
                 ToolbarItem(placement: .principal) {
-                    if !vm.isComplete {
-                        Text("Q\(vm.currentQuestion + 1) of \(vm.totalQuestions)")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(Theme.textTertiary)
-                            .monospacedDigit()
+                    VStack(spacing: 1) {
+                        Text("Precision Quiz")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(Theme.textPrimary)
+                        if !vm.isComplete {
+                            Text("Q\(vm.currentQuestion + 1) of \(vm.totalQuestions)")
+                                .font(.caption2)
+                                .foregroundStyle(Theme.textTertiary)
+                                .monospacedDigit()
+                        }
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {

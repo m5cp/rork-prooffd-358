@@ -498,21 +498,30 @@ struct UnifiedExploreView: View {
                 ArtworkThumbnail(name: PathArtwork.image(for: path), size: 62, accent: heroGradient(for: path)[0])
 
                 VStack(alignment: .leading, spacing: 4) {
+                    // Explicit point size, not `.title3`. A relative text style
+                    // rescales per card once the longer titles wrap, so the three
+                    // rows rendered at visibly different sizes. Fixed size +
+                    // room for two lines keeps all three identical.
                     Text(path.title)
-                        .font(.title3.weight(.bold))
+                        .font(.system(size: 20, weight: .bold))
                         .foregroundStyle(.primary)
+                        .lineLimit(2)
+                        .minimumScaleFactor(1)
+                        .fixedSize(horizontal: false, vertical: true)
                     Text(subtitle)
-                        .font(.subheadline)
+                        .font(.system(size: 15))
                         .foregroundStyle(.secondary)
+                        .lineLimit(1)
                 }
 
-                Spacer()
+                Spacer(minLength: 8)
 
                 Image(systemName: "chevron.right")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.tertiary)
             }
             .padding(20)
+            .frame(minHeight: 102)
             .background(Color(.secondarySystemGroupedBackground))
             .clipShape(.rect(cornerRadius: 20))
         }
