@@ -209,13 +209,16 @@ struct ExploreTabView: View {
             }
             .padding(18)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                LinearGradient(
-                    colors: [Color(hex: "059669"), Color(hex: "0891B2")],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
+            .background {
+                ZStack {
+                    ArtworkImage(name: PathArtwork.quizBackdrop)
+                    LinearGradient(
+                        colors: [Color(hex: "059669").opacity(0.82), Color(hex: "0891B2").opacity(0.82)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
+            }
             .clipShape(.rect(cornerRadius: 20))
             .shadow(color: Color(hex: "059669").opacity(0.35), radius: 14, y: 6)
         }
@@ -239,14 +242,14 @@ struct ExploreTabView: View {
 
         return Button { showFuturePlan = true } label: {
             HStack(spacing: 14) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color(hex: "818CF8").opacity(0.12))
-                        .frame(width: 40, height: 40)
-                    Image(systemName: "map.fill")
-                        .foregroundStyle(Color(hex: "818CF8"))
-                        .font(.system(size: 18))
-                }
+                ArtworkImage(name: PathArtwork.futurePath)
+                    .frame(width: 52, height: 52)
+                    .clipped()
+                    .clipShape(.rect(cornerRadius: 10))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .strokeBorder(Color(hex: "818CF8").opacity(0.35), lineWidth: 1)
+                    )
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {
                         Text(buttonLabel)
@@ -400,45 +403,13 @@ struct ExploreTabView: View {
             showHeroBusinessResult = result
         } label: {
             VStack(spacing: 0) {
-                HStack(spacing: 14) {
-                    ZStack {
-                        Circle()
-                            .fill(catColor.opacity(0.15))
-                            .frame(width: 52, height: 52)
-                        Image(systemName: result.businessPath.icon)
-                            .font(.title3)
-                            .foregroundStyle(catColor)
-                    }
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "crown.fill")
-                                .font(.caption2)
-                                .foregroundStyle(.yellow)
-                            Text("Your Best Match")
-                                .font(.caption.weight(.bold))
-                                .foregroundStyle(Theme.accent)
-                        }
-
-                        Text(result.businessPath.name)
-                            .font(.headline)
-                            .foregroundStyle(Theme.textPrimary)
-                            .lineLimit(1)
-
-                        Text(result.businessPath.category.rawValue)
-                            .font(.caption)
-                            .foregroundStyle(Theme.textTertiary)
-                    }
-
-                    Spacer()
-
-                    heroScoreBadge(result.scorePercentage, color: catColor)
-                }
-                .padding(16)
-
-                Rectangle()
-                    .fill(catColor.opacity(0.08))
-                    .frame(height: 1)
+                heroImageHeader(
+                    artwork: PathArtwork.image(for: result.businessPath),
+                    accentColor: catColor,
+                    name: result.businessPath.name,
+                    subtitle: result.businessPath.category.rawValue,
+                    score: result.scorePercentage
+                )
 
                 HStack(spacing: 16) {
                     heroStat(icon: "dollarsign.circle.fill", value: result.businessPath.startupCostRange, color: catColor)
@@ -446,24 +417,72 @@ struct ExploreTabView: View {
                     heroStat(icon: result.businessPath.zone.icon, value: "\(result.businessPath.aiProofRating)/100", color: catColor)
                 }
                 .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+                .padding(.vertical, 14)
+                .background(Theme.cardBackground)
             }
-            .background(
-                LinearGradient(
-                    colors: [catColor.opacity(0.06), Theme.cardBackground],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
-            .clipShape(.rect(cornerRadius: 16))
+            .clipShape(.rect(cornerRadius: 20))
             .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(catColor.opacity(0.2), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(catColor.opacity(0.25), lineWidth: 1)
             )
             .cardShadow()
         }
-        .buttonStyle(.plain)
+        .buttonStyle(ArtworkPressStyle())
         .padding(.horizontal, 16)
+    }
+
+    /// Shared full-bleed art header for the three hero match cards:
+    /// category render fills the top, dark gradient rises from the bottom,
+    /// name and match score sit on top in white.
+    private func heroImageHeader(artwork: String, accentColor: Color, name: String, subtitle: String, score: Int) -> some View {
+        ZStack(alignment: .bottomLeading) {
+            ArtworkImage(name: artwork)
+                .frame(height: 260)
+                .frame(maxWidth: .infinity)
+                .clipped()
+
+            LinearGradient(
+                colors: [.clear, .black.opacity(0.55), .black.opacity(0.9)],
+                startPoint: .init(x: 0.5, y: 0.35),
+                endPoint: .bottom
+            )
+            .allowsHitTesting(false)
+
+            VStack(alignment: .leading, spacing: 5) {
+                HStack(spacing: 6) {
+                    Image(systemName: "crown.fill")
+                        .font(.caption2)
+                        .foregroundStyle(.yellow)
+                    Text("YOUR BEST MATCH")
+                        .font(.caption2.weight(.bold))
+                        .tracking(1.2)
+                        .foregroundStyle(.white.opacity(0.9))
+                }
+                Text(name)
+                    .font(.title2.weight(.bold))
+                    .foregroundStyle(.white)
+                    .lineLimit(2)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.75))
+            }
+            .padding(16)
+        }
+        .overlay(alignment: .topTrailing) {
+            VStack(spacing: 0) {
+                ScoreCountUpText(target: score, font: .system(size: 28, weight: .heavy, design: .rounded), color: .white)
+                Text("match")
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(.white.opacity(0.8))
+            }
+            .padding(12)
+            .background(.black.opacity(0.35), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(accentColor.opacity(0.5), lineWidth: 1)
+            )
+            .padding(12)
+        }
     }
 
     private func heroTradesCard(_ path: EducationPath, score: Int) -> some View {
@@ -472,45 +491,13 @@ struct ExploreTabView: View {
             showHeroEducationPath = path
         } label: {
             VStack(spacing: 0) {
-                HStack(spacing: 14) {
-                    ZStack {
-                        Circle()
-                            .fill(catColor.opacity(0.15))
-                            .frame(width: 52, height: 52)
-                        Image(systemName: path.icon)
-                            .font(.title3)
-                            .foregroundStyle(catColor)
-                    }
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "crown.fill")
-                                .font(.caption2)
-                                .foregroundStyle(.yellow)
-                            Text("Your Best Match")
-                                .font(.caption.weight(.bold))
-                                .foregroundStyle(catColor)
-                        }
-
-                        Text(path.title)
-                            .font(.headline)
-                            .foregroundStyle(Theme.textPrimary)
-                            .lineLimit(1)
-
-                        Text(path.category.rawValue)
-                            .font(.caption)
-                            .foregroundStyle(Theme.textTertiary)
-                    }
-
-                    Spacer()
-
-                    heroScoreBadge(score, color: catColor)
-                }
-                .padding(16)
-
-                Rectangle()
-                    .fill(catColor.opacity(0.08))
-                    .frame(height: 1)
+                heroImageHeader(
+                    artwork: PathArtwork.educationImage(for: path.category),
+                    accentColor: catColor,
+                    name: path.title,
+                    subtitle: path.category.rawValue,
+                    score: score
+                )
 
                 HStack(spacing: 16) {
                     heroStat(icon: "dollarsign.circle.fill", value: path.typicalSalaryRange, color: catColor)
@@ -518,23 +505,17 @@ struct ExploreTabView: View {
                     heroStat(icon: path.zone.icon, value: "\(path.aiSafeScore)/100", color: catColor)
                 }
                 .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+                .padding(.vertical, 14)
+                .background(Theme.cardBackground)
             }
-            .background(
-                LinearGradient(
-                    colors: [catColor.opacity(0.06), Theme.cardBackground],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
-            .clipShape(.rect(cornerRadius: 16))
+            .clipShape(.rect(cornerRadius: 20))
             .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(catColor.opacity(0.2), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(catColor.opacity(0.25), lineWidth: 1)
             )
             .cardShadow()
         }
-        .buttonStyle(.plain)
+        .buttonStyle(ArtworkPressStyle())
         .padding(.horizontal, 16)
     }
 
@@ -544,45 +525,13 @@ struct ExploreTabView: View {
             showHeroDegreeRecord = record
         } label: {
             VStack(spacing: 0) {
-                HStack(spacing: 14) {
-                    ZStack {
-                        Circle()
-                            .fill(catColor.opacity(0.15))
-                            .frame(width: 52, height: 52)
-                        Image(systemName: record.icon)
-                            .font(.title3)
-                            .foregroundStyle(catColor)
-                    }
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "crown.fill")
-                                .font(.caption2)
-                                .foregroundStyle(.yellow)
-                            Text("Your Best Match")
-                                .font(.caption.weight(.bold))
-                                .foregroundStyle(catColor)
-                        }
-
-                        Text(record.title)
-                            .font(.headline)
-                            .foregroundStyle(Theme.textPrimary)
-                            .lineLimit(1)
-
-                        Text(record.category.rawValue)
-                            .font(.caption)
-                            .foregroundStyle(Theme.textTertiary)
-                    }
-
-                    Spacer()
-
-                    heroScoreBadge(score, color: catColor)
-                }
-                .padding(16)
-
-                Rectangle()
-                    .fill(catColor.opacity(0.08))
-                    .frame(height: 1)
+                heroImageHeader(
+                    artwork: PathArtwork.image(for: record),
+                    accentColor: catColor,
+                    name: record.title,
+                    subtitle: record.category.rawValue,
+                    score: score
+                )
 
                 HStack(spacing: 16) {
                     heroStat(icon: "dollarsign.circle.fill", value: record.salaryExperienced, color: catColor)
@@ -590,39 +539,18 @@ struct ExploreTabView: View {
                     heroStat(icon: record.aiProofTier.icon, value: record.aiProofTier.label, color: catColor)
                 }
                 .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+                .padding(.vertical, 14)
+                .background(Theme.cardBackground)
             }
-            .background(
-                LinearGradient(
-                    colors: [catColor.opacity(0.06), Theme.cardBackground],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
-            .clipShape(.rect(cornerRadius: 16))
+            .clipShape(.rect(cornerRadius: 20))
             .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(catColor.opacity(0.2), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(catColor.opacity(0.25), lineWidth: 1)
             )
             .cardShadow()
         }
-        .buttonStyle(.plain)
+        .buttonStyle(ArtworkPressStyle())
         .padding(.horizontal, 16)
-    }
-
-    private func heroScoreBadge(_ score: Int, color: Color) -> some View {
-        VStack(spacing: 2) {
-            Text("\(score)%")
-                .font(.title2.weight(.bold))
-                .foregroundStyle(color)
-                .contentTransition(.numericText(countsDown: false))
-                .animation(.spring(response: 0.6, dampingFraction: 0.7),
-                           value: matchScoresUpdated)
-            Text("match")
-                .font(.caption2.weight(.medium))
-                .foregroundStyle(Theme.textTertiary)
-        }
-        .frame(width: 60)
     }
 
     private func heroStat(icon: String, value: String, color: Color) -> some View {
@@ -717,49 +645,49 @@ struct ExploreTabView: View {
             selectedResult = result
             appState.markPathExplored(result.businessPath.id)
         } label: {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack {
-                    ZStack {
-                        Circle()
-                            .fill(catColor.opacity(0.15))
-                            .frame(width: 40, height: 40)
-                        Image(systemName: result.businessPath.icon)
-                            .font(.body)
-                            .foregroundStyle(catColor)
-                    }
-                    Spacer()
+            VStack(alignment: .leading, spacing: 0) {
+                ZStack(alignment: .topTrailing) {
+                    ArtworkImage(name: PathArtwork.image(for: result.businessPath))
+                        .frame(height: 84)
+                        .frame(maxWidth: .infinity)
+                        .clipped()
                     if isFav {
                         Image(systemName: "heart.fill")
                             .font(.caption2)
                             .foregroundStyle(.pink)
+                            .padding(6)
+                            .background(.black.opacity(0.35), in: Circle())
+                            .padding(6)
                     }
                 }
 
-                Text(result.businessPath.name)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Theme.textPrimary)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(result.businessPath.name)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Theme.textPrimary)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
 
-                Spacer(minLength: 0)
+                    Spacer(minLength: 0)
 
-                HStack(spacing: 4) {
-                    Image(systemName: result.businessPath.zone.icon)
-                        .font(.system(size: 9))
-                    Text("\(result.businessPath.aiProofRating)/100")
-                        .font(.caption2.weight(.semibold))
-                        .contentTransition(.numericText(countsDown: false))
-                        .animation(.spring(response: 0.6, dampingFraction: 0.7),
-                                   value: matchScoresUpdated)
+                    HStack(spacing: 4) {
+                        Image(systemName: result.businessPath.zone.icon)
+                            .font(.system(size: 9))
+                        Text("\(result.businessPath.aiProofRating)/100")
+                            .font(.caption2.weight(.semibold))
+                            .contentTransition(.numericText(countsDown: false))
+                            .animation(.spring(response: 0.6, dampingFraction: 0.7),
+                                       value: matchScoresUpdated)
+                    }
+                    .foregroundStyle(catColor)
+
+                    Text(result.businessPath.startupCostRange)
+                        .font(.caption2)
+                        .foregroundStyle(Theme.textTertiary)
                 }
-                .foregroundStyle(catColor)
-
-                Text(result.businessPath.startupCostRange)
-                    .font(.caption2)
-                    .foregroundStyle(Theme.textTertiary)
+                .padding(12)
             }
-            .frame(width: 150, height: 160, alignment: .leading)
-            .padding(14)
+            .frame(width: 150, height: 178, alignment: .leading)
             .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 14))
             .overlay(
@@ -768,7 +696,7 @@ struct ExploreTabView: View {
             )
             .cardShadow()
         }
-        .buttonStyle(.plain)
+        .buttonStyle(ArtworkPressStyle())
         .contextMenu {
             Button {
                 appState.toggleFavorite(result.businessPath.id)
@@ -864,14 +792,14 @@ struct ExploreTabView: View {
         } label: {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 10) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(catColor.opacity(0.12))
-                            .frame(width: 36, height: 36)
-                        Image(systemName: category.icon)
-                            .font(.subheadline)
-                            .foregroundStyle(catColor)
-                    }
+                    ArtworkImage(name: PathArtwork.educationImage(for: category))
+                        .frame(width: 44, height: 44)
+                        .clipped()
+                        .clipShape(.rect(cornerRadius: 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .strokeBorder(catColor.opacity(0.3), lineWidth: 1)
+                        )
                     Spacer()
                     Text("\(count)")
                         .font(.caption2.weight(.bold))
@@ -895,21 +823,12 @@ struct ExploreTabView: View {
                     .stroke(catColor.opacity(0.08), lineWidth: 0.5)
             )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(ArtworkPressStyle())
         .sensoryFeedback(.selection, trigger: showEducationCategorySheet)
     }
 
     private func emptyFilterState(_ message: String) -> some View {
-        VStack(spacing: 8) {
-            Image(systemName: appState.exploreFilter == .favorites ? "heart" : "eye.slash")
-                .font(.title2)
-                .foregroundStyle(Theme.textTertiary)
-            Text(message)
-                .font(.subheadline)
-                .foregroundStyle(Theme.textTertiary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 24)
+        ArtworkEmptyState(title: message)
     }
 
 
@@ -1135,15 +1054,12 @@ struct CareerPathDetailSheet: View {
 
     private var heroHeader: some View {
         VStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(Theme.accentBlue.opacity(0.12))
-                    .frame(width: 72, height: 72)
-                Image(systemName: career.icon)
-                    .font(.system(size: 28))
-                    .foregroundStyle(Theme.accentBlue)
-            }
-            .padding(.top, 8)
+            ArtworkImage(name: PathArtwork.educationImage(for: career.category))
+                .frame(height: 170)
+                .frame(maxWidth: .infinity)
+                .clipped()
+                .clipShape(.rect(cornerRadius: 16))
+                .accessibilityHidden(true)
 
             Text(career.name)
                 .font(.title2.bold())

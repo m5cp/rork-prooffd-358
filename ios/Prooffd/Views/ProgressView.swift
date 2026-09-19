@@ -4,6 +4,20 @@ struct ProgressTabView: View {
     @Environment(AppState.self) private var appState
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var showLogWin = false
+    @State private var showMilestoneCelebration = false
+
+    /// Artwork for the committed path, resolved from the source path id.
+    private var myPathArtwork: String? {
+        guard let path = appState.myPath else { return nil }
+        switch path.type {
+        case .business:
+            return BusinessPathDatabase.allPaths.first { $0.id == path.id }.map { PathArtwork.image(for: $0) }
+        case .trade:
+            return EducationPathDatabase.all.first { $0.id == path.id }.map { PathArtwork.educationImage(for: $0.category) }
+        case .degree:
+            return PathArtwork.collegeDegree
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -26,6 +40,11 @@ struct ProgressTabView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .preferredColorScheme(.dark)
+            .overlay {
+                if showMilestoneCelebration {
+                    milestoneCelebrationOverlay
+                }
+            }
         }
     }
 
@@ -277,10 +296,45 @@ struct ProgressTabView: View {
         }
     }
 
+    private var milestoneCelebrationOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.65)
+                .ignoresSafeArea()
+            VStack(spacing: 16) {
+                ArtworkImage(name: PathArtwork.celebration)
+                    .frame(height: 230)
+                    .frame(maxWidth: .infinity)
+                    .clipped()
+                Text("Milestone complete!")
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(.white)
+            }
+            .padding(.horizontal, 32)
+        }
+        .transition(.opacity)
+        .onAppear {
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            Task {
+                try? await Task.sleep(for: .seconds(1.8))
+                withAnimation(.easeOut(duration: 0.35)) {
+                    showMilestoneCelebration = false
+                }
+            }
+        }
+    }
+
     private var myPathHeroSection: some View {
         Group {
             if let path = appState.myPath {
                 VStack(spacing: 0) {
+                    if let art = myPathArtwork {
+                        ArtworkImage(name: art)
+                            .frame(height: 120)
+                            .frame(maxWidth: .infinity)
+                            .clipped()
+                            .clipShape(.rect(topLeadingRadius: 18, topTrailingRadius: 18))
+                    }
+
                     HStack(spacing: 12) {
                         Text(path.icon).font(.title)
                         VStack(alignment: .leading, spacing: 3) {
@@ -378,12 +432,21 @@ struct ProgressTabView: View {
                     Spacer()
                 }
 
+                ArtworkImage(name: PathArtwork.milestone)
+                    .frame(height: 110)
+                    .frame(maxWidth: .infinity)
+                    .clipped()
+                    .clipShape(.rect(cornerRadius: 14))
+
                 VStack(spacing: 8) {
                     ForEach(path.milestones) { milestone in
                         Button {
                             if !milestone.isCompleted {
                                 withAnimation(.spring(response: 0.3)) {
                                     appState.completeMilestone(id: milestone.id)
+                                }
+                                withAnimation(.easeOut(duration: 0.25)) {
+                                    showMilestoneCelebration = true
                                 }
                             }
                         } label: {

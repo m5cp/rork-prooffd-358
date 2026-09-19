@@ -215,16 +215,11 @@ struct DegreeExplorePage: View {
     }
 
     private var emptyState: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "magnifyingglass")
-                .font(.title)
-                .foregroundStyle(.tertiary)
-            Text("No results for \"\(searchText)\"")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 60)
+        ArtworkEmptyState(
+            title: "No results for \"\(searchText)\"",
+            message: "Try a different search term"
+        )
+        .padding(.vertical, 40)
     }
 
     private func degreeCategoryColor(_ category: DegreeCareerCategory) -> Color {

@@ -204,15 +204,12 @@ struct DegreeCareerDetailSheet: View {
 
     private var heroHeader: some View {
         VStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(catColor.opacity(0.12))
-                    .frame(width: 72, height: 72)
-                Image(systemName: record.icon)
-                    .font(.system(size: 28))
-                    .foregroundStyle(catColor)
-            }
-            .padding(.top, 8)
+            ArtworkImage(name: PathArtwork.image(for: record))
+                .frame(height: 170)
+                .frame(maxWidth: .infinity)
+                .clipped()
+                .clipShape(.rect(cornerRadius: 16))
+                .accessibilityHidden(true)
 
             Text(record.title)
                 .font(.title2.bold())

@@ -344,9 +344,11 @@ struct MyBuildsView: View {
 
     private var emptyState: some View {
         VStack(spacing: 20) {
-            Image(systemName: "list.clipboard")
-                .font(.system(size: 48))
-                .foregroundStyle(.tertiary)
+            ArtworkImage(name: PathArtwork.emptyState)
+                .frame(height: 150)
+                .frame(maxWidth: .infinity)
+                .clipped()
+                .accessibilityHidden(true)
 
             VStack(spacing: 6) {
                 Text("No plans yet")

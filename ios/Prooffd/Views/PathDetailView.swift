@@ -21,29 +21,33 @@ struct PathDetailView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: 0) {
                     heroSection
-                    trackBadge
-                    quickStats
-                    favHideBar
-                    startBuildSection
-                    overviewSection
-                    degreeRequirementSection
 
-                    switch track {
-                    case .startBusiness:
-                        businessTrackContent
-                    case .tradeAndCertification:
-                        tradeTrackContent
-                    case .degreeBasedCareer:
-                        degreeTrackContent
+                    VStack(spacing: 24) {
+                        trackBadge
+                        quickStats
+                        favHideBar
+                        startBuildSection
+                        overviewSection
+                        degreeRequirementSection
+
+                        switch track {
+                        case .startBusiness:
+                            businessTrackContent
+                        case .tradeAndCertification:
+                            tradeTrackContent
+                        case .degreeBasedCareer:
+                            degreeTrackContent
+                        }
+
+                        actionButtons
+
+                        Color.clear.frame(height: 40)
                     }
-
-                    actionButtons
-
-                    Color.clear.frame(height: 40)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 20)
                 }
-                .padding(.horizontal, 16)
             }
             .scrollIndicators(.hidden)
             .background(Theme.background)
@@ -147,38 +151,32 @@ struct PathDetailView: View {
     }
 
     private var heroSection: some View {
-        VStack(spacing: 16) {
-            ZStack {
-                Circle()
-                    .fill(catColor.opacity(0.12))
-                    .frame(width: 80, height: 80)
-                Image(systemName: path.icon)
-                    .font(.system(size: 32))
-                    .foregroundStyle(catColor)
+        ParallaxHeroHeader(name: PathArtwork.image(for: path), height: 270)
+            .overlay(alignment: .bottomLeading) {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(path.name)
+                        .font(.title.bold())
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.leading)
+                        .dynamicTypeSize(...DynamicTypeSize.accessibility2)
+
+                    HStack(spacing: 8) {
+                        HStack(spacing: 6) {
+                            Image(systemName: path.category.icon)
+                                .font(.caption2)
+                            Text(path.category.rawValue)
+                                .font(.caption.weight(.medium))
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 5)
+                        .background(.black.opacity(0.45), in: .capsule)
+
+                        aiProofDisplay
+                    }
+                }
+                .padding(16)
             }
-            .padding(.top, 8)
-            .accessibilityHidden(true)
-
-            Text(path.name)
-                .font(.title.bold())
-                .foregroundStyle(Theme.textPrimary)
-                .multilineTextAlignment(.center)
-                .dynamicTypeSize(...DynamicTypeSize.accessibility2)
-
-            HStack(spacing: 6) {
-                Image(systemName: path.category.icon)
-                    .font(.caption2)
-                Text(path.category.rawValue)
-                    .font(.caption.weight(.medium))
-            }
-            .foregroundStyle(catColor.opacity(0.8))
-            .padding(.horizontal, 12)
-            .padding(.vertical, 5)
-            .background(catColor.opacity(0.1))
-            .clipShape(.capsule)
-
-            aiProofDisplay
-        }
     }
 
     private var aiProofDisplay: some View {
@@ -197,6 +195,7 @@ struct PathDetailView: View {
         .padding(.vertical, 8)
         .background(color.opacity(0.12))
         .clipShape(.capsule)
+        .background(.black.opacity(0.35), in: .capsule)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("AI Proof rating \(path.aiProofRating) out of 100, \(zone.label)")
     }

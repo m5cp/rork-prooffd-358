@@ -12,7 +12,7 @@ struct FuturePlanQuizView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                ElectricBackdrop()
+                QuizArtworkBackdrop()
 
                 if vm.isComplete {
                     resultsContent
@@ -303,9 +303,32 @@ struct FuturePlanQuizView: View {
             if let plan = appState.futurePlan {
                 ScrollView {
                     VStack(spacing: 24) {
+                        ArtworkImage(name: PathArtwork.futurePath)
+                            .frame(height: 180)
+                            .frame(maxWidth: .infinity)
+                            .clipped()
+                            .clipShape(.rect(cornerRadius: 20))
+                            .overlay(alignment: .bottomTrailing) {
+                                VStack(spacing: 0) {
+                                    ScoreCountUpText(
+                                        target: plan.confidence,
+                                        font: .system(size: 32, weight: .heavy, design: .rounded),
+                                        color: .white
+                                    )
+                                    Text("confident")
+                                        .font(.caption2.weight(.medium))
+                                        .foregroundStyle(.white.opacity(0.85))
+                                }
+                                .padding(10)
+                                .background(.black.opacity(0.4), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .padding(10)
+                            }
+                            .accessibilityHidden(true)
+                            .padding(.horizontal, 20)
+                            .padding(.top, 8)
+
                         heroCard(plan: plan)
                             .padding(.horizontal, 20)
-                            .padding(.top, 20)
 
                         if !plan.whyThisFits.isEmpty {
                             whyCard(plan: plan)

@@ -232,7 +232,7 @@ struct OnboardingView: View {
     private var stepContent: some View {
         Group {
             switch vm.currentStep {
-            case 0: motivationStep
+            case 0: welcomeStep
             case 1: workPreferenceStep
             case 2: situationGoalStep
             case 3: workConditionsStep
@@ -252,6 +252,19 @@ struct OnboardingView: View {
     }
 
     // MARK: - Step 0: Motivation
+
+    private var welcomeStep: some View {
+        VStack(spacing: 20) {
+            ArtworkImage(name: PathArtwork.onboardingHero)
+                .frame(height: 150)
+                .frame(maxWidth: .infinity)
+                .clipped()
+                .clipShape(.rect(cornerRadius: 20))
+                .accessibilityHidden(true)
+
+            motivationStep
+        }
+    }
 
     private var motivationStep: some View {
         VStack(spacing: 12) {

@@ -196,19 +196,11 @@ struct SeeAllView: View {
     }
 
     private var emptyState: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 36))
-                .foregroundStyle(Theme.textTertiary)
-            Text("No matches found")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(Theme.textSecondary)
-            Text("Try adjusting your search or filters")
-                .font(.caption)
-                .foregroundStyle(Theme.textTertiary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 60)
+        ArtworkEmptyState(
+            title: "No matches found",
+            message: "Try adjusting your search or filters"
+        )
+        .padding(.vertical, 40)
     }
 }
 

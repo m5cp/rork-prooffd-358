@@ -11,7 +11,7 @@ struct LongQuizView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                ElectricBackdrop()
+                QuizArtworkBackdrop()
 
                 if vm.isComplete {
                     completionContent
@@ -170,21 +170,21 @@ struct LongQuizView: View {
     private var completionContent: some View {
         VStack(spacing: 20) {
             Spacer()
-            ZStack {
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [Theme.accent.opacity(0.35), Theme.accent.opacity(0.04)],
-                            center: .center,
-                            startRadius: 5,
-                            endRadius: 60
+            ArtworkImage(name: PathArtwork.resultsReveal)
+                .frame(height: 250)
+                .frame(maxWidth: .infinity)
+                .clipped()
+                .overlay(alignment: .bottom) {
+                    if let score = topMatchScore {
+                        ScoreCountUpText(
+                            target: score,
+                            font: .system(size: 46, weight: .heavy, design: .rounded),
+                            color: .white
                         )
-                    )
-                    .frame(width: 120, height: 120)
-                Image(systemName: "sparkles")
-                    .font(.system(size: 56))
-                    .foregroundStyle(Theme.accent)
-            }
+                        .shadow(color: .black.opacity(0.6), radius: 8, y: 2)
+                        .padding(.bottom, 2)
+                    }
+                }
             VStack(spacing: 10) {
                 Text("Your matches just got sharper")
                     .font(.title2.bold())
@@ -213,6 +213,10 @@ struct LongQuizView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
         }
+    }
+
+    private var topMatchScore: Int? {
+        appState.matchResults.first?.scorePercentage
     }
 
     // MARK: - Questions
