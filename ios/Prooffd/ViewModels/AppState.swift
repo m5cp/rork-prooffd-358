@@ -73,6 +73,9 @@ class AppState {
     var realWorldWins: [RealWorldWin] = [] {
         didSet { saveRealWorldWins() }
     }
+    var futurePlan: FuturePlan? = nil {
+        didSet { saveFuturePlan() }
+    }
 
     var hasUsedWhatIf: Bool {
         get { UserDefaults.standard.bool(forKey: "hasUsedWhatIf") }
@@ -123,6 +126,7 @@ class AppState {
         loadPlanItems()
         loadMyPath()
         loadRealWorldWins()
+        loadFuturePlan()
         assignAvatarIfNeeded()
         if let raw = savedChosenPath, let path = ChosenPath(rawValue: raw) {
             chosenPath = path
@@ -257,6 +261,7 @@ class AppState {
         momentum = MomentumSystem()
         dailyRewards = DailyRewardTracker()
         dailyMicroAction = DailyMicroActionTracker()
+        futurePlan = nil
         hasCompletedOnboarding = false
         hasCompletedQuiz = false
         hasSeenResultsReveal = false
@@ -272,7 +277,8 @@ class AppState {
             "hiddenPathIDs", "hiddenEducationIDs", "hiddenDegreeIDs",
             "exploredPathIDs", "unlockedAchievementIDs",
             "hasUsedWhatIf", "hasSharedResult", "completedChallengeWeeks",
-            "lastSessionDate", "prompted_share_25", "prompted_share_50"
+            "lastSessionDate", "prompted_share_25", "prompted_share_50",
+            "futurePlan", "futurePlanAnswers"
         ]
         for key in keysToRemove {
             UserDefaults.standard.removeObject(forKey: key)
@@ -362,6 +368,51 @@ class AppState {
            let saved = try? JSONDecoder().decode([RealWorldWin].self, from: data) {
             realWorldWins = saved
         }
+    }
+
+    func applyFuturePlan(_ vm: FuturePlanViewModel) {
+        let plan = FuturePlanEngine.computePlan(
+            answers: vm.answers,
+            businessResults: matchResults,
+            educationScores: educationScores,
+            degreeScores: degreeScores
+        )
+        futurePlan = plan
+        vm.clearPartial()
+    }
+
+    /// Loads the Future Plan roadmap into My Path so its milestones
+    /// appear on the Progress tab.
+    func addFuturePlanToMyPath() {
+        guard let plan = futurePlan else { return }
+        var milestones: [PathMilestone] = []
+        for (stageIndex, stage) in plan.roadmap.enumerated() {
+            for (milestoneIndex, milestone) in stage.milestones.enumerated() {
+                milestones.append(PathMilestone(
+                    id: "fp-\(stageIndex)-\(milestoneIndex)",
+                    title: "\(stage.title) \u{2014} \(milestone)",
+                    category: milestoneIndex == stage.milestones.count - 1 ? .milestone : .action
+                ))
+            }
+        }
+        myPath = MyPath(id: plan.nicheId, name: plan.nicheName, icon: plan.nicheIcon,
+                        type: plan.nicheType, matchScore: plan.confidence,
+                        dateSet: Date(), milestones: milestones)
+    }
+
+    private func saveFuturePlan() {
+        if let plan = futurePlan,
+           let data = try? JSONEncoder().encode(plan) {
+            UserDefaults.standard.set(data, forKey: "futurePlan")
+        } else {
+            UserDefaults.standard.removeObject(forKey: "futurePlan")
+        }
+    }
+
+    private func loadFuturePlan() {
+        guard let data = UserDefaults.standard.data(forKey: "futurePlan"),
+              let saved = try? JSONDecoder().decode(FuturePlan.self, from: data) else { return }
+        futurePlan = saved
     }
 
     func educationScore(for id: String) -> Int {

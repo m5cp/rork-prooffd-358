@@ -19,6 +19,7 @@ struct ExploreTabView: View {
     @State private var weeklyPlan: WeeklyActionPlan? = nil
     @State private var showActionPlan = false
     @State private var showLongQuiz = false
+    @State private var showFuturePlan = false
     @State private var matchScoresUpdated: Bool = false
     @State private var showScoreUpdateBanner: Bool = false
     @State private var showROICalcFromExplore = false
@@ -33,6 +34,8 @@ struct ExploreTabView: View {
                     }
                     bestMatchHeroCard
                     longQuizRefineCard
+                        .padding(.horizontal, 16)
+                    futurePlanCard
                         .padding(.horizontal, 16)
                     roiCalculatorShortcut
                         .padding(.horizontal, 16)
@@ -206,6 +209,62 @@ struct ExploreTabView: View {
                 isPresented: $showLongQuiz,
                 onComplete: {
                     showLongQuiz = false
+                }
+            )
+        }
+    }
+
+    private var futurePlanCard: some View {
+        let isCompleted = appState.futurePlan != nil
+        let buttonLabel = isCompleted ? "Retake Future Planner" : "Build Your Future Plan"
+        let subtitle = isCompleted
+            ? "Update your roadmap and age outlook anytime"
+            : "A deeper quiz that maps your future, step by step"
+
+        return Button { showFuturePlan = true } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color(hex: "818CF8").opacity(0.12))
+                        .frame(width: 40, height: 40)
+                    Image(systemName: "map.fill")
+                        .foregroundStyle(Color(hex: "818CF8"))
+                        .font(.system(size: 18))
+                }
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 6) {
+                        Text(buttonLabel)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.textPrimary)
+                        if !isCompleted {
+                            Text("FREE")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundStyle(Theme.accent)
+                                .padding(.horizontal, 6).padding(.vertical, 2)
+                                .background(Theme.accent.opacity(0.12))
+                                .clipShape(Capsule())
+                        }
+                    }
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundStyle(Theme.textTertiary).font(.caption)
+            }
+            .padding(14)
+            .background(Theme.cardBackground)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14)
+                .stroke(Theme.border, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .sheet(isPresented: $showFuturePlan) {
+            FuturePlanQuizView(
+                isPresented: $showFuturePlan,
+                onComplete: {
+                    showFuturePlan = false
                 }
             )
         }

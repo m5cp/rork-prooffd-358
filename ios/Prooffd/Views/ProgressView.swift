@@ -462,6 +462,23 @@ struct ProgressTabView: View {
                     .foregroundStyle(Theme.textPrimary)
                 Spacer()
                 Button {
+                    if let url = ProofPortfolioPDFService.export(appState: appState) {
+                        PDFExportService.presentShareSheet(items: [url])
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.caption.weight(.bold))
+                        Text("Export")
+                            .font(.caption.weight(.bold))
+                    }
+                    .foregroundStyle(Theme.textPrimary)
+                    .padding(.horizontal, 12).padding(.vertical, 6)
+                    .background(Theme.cardBackgroundLight)
+                    .clipShape(Capsule())
+                }
+                .accessibilityLabel("Export Proof Portfolio PDF")
+                Button {
                     showLogWin = true
                 } label: {
                     HStack(spacing: 4) {
