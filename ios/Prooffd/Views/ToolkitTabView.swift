@@ -63,7 +63,7 @@ struct ToolkitTabView: View {
                         showROICalc = true
                     }
 
-                    Color.clear.frame(height: 40)
+                    Color.clear.frame(height: 96)
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
@@ -130,14 +130,7 @@ struct ToolkitTabView: View {
     ) -> some View {
         Button(action: action) {
             HStack(spacing: 14) {
-                ArtworkImage(name: artwork)
-                    .frame(width: 60, height: 60)
-                    .clipped()
-                    .clipShape(.rect(cornerRadius: 14))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .strokeBorder(iconColor.opacity(0.35), lineWidth: 1)
-                    )
+                ArtworkThumbnail(name: artwork, size: 62, accent: iconColor)
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(title)

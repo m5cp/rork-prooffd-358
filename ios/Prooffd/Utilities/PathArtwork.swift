@@ -68,16 +68,25 @@ enum PathArtwork {
 /// Never intercepts touches, so taps pass through to the card underneath.
 struct ArtworkImage: View {
     let name: String
+    /// `.fill` crops to fill the frame; `.fit` keeps the whole render visible.
+    var contentMode: ContentMode = .fill
+    /// Lifts these near-black renders so they read on a dark UI instead of turning to mush.
+    var lift: Bool = true
     @State private var appeared = false
 
-    init(name: String) {
+    init(name: String, contentMode: ContentMode = .fill, lift: Bool = true) {
         self.name = name
+        self.contentMode = contentMode
+        self.lift = lift
     }
 
     var body: some View {
         Image(name)
             .resizable()
-            .aspectRatio(contentMode: .fill)
+            .aspectRatio(contentMode: contentMode)
+            .saturation(lift ? 1.2 : 1)
+            .contrast(lift ? 1.08 : 1)
+            .brightness(lift ? 0.06 : 0)
             .opacity(appeared ? 1 : 0)
             .scaleEffect(appeared ? 1 : 1.05)
             .onAppear {
@@ -85,6 +94,39 @@ struct ArtworkImage: View {
             }
             .allowsHitTesting(false)
             .accessibilityHidden(true)
+    }
+}
+
+// MARK: - ArtworkThumbnail
+
+/// Square artwork chip for list rows. Zooms in past the render's empty margins
+/// so the subject actually fills the square at small sizes, and carries a soft
+/// accent ring + glow so it reads against dark cards.
+struct ArtworkThumbnail: View {
+    let name: String
+    var size: CGFloat = 60
+    var accent: Color = Theme.accent
+
+    private var radius: CGFloat { size * 0.28 }
+
+    var body: some View {
+        ArtworkImage(name: name)
+            .scaleEffect(1.35)
+            .frame(width: size, height: size)
+            .clipped()
+            .clipShape(.rect(cornerRadius: radius, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: radius, style: .continuous)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [accent.opacity(0.6), accent.opacity(0.15)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+            )
+            .shadow(color: accent.opacity(0.28), radius: 7, y: 2)
     }
 }
 
@@ -199,10 +241,9 @@ struct ArtworkEmptyState: View {
 
     var body: some View {
         VStack(spacing: 14) {
-            ArtworkImage(name: artwork)
-                .frame(height: artworkHeight)
-                .clipped()
+            ArtworkImage(name: artwork, contentMode: .fit)
                 .frame(maxWidth: .infinity)
+                .frame(height: artworkHeight)
             Text(title)
                 .font(.headline)
                 .foregroundStyle(Theme.textSecondary)

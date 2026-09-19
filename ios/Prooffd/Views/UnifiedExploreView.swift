@@ -59,7 +59,7 @@ struct UnifiedExploreView: View {
 
                     redoQuizCard
 
-                    Color.clear.frame(height: 40)
+                    Color.clear.frame(height: 96)
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
@@ -278,13 +278,18 @@ struct UnifiedExploreView: View {
     private func heroImageHeader(artwork: String, accentColor: Color, name: String, subtitle: String, score: Int) -> some View {
         ZStack(alignment: .bottomLeading) {
             ArtworkImage(name: artwork)
-                .frame(height: 240)
+                .frame(height: 210)
                 .frame(maxWidth: .infinity)
                 .clipped()
 
             LinearGradient(
-                colors: [.clear, .black.opacity(0.55), .black.opacity(0.9)],
-                startPoint: .init(x: 0.5, y: 0.35),
+                colors: [
+                    .clear,
+                    .black.opacity(0.35),
+                    .black.opacity(0.78),
+                    .black.opacity(0.94)
+                ],
+                startPoint: .init(x: 0.5, y: 0.25),
                 endPoint: .bottom
             )
             .allowsHitTesting(false)
@@ -490,14 +495,7 @@ struct UnifiedExploreView: View {
     private func heroCard(path: ChosenPath, subtitle: String) -> some View {
         NavigationLink(value: path) {
             HStack(spacing: 16) {
-                ArtworkImage(name: PathArtwork.image(for: path))
-                    .frame(width: 56, height: 56)
-                    .clipped()
-                    .clipShape(.rect(cornerRadius: 16))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .strokeBorder(heroGradient(for: path)[0].opacity(0.4), lineWidth: 1)
-                    )
+                ArtworkThumbnail(name: PathArtwork.image(for: path), size: 62, accent: heroGradient(for: path)[0])
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(path.title)

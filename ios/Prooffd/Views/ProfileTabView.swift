@@ -18,7 +18,7 @@ struct ProfileTabView: View {
                     profileHeader
                     statsRow
                     settingsSection
-                    Color.clear.frame(height: 40)
+                    Color.clear.frame(height: 96)
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
