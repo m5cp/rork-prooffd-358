@@ -371,6 +371,18 @@ nonisolated struct UserProfile: Codable, Sendable {
     var scheduleShape: ScheduleShape? = nil
     var clientType: ClientType? = nil
 
+    // Military service (Q19–Q20). Optional so older saved profiles decode
+    // unchanged. Without these the matcher has no direct signal for military
+    // paths and can only rank them off incidental work-environment overlap.
+    var militaryInterest: MilitaryInterest? = nil
+    var militaryEligibility: MilitaryEligibility? = nil
+
+    /// Whether military paths should appear in results at all.
+    var wantsMilitaryPaths: Bool {
+        guard let interest = militaryInterest else { return true }
+        return interest != .notForMe
+    }
+
     /// Filename of a user-supplied profile photo, if they picked one.
     var profilePhotoFilename: String? = nil
 

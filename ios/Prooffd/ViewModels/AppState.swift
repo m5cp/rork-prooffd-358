@@ -4,12 +4,14 @@ nonisolated enum ChosenPath: String, Codable, Sendable {
     case business = "business"
     case trades = "trades"
     case degree = "degree"
+    case military = "military"
 
     var title: String {
         switch self {
         case .business: return "Start a Business"
         case .trades: return "Trades & Certifications"
         case .degree: return "Advanced Education Careers"
+        case .military: return "Military Service"
         }
     }
 
@@ -18,6 +20,7 @@ nonisolated enum ChosenPath: String, Codable, Sendable {
         case .business: return "briefcase.fill"
         case .trades: return "wrench.and.screwdriver.fill"
         case .degree: return "building.columns.fill"
+        case .military: return "shield.checkered"
         }
     }
 
@@ -26,6 +29,7 @@ nonisolated enum ChosenPath: String, Codable, Sendable {
         case .business: return "Launch your own business with step-by-step plans"
         case .trades: return "Skilled trades, healthcare, tech & professional programs"
         case .degree: return "Licensed careers requiring a college degree"
+        case .military: return "Enlist or commission as an officer — paid training from day one"
         }
     }
 
@@ -34,6 +38,7 @@ nonisolated enum ChosenPath: String, Codable, Sendable {
         case .business: return Theme.accent
         case .trades: return Theme.accentBlue
         case .degree: return Color(hex: "818CF8")
+        case .military: return Color(hex: "4ADE80")
         }
     }
 }

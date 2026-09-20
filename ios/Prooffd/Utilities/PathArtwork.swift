@@ -16,6 +16,8 @@ enum PathArtwork {
     static let milestone = "mountain_peak_flag_milestone"
     static let celebration = "trophy_cup_confetti_stars"
     static let emptyState = "plant_sprout_dome"
+    static let militaryService = "military_service_emblem"
+    static let militaryOfficer = "military_rank_insignia"
 
     /// Hero render for a business path category.
     static func businessImage(for category: BusinessCategory) -> String {
@@ -37,7 +39,8 @@ enum PathArtwork {
     /// apprenticeship render; academic/professional ones use the degree render.
     static func educationImage(for category: EducationCategory) -> String {
         switch category {
-        case .trade, .certification, .military: return tradesEducation
+        case .military: return militaryService
+        case .trade, .certification: return tradesEducation
         case .healthcare, .technology, .business, .creative: return collegeDegree
         }
     }
@@ -58,6 +61,7 @@ enum PathArtwork {
         case .business: return "house_with_tools_floating"
         case .trades: return tradesEducation
         case .degree: return collegeDegree
+        case .military: return militaryService
         }
     }
 }

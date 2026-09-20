@@ -13,6 +13,7 @@ struct UnifiedExploreView: View {
     @State private var showWeeklySummary: Bool = WeeklySummaryScheduler.shouldShow
     @State private var siriTipHidden: Bool = UserDefaults.standard.bool(forKey: "siriTip_dismissed_dailyTip")
     @State private var showLongQuiz: Bool = false
+    @State private var showRetakePrecisionAlert: Bool = false
     @State private var showFuturePlan: Bool = false
 
     private var allResults: [MatchResult] { appState.matchResults }
@@ -52,6 +53,9 @@ struct UnifiedExploreView: View {
                     heroCard(path: .business, subtitle: "\(ContentLibrary.jobCount) businesses")
                     heroCard(path: .trades, subtitle: "\(EducationPathDatabase.all.count) programs")
                     heroCard(path: .degree, subtitle: "\(DegreeCareerDatabase.allRecords.count) careers")
+                    if appState.userProfile.wantsMilitaryPaths {
+                        heroCard(path: .military, subtitle: "Enlisted & officer routes")
+                    }
 
                     futurePlanCard
 
@@ -80,6 +84,8 @@ struct UnifiedExploreView: View {
                     TradesExplorePage()
                 case .degree:
                     DegreeExplorePage()
+                case .military:
+                    MilitaryExplorePage()
                 }
             }
             .sheet(item: $selectedResult) { result in
@@ -102,6 +108,14 @@ struct UnifiedExploreView: View {
             }
             .sheet(isPresented: $showFuturePlan) {
                 FuturePlanQuizView(isPresented: $showFuturePlan, onComplete: { showFuturePlan = false })
+            }
+            .alert("Retake the Precision Quiz?", isPresented: $showRetakePrecisionAlert) {
+                Button("Retake Quiz", role: .destructive) {
+                    showLongQuiz = true
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Your previous answers will be pre-filled, and anything you change will replace your earlier results and re-rank all of your matches.")
             }
             .alert("Redo Quiz?", isPresented: $showRedoQuizAlert) {
                 Button("Redo Quiz", role: .destructive) {
@@ -132,12 +146,19 @@ struct UnifiedExploreView: View {
 
     private var longQuizRefineCard: some View {
         let isCompleted = UserDefaults.standard.bool(forKey: "longQuizCompleted")
-        let title = isCompleted ? "Retake the Precision Quiz" : "Extended Precision Quiz"
+        let title = "Precision Quiz"
         let subtitle = isCompleted
-            ? "18 deeper questions, including how much AI worries you — retake anytime"
-            : "18 questions, including how much AI worries you, for sharper match scores"
+            ? "20 deeper questions, including AI concern and military service — take it again anytime"
+            : "20 questions, including how much AI worries you, for sharper match scores"
 
-        return Button { showLongQuiz = true } label: {
+        return Button {
+            // Retaking overwrites the previous run's answers, so confirm first.
+            if isCompleted {
+                showRetakePrecisionAlert = true
+            } else {
+                showLongQuiz = true
+            }
+        } label: {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 10) {
                     Image(systemName: "slider.horizontal.3")
@@ -168,7 +189,7 @@ struct UnifiedExploreView: View {
                     .foregroundStyle(.white.opacity(0.85))
                     .fixedSize(horizontal: false, vertical: true)
                 HStack(spacing: 6) {
-                    Text(isCompleted ? "Retake now" : "Take the quiz")
+                    Text(isCompleted ? "Take it again" : "Take the quiz")
                         .font(.subheadline.weight(.bold))
                         .foregroundStyle(Color(hex: "059669"))
                     Image(systemName: "arrow.right")
@@ -322,6 +343,10 @@ struct UnifiedExploreView: View {
                 if let topDeg = topDegreeMatch {
                     bestMatchDegreeCard(topDeg.record, score: topDeg.score)
                 }
+            case .military:
+                if let topMil = topMilitaryMatch {
+                    bestMatchTradesCard(topMil.path, score: topMil.score)
+                }
             }
         }
     }
@@ -330,6 +355,13 @@ struct UnifiedExploreView: View {
         let scored = EducationPathDatabase.all.compactMap { path -> (path: EducationPath, score: Int)? in
             let s = appState.educationScore(for: path.id)
             return (path, s)
+        }
+        return scored.max(by: { $0.score < $1.score })
+    }
+
+    private var topMilitaryMatch: (path: EducationPath, score: Int)? {
+        let scored = EducationPathDatabase.military.map { path in
+            (path: path, score: appState.educationScore(for: path.id))
         }
         return scored.max(by: { $0.score < $1.score })
     }
@@ -506,6 +538,7 @@ struct UnifiedExploreView: View {
         case .business: return [Theme.accent, Theme.accent.opacity(0.7)]
         case .trades: return [Theme.accentBlue, Theme.accentBlue.opacity(0.7)]
         case .degree: return [Color(hex: "818CF8"), Color(hex: "818CF8").opacity(0.7)]
+        case .military: return [Color(hex: "4ADE80"), Color(hex: "4ADE80").opacity(0.7)]
         }
     }
 

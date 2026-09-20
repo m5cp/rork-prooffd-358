@@ -142,6 +142,8 @@ struct LongQuizView: View {
             case .credentialAppetite:  credentialStep
             case .scheduleShape:       scheduleStep
             case .clientType:          clientTypeStep
+            case .militaryInterest:    militaryInterestStep
+            case .militaryEligibility: militaryEligibilityStep
             }
         }
         .id(vm.currentQuestion)
@@ -157,7 +159,7 @@ struct LongQuizView: View {
             .allowsHitTesting(false)
 
             Button {
-                let wasLast = vm.currentQuestion == vm.totalQuestions - 1
+                let wasLast = vm.isOnFinalQuestion
                 withAnimation(.spring(duration: 0.35)) {
                     vm.next()
                 }
@@ -167,7 +169,7 @@ struct LongQuizView: View {
                     appState.applyLongQuizAnswers(vm)
                 }
             } label: {
-                Text(vm.currentQuestion == vm.totalQuestions - 1 ? "See Updated Matches" : "Continue")
+                Text(vm.isOnFinalQuestion ? "See Updated Matches" : "Continue")
                     .font(.headline)
                     .foregroundStyle(.black)
                     .frame(maxWidth: .infinity)
@@ -501,6 +503,34 @@ struct LongQuizView: View {
                                  subtitle: option.subtitle,
                                  isSelected: vm.clientType == option) {
                     vm.clientType = option
+                }
+            }
+        }
+    }
+
+    private var militaryInterestStep: some View {
+        VStack(spacing: 12) {
+            RenderedIcon(name: PathArtwork.militaryService, size: 96, glow: Color(hex: "4ADE80"))
+                .padding(.bottom, 4)
+            ForEach(MilitaryInterest.allCases) { option in
+                singleSelectCard(icon: option.icon, title: option.rawValue,
+                                 subtitle: option.subtitle,
+                                 isSelected: vm.militaryInterest == option) {
+                    vm.militaryInterest = option
+                }
+            }
+        }
+    }
+
+    private var militaryEligibilityStep: some View {
+        VStack(spacing: 12) {
+            RenderedIcon(name: PathArtwork.militaryOfficer, size: 96, glow: Color(hex: "4ADE80"))
+                .padding(.bottom, 4)
+            ForEach(MilitaryEligibility.allCases) { option in
+                singleSelectCard(icon: option.icon, title: option.rawValue,
+                                 subtitle: option.subtitle,
+                                 isSelected: vm.militaryEligibility == option) {
+                    vm.militaryEligibility = option
                 }
             }
         }

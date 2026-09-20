@@ -39,6 +39,19 @@ struct ResultsRevealView: View {
                     artwork: PathArtwork.educationImage(for: path.category)
                 )
             }.sorted { $0.scorePercentage > $1.scorePercentage }
+        case .military:
+            return EducationPathDatabase.military.map { path in
+                RevealMatch(
+                    id: path.id,
+                    name: path.title,
+                    category: path.category.rawValue,
+                    icon: path.icon,
+                    scorePercentage: appState.educationScore(for: path.id),
+                    artwork: path.id.contains("officer")
+                        ? PathArtwork.militaryOfficer
+                        : PathArtwork.militaryService
+                )
+            }.sorted { $0.scorePercentage > $1.scorePercentage }
         case .degree:
             return DegreeCareerDatabase.allRecords.map { record in
                 RevealMatch(

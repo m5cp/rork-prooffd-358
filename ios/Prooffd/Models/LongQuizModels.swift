@@ -19,6 +19,8 @@ nonisolated enum LongQuizQuestion: Int, CaseIterable, Sendable {
     case credentialAppetite = 15
     case scheduleShape      = 16
     case clientType         = 17
+    case militaryInterest   = 18
+    case militaryEligibility = 19
 
     var title: String {
         switch self {
@@ -40,6 +42,8 @@ nonisolated enum LongQuizQuestion: Int, CaseIterable, Sendable {
         case .credentialAppetite:  return "Willing to get licensed or certified?"
         case .scheduleShape:       return "When can you actually work?"
         case .clientType:          return "Who would you rather serve?"
+        case .militaryInterest:    return "Would you consider military service?"
+        case .militaryEligibility: return "Which describes you today?"
         }
     }
 
@@ -63,6 +67,82 @@ nonisolated enum LongQuizQuestion: Int, CaseIterable, Sendable {
         case .credentialAppetite:  return "Licenses gate the highest-paying trades"
         case .scheduleShape:       return "Some work can't be done on nights and weekends"
         case .clientType:          return "Consumers and businesses are very different games"
+        case .militaryInterest:    return "Paid training, housing, and healthcare from day one — no degree needed to enlist"
+        case .militaryEligibility: return "Enlisting and commissioning have hard age limits, so we only show what you can actually join"
+        }
+    }
+}
+
+/// How open the user is to military service. This is the only direct signal the
+/// matcher has for military paths — without it they can never rank honestly.
+nonisolated enum MilitaryInterest: String, CaseIterable, Identifiable, Codable, Sendable {
+    case seriouslyConsidering = "Yes — I'm seriously considering it"
+    case curious              = "I'm open to hearing about it"
+    case onlyIfBestFit        = "Only if it's clearly my best option"
+    case notForMe             = "No — not for me"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .seriouslyConsidering: return "star.circle.fill"
+        case .curious:              return "binoculars.fill"
+        case .onlyIfBestFit:        return "scalemass.fill"
+        case .notForMe:             return "hand.raised.fill"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .seriouslyConsidering: return "Rank enlisted and officer paths alongside your top matches"
+        case .curious:              return "Show them, but don't push them to the top"
+        case .onlyIfBestFit:        return "Only surface them if they genuinely beat everything else"
+        case .notForMe:             return "We'll keep military paths out of your results"
+        }
+    }
+}
+
+/// Eligibility band for military service. Enlisting closes at 39 and
+/// commissioning at 34, so these are real gates, not preferences.
+nonisolated enum MilitaryEligibility: String, CaseIterable, Identifiable, Codable, Sendable {
+    case under34     = "17–34, U.S. citizen or permanent resident"
+    case age35to39   = "35–39, U.S. citizen or permanent resident"
+    case over39      = "40 or older"
+    case notCitizen  = "Not a U.S. citizen or permanent resident"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .under34:    return "checkmark.seal.fill"
+        case .age35to39:  return "clock.badge.checkmark.fill"
+        case .over39:     return "clock.badge.xmark.fill"
+        case .notCitizen: return "globe"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .under34:    return "Both enlisting and commissioning as an officer are open to you"
+        case .age35to39:  return "Enlisting is still open; the officer age cutoff has passed"
+        case .over39:     return "Past the enlistment age limit for active duty"
+        case .notCitizen: return "Citizenship or permanent residency is required to serve"
+        }
+    }
+
+    /// Whether enlisted service is realistically available.
+    var allowsEnlisted: Bool {
+        switch self {
+        case .under34, .age35to39: return true
+        case .over39, .notCitizen: return false
+        }
+    }
+
+    /// Whether officer commissioning is realistically available.
+    var allowsOfficer: Bool {
+        switch self {
+        case .under34: return true
+        case .age35to39, .over39, .notCitizen: return false
         }
     }
 }

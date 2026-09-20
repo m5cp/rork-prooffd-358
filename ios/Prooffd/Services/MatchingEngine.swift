@@ -621,6 +621,16 @@ enum MatchingEngine {
             }
             score += min(interestBonus, 10)
 
+            // Military service. Before this term the only signal military paths
+            // could pick up was incidental work-environment overlap, so they
+            // essentially never ranked. Stated interest is now the heaviest
+            // single term for these two paths, and eligibility is a hard gate:
+            // showing someone a path they are too old to join is a false promise.
+            if path.category == .military {
+                maxScore += 18
+                score += militaryScore(for: path.id, profile: profile)
+            }
+
             let userMatch = maxScore > 0 ? (score / maxScore) * 100 : 50
             let finalScore = CareerScoringEngine.shared.adjustedFinalScore(
                 userMatchScore: min(99, userMatch),
@@ -634,6 +644,31 @@ enum MatchingEngine {
             scores[path.id] = min(Int(finalScore), 99)
         }
         return scores
+    }
+
+    /// Score contribution (0-18) for a military path, driven by stated interest
+    /// and hard eligibility. `pathID` distinguishes the enlisted route (open to
+    /// 17-39) from the officer route, where commissioning closes at 34.
+    nonisolated static func militaryScore(for pathID: String, profile: UserProfile) -> Double {
+        let isOfficerRoute = pathID.contains("officer")
+
+        // Eligibility gate first. A path the user cannot realistically join
+        // scores zero no matter how interested they are.
+        if let eligibility = profile.militaryEligibility {
+            let allowed = isOfficerRoute ? eligibility.allowsOfficer : eligibility.allowsEnlisted
+            if !allowed { return 0 }
+        }
+
+        // Never asked, because the profile predates the question. Stay neutral
+        // rather than inventing enthusiasm the user never expressed.
+        guard let interest = profile.militaryInterest else { return 7 }
+
+        switch interest {
+        case .notForMe:             return 0
+        case .onlyIfBestFit:        return 6
+        case .curious:              return 12
+        case .seriouslyConsidering: return 18
+        }
     }
 
     // MARK: - Degree Career Scoring
@@ -738,6 +773,13 @@ enum MatchingEngine {
             maxScore += 10
             let tierBonus: Double = record.aiProofTier == .tier1 ? 10 : record.aiProofTier == .tier2 ? 7 : 4
             score += tierBonus
+
+            // Military Officer lives on the degree track too, and needs the
+            // same direct signal the education-path scorer got.
+            if record.category == .military {
+                maxScore += 18
+                score += militaryScore(for: record.id, profile: profile)
+            }
 
             let userMatch = maxScore > 0 ? (score / maxScore) * 100 : 50
 

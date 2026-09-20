@@ -276,14 +276,7 @@ struct OnboardingView: View {
                     }
                 } label: {
                     HStack(spacing: 16) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 14)
-                                .fill(isSelected ? Theme.accent : Theme.accent.opacity(0.12))
-                                .frame(width: 56, height: 56)
-                            Image(systemName: goal.icon)
-                                .font(.title2)
-                                .foregroundStyle(isSelected ? .black : Theme.accent)
-                        }
+                        RenderedIcon(name: IconArtwork.motivation(goal), size: 56)
                         VStack(alignment: .leading, spacing: 4) {
                             Text(goal.rawValue)
                                 .font(.headline)
@@ -330,14 +323,7 @@ struct OnboardingView: View {
                     }
                 } label: {
                     HStack(spacing: 16) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 14)
-                                .fill(isSelected ? Theme.accent : Theme.accent.opacity(0.12))
-                                .frame(width: 56, height: 56)
-                            Image(systemName: goal.icon)
-                                .font(.title2)
-                                .foregroundStyle(isSelected ? .black : Theme.accent)
-                        }
+                        RenderedIcon(name: IconArtwork.situation(goal), size: 56)
                         VStack(alignment: .leading, spacing: 4) {
                             Text(goal.rawValue)
                                 .font(.headline)
@@ -406,12 +392,7 @@ struct OnboardingView: View {
             }
         } label: {
             HStack(spacing: 14) {
-                Image(systemName: icon)
-                    .font(.title3)
-                    .foregroundStyle(isSelected ? .white : color)
-                    .frame(width: 48, height: 48)
-                    .background(isSelected ? color : color.opacity(0.12))
-                    .clipShape(.rect(cornerRadius: 12))
+                RenderedIcon(name: IconArtwork.workPreference(value), size: 48, glow: color)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)

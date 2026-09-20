@@ -53,6 +53,37 @@ enum IconArtwork {
         }
     }
 
+    /// Onboarding step 1: what's driving them. These were flat SF Symbols in
+    /// tinted squares — the first screens a new user ever sees, and the last
+    /// place still using that pattern.
+    static func motivation(_ goal: MotivationGoal) -> String {
+        switch goal {
+        case .ownBoss:            return "crystal_star_podium"
+        case .stableSkill:        return "hard_hat_tools_staircase"
+        case .helpPeople:         return "heart_3d_glossy"
+        case .professionalStatus: return "graduation_cap_diploma_books"
+        }
+    }
+
+    /// Onboarding step 2: their current situation.
+    static func situation(_ goal: SituationGoal) -> String {
+        switch goal {
+        case .needsMoneyFast:   return "lightning_bolt"
+        case .willingToTrain:   return "mountain_peak_flag_milestone"
+        case .highestEarning:   return "trophy_cup_gold"
+        case .flexibilityFirst: return "bird_3d_icon"
+        }
+    }
+
+    /// Onboarding work-preference step.
+    static func workPreference(_ pref: WorkPreference) -> String {
+        switch pref {
+        case .physical: return "claw_hammer"
+        case .digital:  return "laptop_camera_stylus_ui"
+        case .either:   return "glowing_path_journey"
+        }
+    }
+
     /// Business Plan Builder stages. These were flat SF Symbols in colored
     /// circles — the exact pattern this app replaced everywhere else.
     static func planStage(_ stage: PlanStage) -> String {

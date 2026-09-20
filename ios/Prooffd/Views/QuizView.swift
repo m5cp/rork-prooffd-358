@@ -11,7 +11,7 @@ struct QuizView: View {
     @State private var selectedPath: ChosenPath?
     @State private var appeared: Bool = false
 
-    private let paths: [ChosenPath] = [.business, .trades, .degree]
+    private let paths: [ChosenPath] = [.business, .trades, .degree, .military]
 
     var body: some View {
         ZStack {
@@ -92,14 +92,7 @@ struct QuizView: View {
             }
         } label: {
             HStack(spacing: 16) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(isSelected ? path.color : path.color.opacity(0.12))
-                        .frame(width: 56, height: 56)
-                    Image(systemName: path.icon)
-                        .font(.title2)
-                        .foregroundStyle(isSelected ? .white : path.color)
-                }
+                RenderedIcon(name: PathArtwork.image(for: path), size: 56, glow: path.color)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(path.title)

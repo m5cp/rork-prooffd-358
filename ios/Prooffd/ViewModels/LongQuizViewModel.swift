@@ -23,6 +23,8 @@ class LongQuizViewModel {
     var credentialAppetite: CredentialAppetite?
     var scheduleShape: ScheduleShape?
     var clientType: ClientType?
+    var militaryInterest: MilitaryInterest?
+    var militaryEligibility: MilitaryEligibility?
 
     let totalQuestions = LongQuizQuestion.allCases.count
 
@@ -54,16 +56,36 @@ class LongQuizViewModel {
         case .credentialAppetite:  return credentialAppetite != nil
         case .scheduleShape:       return scheduleShape != nil
         case .clientType:          return clientType != nil
+        case .militaryInterest:    return militaryInterest != nil
+        case .militaryEligibility: return militaryEligibility != nil
         }
+    }
+
+    /// Eligibility is only worth asking if the person is open to serving.
+    private var skipsEligibility: Bool {
+        militaryInterest == .notForMe
     }
 
     func next() {
         guard canAdvance else { return }
+        // Someone who ruled out service shouldn't be asked their age and
+        // citizenship for a path they'll never see.
+        if currentQ == .militaryInterest, skipsEligibility {
+            militaryEligibility = nil
+            isComplete = true
+            return
+        }
         if currentQuestion < totalQuestions - 1 {
             currentQuestion += 1
         } else {
             isComplete = true
         }
+    }
+
+    /// True when the current question is the last one this user will be shown.
+    var isOnFinalQuestion: Bool {
+        if currentQ == .militaryInterest, skipsEligibility { return true }
+        return currentQuestion == totalQuestions - 1
     }
 
     func previous() {
@@ -91,6 +113,10 @@ class LongQuizViewModel {
         if let v = credentialAppetite  { profile.credentialAppetite = v }
         if let v = scheduleShape       { profile.scheduleShape = v }
         if let v = clientType          { profile.clientType = v }
+        if let v = militaryInterest    { profile.militaryInterest = v }
+        // Deliberately assigned even when nil: someone who switches to "not for
+        // me" on a retake must clear a stale eligibility answer.
+        profile.militaryEligibility = militaryEligibility
 
         // Keep education willingness in sync with how this person actually
         // learns, so the matcher's education term reflects the long quiz.
@@ -138,5 +164,7 @@ class LongQuizViewModel {
         credentialAppetite = profile.credentialAppetite
         scheduleShape = profile.scheduleShape
         clientType = profile.clientType
+        militaryInterest = profile.militaryInterest
+        militaryEligibility = profile.militaryEligibility
     }
 }
