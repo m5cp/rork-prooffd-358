@@ -1,11 +1,9 @@
 import SwiftUI
 
 struct DocumentVaultView: View {
-    @Environment(StoreViewModel.self) private var store
     @Environment(\.dismiss) private var dismiss
     @State private var selectedCategory: DocumentCategory = .legal
     @State private var selectedDocument: VaultDocument?
-    @State private var showPaywall = false
 
     private var filteredDocuments: [VaultDocument] {
         DocumentVaultDatabase.all.filter { $0.category == selectedCategory }
@@ -26,7 +24,7 @@ struct DocumentVaultView: View {
                     .padding(.bottom, 30)
                 }
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Theme.background)
             .navigationTitle("Document Vault")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
@@ -37,7 +35,6 @@ struct DocumentVaultView: View {
             .sheet(item: $selectedDocument) { doc in
                 DocumentDetailView(document: doc)
             }
-            .sheet(isPresented: $showPaywall) { PaywallView() }
         }
     }
 
@@ -55,7 +52,7 @@ struct DocumentVaultView: View {
                         .foregroundStyle(selectedCategory == cat ? .black : .primary)
                         .padding(.horizontal, 14)
                         .padding(.vertical, 8)
-                        .background(selectedCategory == cat ? Theme.accent : Color(.secondarySystemGroupedBackground))
+                        .background(selectedCategory == cat ? Theme.accent : Theme.cardBackground)
                         .clipShape(.capsule)
                     }
                     .buttonStyle(.plain)
@@ -67,49 +64,20 @@ struct DocumentVaultView: View {
     }
 
     private func heroCard(_ doc: VaultDocument) -> some View {
-        let isLocked = doc.isPro && !store.isPremium
-        return Button {
-            if isLocked { showPaywall = true } else { selectedDocument = doc }
+        Button {
+            selectedDocument = doc
         } label: {
             VStack(alignment: .leading, spacing: 0) {
-                ZStack(alignment: .topTrailing) {
-                    LinearGradient(
-                        colors: [Theme.accent.opacity(0.28), Theme.accent.opacity(0.08)],
-                        startPoint: .topLeading, endPoint: .bottomTrailing
-                    )
-                    .frame(height: 110)
-                    .overlay(alignment: .bottomLeading) {
-                        Image(systemName: doc.icon)
-                            .font(.system(size: 34, weight: .semibold))
-                            .foregroundStyle(Theme.accent)
-                            .padding(14)
-                    }
-                    HStack(spacing: 6) {
-                        if doc.isPro {
-                            Text("PRO")
-                                .font(.system(size: 9, weight: .bold))
-                                .foregroundStyle(.black)
-                                .padding(.horizontal, 7).padding(.vertical, 3)
-                                .background(Theme.accent)
-                                .clipShape(.capsule)
-                        } else {
-                            Text("FREE")
-                                .font(.system(size: 9, weight: .bold))
-                                .foregroundStyle(Theme.accent)
-                                .padding(.horizontal, 7).padding(.vertical, 3)
-                                .background(.ultraThinMaterial)
-                                .clipShape(.capsule)
-                        }
-                        if isLocked {
-                            Image(systemName: "lock.fill")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundStyle(.white)
-                                .padding(6)
-                                .background(.black.opacity(0.4))
-                                .clipShape(Circle())
-                        }
-                    }
-                    .padding(10)
+                LinearGradient(
+                    colors: [Theme.accent.opacity(0.28), Theme.accent.opacity(0.08)],
+                    startPoint: .topLeading, endPoint: .bottomTrailing
+                )
+                .frame(height: 110)
+                .overlay(alignment: .bottomLeading) {
+                    Image(systemName: doc.icon)
+                        .font(.system(size: 34, weight: .semibold))
+                        .foregroundStyle(Theme.accent)
+                        .padding(14)
                 }
                 VStack(alignment: .leading, spacing: 6) {
                     Text(doc.title)
@@ -128,7 +96,7 @@ struct DocumentVaultView: View {
                 .padding(14)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .background(Color(.secondarySystemGroupedBackground))
+            .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 18))
             .overlay(
                 RoundedRectangle(cornerRadius: 18)
@@ -156,7 +124,7 @@ struct DocumentDetailView: View {
                     FormattedDocumentContent(raw: document.content)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(16)
-                        .background(Color(.secondarySystemGroupedBackground))
+                        .background(Theme.cardBackground)
                         .clipShape(.rect(cornerRadius: 14))
 
                     Color.clear.frame(height: 20)
@@ -164,7 +132,7 @@ struct DocumentDetailView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 12)
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Theme.background)
             .navigationTitle(document.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

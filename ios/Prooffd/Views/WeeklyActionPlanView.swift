@@ -2,10 +2,8 @@ import SwiftUI
 
 struct WeeklyActionPlanView: View {
     @Binding var plan: WeeklyActionPlan
-    @Environment(StoreViewModel.self) private var store
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var sizeClass
-    @State private var showPaywall = false
 
     private var completedCount: Int { plan.actions.filter { $0.isCompleted }.count }
 
@@ -30,7 +28,6 @@ struct WeeklyActionPlanView: View {
                     Button("Done") { dismiss() }.foregroundStyle(Theme.accent)
                 }
             }
-            .sheet(isPresented: $showPaywall) { PaywallView() }
         }
     }
 
@@ -55,8 +52,7 @@ struct WeeklyActionPlanView: View {
     }
 
     private func dayCard(action: DailyAction, index: Int) -> some View {
-        let isLocked = index >= 3 && !store.isPremium
-        let showUnlockBanner = index == 3 && !store.isPremium
+        let isLocked = false
 
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
@@ -89,24 +85,7 @@ struct WeeklyActionPlanView: View {
                 }
             }
 
-            if showUnlockBanner {
-                Button { showPaywall = true } label: {
-                    HStack {
-                        Image(systemName: "lock.fill").foregroundStyle(Theme.accent)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Unlock Days 4–7 with Pro")
-                                .font(.subheadline.weight(.semibold)).foregroundStyle(Theme.textPrimary)
-                            Text("4 more specific action steps to complete your first week")
-                                .font(.caption).foregroundStyle(Theme.textSecondary)
-                                .multilineTextAlignment(.leading)
-                        }
-                        Spacer()
-                        Text("Upgrade").font(.caption.weight(.bold)).foregroundStyle(.black)
-                            .padding(.horizontal, 12).padding(.vertical, 6)
-                            .background(Theme.accent).clipShape(Capsule())
-                    }
-                }
-            } else if !isLocked {
+            if !isLocked {
                 Text(action.detail).font(.caption).foregroundStyle(Theme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
 

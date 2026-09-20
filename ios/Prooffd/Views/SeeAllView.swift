@@ -35,7 +35,6 @@ struct SeeAllView: View {
     let mode: SeeAllMode
     let results: [MatchResult]
     @Environment(AppState.self) private var appState
-    @Environment(StoreViewModel.self) private var store
     @Environment(\.dismiss) private var dismiss
     @State private var selectedResult: MatchResult?
     @State private var searchText: String = ""

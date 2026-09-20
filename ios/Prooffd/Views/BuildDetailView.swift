@@ -10,9 +10,7 @@ private struct ScrollOffsetKey: PreferenceKey {
 struct BuildDetailView: View {
     let buildId: String
     @Environment(AppState.self) private var appState
-    @Environment(StoreViewModel.self) private var store
     @Environment(\.dismiss) private var dismiss
-    @State private var showPaywall: Bool = false
     @State private var showDeleteConfirm: Bool = false
     @State private var celebrationStep: String?
     @State private var expandedUnlockTier: Int?
@@ -52,26 +50,22 @@ struct BuildDetailView: View {
                             stepsSection(build)
                             overviewSection(build)
 
-                            if store.isPremium {
-                                pricingSection
-                                servicesSection(build)
-                                toolsSection
-                                firstCustomerSection
+                            pricingSection
+                            servicesSection(build)
+                            toolsSection
+                            firstCustomerSection
 
-                                planSectionDivider("Pro Plan")
-                                proContentSections(build)
-                                fullBusinessPlanSection
+                            planSectionDivider("Full Plan")
+                            proContentSections(build)
+                            fullBusinessPlanSection
 
-                                planSectionDivider("Details")
+                            planSectionDivider("Details")
 
-                                businessPlanEditorSection(build)
-                                degreeSection
-                                unlockTiersSection(build)
-                                suggestionsSection(build)
-                                exportButton(build)
-                            } else {
-                                buildProUpgradePrompt
-                            }
+                            businessPlanEditorSection(build)
+                            degreeSection
+                            unlockTiersSection(build)
+                            suggestionsSection(build)
+                            exportButton(build)
 
                             shareProgressButton(build)
 
@@ -134,9 +128,6 @@ struct BuildDetailView: View {
                     }
                 }
                 .toolbarBackground(Theme.background, for: .navigationBar)
-                .sheet(isPresented: $showPaywall) {
-                    PaywallView()
-                }
                 .sheet(isPresented: $showProgressShareCard) {
                     ShareCardPresenterSheet(content: .progress(from: build))
                 }
@@ -838,12 +829,10 @@ struct BuildDetailView: View {
                 lockedTierCard(title: "Growth Kit", requirement: "Reach 40% progress to unlock", progress: Double(build.progressPercentage) / 40.0)
             }
 
-            if build.unlockTier >= 3 && store.isPremium {
+            if build.unlockTier >= 3 {
                 unlockTierCard(tier3, isUnlocked: true)
-            } else if store.isPremium {
-                lockedTierCard(title: "Pro Growth System", requirement: "Reach 70% to unlock", progress: Double(build.progressPercentage) / 70.0)
             } else {
-                lockedTierCard(title: "Pro Growth System", requirement: "Pro feature \u{2014} upgrade to access", progress: 0, isPro: true)
+                lockedTierCard(title: "Growth System", requirement: "Reach 70% to unlock", progress: Double(build.progressPercentage) / 70.0)
             }
         }
         .padding(16)
@@ -933,15 +922,6 @@ struct BuildDetailView: View {
                 .frame(height: 3)
             }
 
-            if isPro {
-                Button {
-                    showPaywall = true
-                } label: {
-                    Text("Upgrade to Pro")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(Theme.accent)
-                }
-            }
         }
         .padding(12)
         .background(Theme.cardBackgroundLight.opacity(0.5))
@@ -1053,7 +1033,7 @@ struct BuildDetailView: View {
 
     private var fullBusinessPlanSection: some View {
         Group {
-            if store.isPremium, let path {
+            if let path {
                 let sections = BusinessPlanGenerator.generate(for: path)
 
                 VStack(alignment: .leading, spacing: 0) {
@@ -1252,70 +1232,6 @@ struct BuildDetailView: View {
         }
         .accessibilityLabel("Share build progress")
         .accessibilityHint("Creates a shareable card of your progress")
-    }
-
-    private var upgradeCard: some View {
-        Button {
-            showPaywall = true
-        } label: {
-            HStack(spacing: 12) {
-                ZStack {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [Theme.accent, Theme.accentBlue],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 40, height: 40)
-                    Image(systemName: "crown.fill")
-                        .font(.subheadline)
-                        .foregroundStyle(.white)
-                }
-
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("Unlock Full Build Plan")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Theme.textPrimary)
-                    Text("Pricing, tools, marketing, business plan & PDF export")
-                        .font(.caption)
-                        .foregroundStyle(Theme.textSecondary)
-                }
-
-                Spacer()
-
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(Theme.textTertiary)
-            }
-            .padding(14)
-            .background(Theme.cardBackground)
-            .clipShape(.rect(cornerRadius: 14))
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(Theme.accent.opacity(0.2), lineWidth: 1)
-            )
-            .cardShadow()
-        }
-        .buttonStyle(.plain)
-    }
-
-    private var buildProUpgradePrompt: some View {
-        ProUpgradePromptView(
-            title: "Unlock Your Complete Build Plan",
-            subtitle: "Get full pricing, tools, marketing, and business plan details.",
-            features: [
-                "Pricing & market rate analysis",
-                "Services you can offer",
-                "Tools, resources & customer sources",
-                "First customer plan",
-                "Marketing & outreach templates",
-                "One-page business plan",
-                "PDF export & editable notes"
-            ],
-            onUpgrade: { showPaywall = true }
-        )
     }
 
     private var dangerZone: some View {

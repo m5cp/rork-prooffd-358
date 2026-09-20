@@ -1,11 +1,9 @@
 import SwiftUI
 
 struct ToolkitTabView: View {
-    @Environment(StoreViewModel.self) private var store
     @State private var showDocumentVault = false
     @State private var showTradeToolkits = false
     @State private var showDegreeGuides = false
-    @State private var showPaywall = false
     @State private var showROICalc = false
     @State private var showPlanBuilder = false
 
@@ -33,7 +31,7 @@ struct ToolkitTabView: View {
                         iconColor: Theme.accent,
                         title: "Document Vault",
                         subtitle: "Contracts, invoices, emails & more",
-                        meta: "\(DocumentVaultDatabase.all.count) templates  •  Free + Pro",
+                        meta: "\(DocumentVaultDatabase.all.count) templates  •  Free",
                         badge: nil
                     ) {
                         showDocumentVault = true
@@ -45,11 +43,10 @@ struct ToolkitTabView: View {
                         iconColor: Theme.accentBlue,
                         title: "Trade Toolkits",
                         subtitle: "Tools, licenses, unions & 90-day plans",
-                        meta: "\(TradeToolkitDatabase.all.count) trades  •  Pro",
-                        badge: store.isPremium ? nil : "PRO"
+                        meta: "\(TradeToolkitDatabase.all.count) trades  •  Free",
+                        badge: nil
                     ) {
-                        if store.isPremium { showTradeToolkits = true }
-                        else { showPaywall = true }
+                        showTradeToolkits = true
                     }
 
                     toolkitCard(
@@ -82,35 +79,12 @@ struct ToolkitTabView: View {
                 .padding(.top, 8)
             }
             .scrollIndicators(.hidden)
-            .background(Color(.systemGroupedBackground))
+            .background(Theme.background)
             .navigationTitle("Toolkit")
             .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                if !store.isPremium {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button {
-                            showPaywall = true
-                        } label: {
-                            HStack(spacing: 4) {
-                                Image(systemName: "crown.fill")
-                                    .font(.caption.weight(.bold))
-                                Text("PRO")
-                                    .font(.caption.weight(.bold))
-                            }
-                            .foregroundStyle(.black)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(Theme.accent)
-                            .clipShape(.capsule)
-                        }
-                        .accessibilityLabel("Unlock Pro")
-                    }
-                }
-            }
             .sheet(isPresented: $showDocumentVault) { DocumentVaultView() }
             .sheet(isPresented: $showTradeToolkits) { TradeToolkitListView() }
             .sheet(isPresented: $showDegreeGuides) { DegreeGuidesView() }
-            .sheet(isPresented: $showPaywall) { PaywallView() }
             .sheet(isPresented: $showROICalc) { DegreeROICalculatorView() }
             .sheet(isPresented: $showPlanBuilder) { VenturePlanListView() }
         }
@@ -128,7 +102,7 @@ struct ToolkitTabView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 16))
     }
 
@@ -177,7 +151,7 @@ struct ToolkitTabView: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity)
-            .background(Color(.secondarySystemGroupedBackground))
+            .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 18))
         }
         .buttonStyle(.plain)

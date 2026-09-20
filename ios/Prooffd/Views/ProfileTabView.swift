@@ -5,7 +5,6 @@ struct ProfileTabView: View {
     @Environment(AppState.self) private var appState
     @Environment(StoreViewModel.self) private var store
     @Environment(ThemeManager.self) private var themeManager
-    @State private var showPaywall: Bool = false
     @State private var showAchievements: Bool = false
     @State private var showAvatarPicker: Bool = false
     @State private var showNameEdit: Bool = false
@@ -29,12 +28,9 @@ struct ProfileTabView: View {
                 .padding(.top, 8)
             }
             .scrollIndicators(.hidden)
-            .background(Color(.systemGroupedBackground))
+            .background(Theme.background)
             .navigationTitle("You")
             .navigationBarTitleDisplayMode(.large)
-            .sheet(isPresented: $showPaywall) {
-                PaywallView()
-            }
             .sheet(isPresented: $showAchievements) {
                 AchievementsView()
             }
@@ -125,20 +121,6 @@ struct ProfileTabView: View {
                     }
                 }
 
-                if store.isPremium {
-                    HStack(spacing: 4) {
-                        Image(systemName: "crown.fill")
-                            .font(.system(size: 10))
-                            .foregroundStyle(.yellow)
-                        Text("Pro")
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(Theme.accent)
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(Theme.accent.opacity(0.1))
-                    .clipShape(.capsule)
-                }
             }
 
             Spacer()
@@ -146,7 +128,7 @@ struct ProfileTabView: View {
         .padding(20)
         .background(
             ZStack {
-                Color(.secondarySystemGroupedBackground)
+                Theme.cardBackground
                 ArtworkImage(name: PathArtwork.celebration)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .clipped()
@@ -154,8 +136,8 @@ struct ProfileTabView: View {
                     .overlay(
                         LinearGradient(
                             colors: [
-                                Color(.secondarySystemGroupedBackground).opacity(0.1),
-                                Color(.secondarySystemGroupedBackground).opacity(0.85)
+                                Theme.cardBackground.opacity(0.1),
+                                Theme.cardBackground.opacity(0.85)
                             ],
                             startPoint: .topTrailing,
                             endPoint: .bottomLeading
@@ -214,21 +196,12 @@ struct ProfileTabView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 16)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 14))
     }
 
     private var settingsSection: some View {
         VStack(spacing: 0) {
-            if !store.isPremium {
-                Button {
-                    showPaywall = true
-                } label: {
-                    settingsRowContent(icon: "crown.fill", color: .yellow, title: "Upgrade to Pro")
-                }
-                settingsDivider
-            }
-
             settingsLink(icon: "square.and.arrow.up.fill", color: Theme.accentBlue, title: "Share My Path") {
                 showMyPathShare = true
             }
@@ -258,15 +231,6 @@ struct ProfileTabView: View {
             .padding(.vertical, 10)
 
             settingsDivider
-
-            if store.isPremium {
-                settingsLink(icon: "creditcard.fill", color: Theme.accent, title: "Manage Subscription", external: true) {
-                    if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
-                        UIApplication.shared.open(url)
-                    }
-                }
-                settingsDivider
-            }
 
             settingsLink(icon: "arrow.counterclockwise", color: Theme.accentBlue, title: "Restore Purchases") {
                 Task { await store.restore() }
@@ -298,7 +262,7 @@ struct ProfileTabView: View {
                 settingsRowContent(icon: "exclamationmark.triangle.fill", color: .secondary, title: "Disclaimer")
             }
         }
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 16))
     }
 

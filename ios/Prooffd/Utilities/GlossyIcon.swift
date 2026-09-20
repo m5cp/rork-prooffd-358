@@ -33,6 +33,26 @@ enum IconArtwork {
     static let help = "question_mark_glowing"
     static let retake = "glowing_path_journey"
 
+    /// Education / Degree Guides sections.
+    static let testPrep = "graduation_cap_diploma_books"
+    static let planningGuides = "glowing_path_journey"
+    static let roiCalculator = "dart_target_bullseye"
+
+    /// Trade toolkits. These were flat blue SF Symbols in tinted squares — the
+    /// last screen in the app still using that pattern. Keyed off the trade's
+    /// existing `tradeIcon` symbol so the database needs no new field.
+    static func trade(_ symbolName: String) -> String {
+        switch symbolName {
+        case "bolt.fill":     return "lightning_bolt"
+        case "drop.fill":     return "water_droplet_3d"
+        case "wind":          return "cloud_fluffy_3d"
+        case "flame.fill":    return "flame_icon"
+        case "hammer.fill":   return "claw_hammer"
+        case "sun.max.fill":  return "sun_rays_3d"
+        default:              return "construction_tools_render"
+        }
+    }
+
     /// Business Plan Builder stages. These were flat SF Symbols in colored
     /// circles — the exact pattern this app replaced everywhere else.
     static func planStage(_ stage: PlanStage) -> String {

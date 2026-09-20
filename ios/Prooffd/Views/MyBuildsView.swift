@@ -3,9 +3,7 @@ import StoreKit
 
 struct MyBuildsView: View {
     @Environment(AppState.self) private var appState
-    @Environment(StoreViewModel.self) private var store
     @State private var selectedBuild: BuildProject?
-    @State private var showPaywall: Bool = false
     @State private var showStepCelebration: Bool = false
     @State private var celebratedStepTitle: String = ""
     @State private var showProgressShare: Bool = false
@@ -62,14 +60,11 @@ struct MyBuildsView: View {
                 .padding(.top, 8)
             }
             .scrollIndicators(.hidden)
-            .background(Color(.systemGroupedBackground))
+            .background(Theme.background)
             .navigationTitle("My Plan")
             .navigationBarTitleDisplayMode(.large)
             .sheet(item: $selectedBuild) { build in
                 BuildDetailView(buildId: build.id)
-            }
-            .sheet(isPresented: $showPaywall) {
-                PaywallView()
             }
             .sheet(isPresented: $showProgressShare) {
                 if let build = appState.activeBuild {
@@ -237,7 +232,7 @@ struct MyBuildsView: View {
             .sensoryFeedback(.success, trigger: showStepCelebration)
         }
         .padding(16)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 16))
     }
 
@@ -309,7 +304,7 @@ struct MyBuildsView: View {
                 }
             }
             .padding(16)
-            .background(Color(.secondarySystemGroupedBackground))
+            .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 16))
         }
         .buttonStyle(.plain)
@@ -354,7 +349,7 @@ struct MyBuildsView: View {
                     .foregroundStyle(.tertiary)
             }
             .padding(16)
-            .background(Color(.secondarySystemGroupedBackground))
+            .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 16))
         }
         .buttonStyle(.plain)
@@ -403,7 +398,7 @@ struct MyBuildsView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 60)
         .padding(.horizontal, 20)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 16))
     }
 

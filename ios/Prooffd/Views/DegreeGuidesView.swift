@@ -1,11 +1,9 @@
 import SwiftUI
 
 struct DegreeGuidesView: View {
-    @Environment(StoreViewModel.self) private var store
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var expandedSection: DegreeSection? = .testPrep
-    @State private var showPaywall = false
     @State private var showROICalc = false
     @State private var selectedRoadmap: TestPrepRoadmap? = nil
     @State private var showScholarship = false
@@ -17,11 +15,14 @@ struct DegreeGuidesView: View {
         case planningGuides = "Planning Guides"
         case calculator     = "ROI Calculator"
 
-        var icon: String {
+        /// Bundled 3D render for this section. Flat symbols in tinted squares
+        /// were the last remaining instance of the pattern the rest of the app
+        /// replaced with real artwork.
+        var artwork: String {
             switch self {
-            case .testPrep:       return "pencil.and.ruler.fill"
-            case .planningGuides: return "list.clipboard.fill"
-            case .calculator:     return "chart.line.uptrend.xyaxis"
+            case .testPrep:       return IconArtwork.testPrep
+            case .planningGuides: return IconArtwork.planningGuides
+            case .calculator:     return IconArtwork.roiCalculator
             }
         }
         var subtitle: String {
@@ -33,7 +34,7 @@ struct DegreeGuidesView: View {
         }
         var meta: String {
             switch self {
-            case .testPrep:       return "4 exams  •  Pro"
+            case .testPrep:       return "4 exams  •  Free"
             case .planningGuides: return "3 guides  •  Free"
             case .calculator:     return "Interactive tool  •  Free"
             }
@@ -64,7 +65,6 @@ struct DegreeGuidesView: View {
             .sheet(isPresented: $showScholarship)   { ScholarshipGuideView() }
             .sheet(isPresented: $showProgramPicker) { HowToPickProgramView() }
             .sheet(isPresented: $showAppChecklist)  { ApplicationChecklistView() }
-            .sheet(isPresented: $showPaywall)       { PaywallView() }
             .sheet(item: $selectedRoadmap)          { roadmap in TestPrepRoadmapView(roadmap: roadmap) }
         }
     }
@@ -83,13 +83,7 @@ struct DegreeGuidesView: View {
                 }
             } label: {
                 HStack(spacing: 14) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Theme.accent.opacity(0.12))
-                            .frame(width: 40, height: 40)
-                        Image(systemName: section.icon)
-                            .foregroundStyle(Theme.accent).font(.system(size: 16))
-                    }
+                    RenderedIcon(name: section.artwork, size: 44, glow: Theme.accent)
                     VStack(alignment: .leading, spacing: 3) {
                         Text(section.rawValue).font(.headline).foregroundStyle(Theme.textPrimary)
                         Text(section.subtitle).font(.caption).foregroundStyle(Theme.textSecondary)
@@ -132,8 +126,7 @@ struct DegreeGuidesView: View {
             ForEach(Array(TestPrepDatabase.all.enumerated()), id: \.element.id) { index, roadmap in
                 if index > 0 { Divider().background(Theme.border).padding(.leading, 54) }
                 Button {
-                    if store.isPremium { selectedRoadmap = roadmap }
-                    else { showPaywall = true }
+                    selectedRoadmap = roadmap
                 } label: {
                     HStack(spacing: 14) {
                         Image(systemName: roadmap.icon)
@@ -142,15 +135,11 @@ struct DegreeGuidesView: View {
                             .frame(width: 24)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(roadmap.examName).font(.subheadline)
-                                .foregroundStyle(store.isPremium ? Theme.textPrimary : Theme.textSecondary)
+                                .foregroundStyle(Theme.textPrimary)
                             Text(roadmap.whoNeedsIt).font(.caption).foregroundStyle(Theme.textTertiary).lineLimit(1)
                         }
                         Spacer()
-                        if !store.isPremium {
-                            Image(systemName: "lock.fill").font(.caption).foregroundStyle(Theme.textTertiary)
-                        } else {
-                            Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.textTertiary)
-                        }
+                        Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.textTertiary)
                     }
                     .padding(.horizontal, 16).padding(.vertical, 13)
                     .frame(minHeight: 44)

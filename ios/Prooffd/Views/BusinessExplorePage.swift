@@ -2,7 +2,6 @@ import SwiftUI
 
 struct BusinessExplorePage: View {
     @Environment(AppState.self) private var appState
-    @Environment(StoreViewModel.self) private var store
     @State private var searchText: String = ""
     @State private var selectedCategory: BusinessCategory?
     @State private var selectedTopMatch: MatchResult?
@@ -69,7 +68,7 @@ struct BusinessExplorePage: View {
             .padding(.bottom, 40)
         }
         .scrollIndicators(.hidden)
-        .background(Color(.systemGroupedBackground))
+        .background(Theme.background)
         .navigationTitle("Start a Business")
         .navigationBarTitleDisplayMode(.large)
         .searchable(text: $searchText, prompt: "Search businesses...")
@@ -154,7 +153,7 @@ struct BusinessExplorePage: View {
             .background(
                 isTop
                     ? AnyShapeStyle(Theme.accent.opacity(0.06))
-                    : AnyShapeStyle(Color(.secondarySystemGroupedBackground))
+                    : AnyShapeStyle(Theme.cardBackground)
             )
             .clipShape(.rect(cornerRadius: 14))
             .overlay(
@@ -216,7 +215,7 @@ struct BusinessExplorePage: View {
                     .foregroundStyle(.tertiary)
             }
             .padding(14)
-            .background(Color(.secondarySystemGroupedBackground))
+            .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 14))
         }
         .buttonStyle(.plain)

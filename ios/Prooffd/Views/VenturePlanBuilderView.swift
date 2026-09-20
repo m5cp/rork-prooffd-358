@@ -56,7 +56,7 @@ struct VenturePlanBuilderView: View {
             .padding(.top, 8)
         }
         .scrollIndicators(.hidden)
-        .background(Color(.systemGroupedBackground))
+        .background(Theme.background)
         .navigationTitle(plan.businessName.trimmed.isEmpty ? "Your Plan" : plan.businessName)
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $openStage) { stage in
@@ -105,7 +105,7 @@ struct VenturePlanBuilderView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(20)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 18))
     }
 
@@ -128,7 +128,7 @@ struct VenturePlanBuilderView: View {
                             .foregroundStyle(.black)
                             .frame(width: 18, height: 18)
                             .background(stage.accent, in: Circle())
-                            .overlay(Circle().strokeBorder(Color(.secondarySystemGroupedBackground), lineWidth: 2))
+                            .overlay(Circle().strokeBorder(Theme.cardBackground, lineWidth: 2))
                     }
                 }
 
@@ -150,7 +150,7 @@ struct VenturePlanBuilderView: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity)
-            .background(Color(.secondarySystemGroupedBackground))
+            .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 18))
         }
         .buttonStyle(.plain)
@@ -182,7 +182,7 @@ struct PlanStageEditorView: View {
                 .padding(20)
             }
             .scrollIndicators(.hidden)
-            .background(Color(.systemGroupedBackground))
+            .background(Theme.background)
             .navigationTitle(stage.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -235,7 +235,7 @@ struct PlanStageEditorView: View {
                     }
                 }
                 .padding(12)
-                .background(Color(.secondarySystemGroupedBackground))
+                .background(Theme.cardBackground)
                 .clipShape(.rect(cornerRadius: 12))
             }
             HStack {
@@ -318,7 +318,7 @@ struct PlanStageEditorView: View {
                     }
                 }
                 .padding(12)
-                .background(Color(.secondarySystemGroupedBackground))
+                .background(Theme.cardBackground)
                 .clipShape(.rect(cornerRadius: 12))
             }
 
@@ -468,7 +468,7 @@ struct PlanStageEditorView: View {
                                 .background(
                                     plan.logo.symbol == symbol
                                         ? AnyShapeStyle(Theme.accent)
-                                        : AnyShapeStyle(Color(.secondarySystemGroupedBackground))
+                                        : AnyShapeStyle(Theme.cardBackground)
                                 )
                                 .clipShape(.rect(cornerRadius: 12))
                         }
@@ -511,7 +511,7 @@ struct PlanStageEditorView: View {
                             }
                             .padding(12)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color(.secondarySystemGroupedBackground))
+                            .background(Theme.cardBackground)
                             .clipShape(.rect(cornerRadius: 12))
                         }
                         .buttonStyle(.plain)
@@ -537,7 +537,7 @@ struct PlanStageEditorView: View {
                 .lineLimit(lines...max(lines, lines))
                 .font(.subheadline)
                 .padding(12)
-                .background(Color(.secondarySystemGroupedBackground))
+                .background(Theme.cardBackground)
                 .clipShape(.rect(cornerRadius: 12))
         }
     }
@@ -551,7 +551,7 @@ struct PlanStageEditorView: View {
                 .keyboardType(.decimalPad)
                 .font(.subheadline)
                 .padding(12)
-                .background(Color(.secondarySystemGroupedBackground))
+                .background(Theme.cardBackground)
                 .clipShape(.rect(cornerRadius: 12))
         }
     }

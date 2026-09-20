@@ -2,7 +2,6 @@ import SwiftUI
 
 struct TradesExplorePage: View {
     @Environment(AppState.self) private var appState
-    @Environment(StoreViewModel.self) private var store
     @State private var searchText: String = ""
     @State private var selectedCategory: EducationCategory?
     @State private var selectedTopCareer: CareerPath?
@@ -58,7 +57,7 @@ struct TradesExplorePage: View {
             .padding(.bottom, 40)
         }
         .scrollIndicators(.hidden)
-        .background(Color(.systemGroupedBackground))
+        .background(Theme.background)
         .navigationTitle("Trades & Certifications")
         .navigationBarTitleDisplayMode(.large)
         .searchable(text: $searchText, prompt: "Search programs...")
@@ -144,7 +143,7 @@ struct TradesExplorePage: View {
             .background(
                 isTop
                     ? AnyShapeStyle(accentColor.opacity(0.06))
-                    : AnyShapeStyle(Color(.secondarySystemGroupedBackground))
+                    : AnyShapeStyle(Theme.cardBackground)
             )
             .clipShape(.rect(cornerRadius: 14))
             .overlay(
@@ -206,7 +205,7 @@ struct TradesExplorePage: View {
                     .foregroundStyle(.tertiary)
             }
             .padding(14)
-            .background(Color(.secondarySystemGroupedBackground))
+            .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 14))
         }
         .buttonStyle(.plain)

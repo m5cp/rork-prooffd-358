@@ -2,7 +2,6 @@ import SwiftUI
 
 struct EducationCategoryListSheet: View {
     let category: EducationCategory
-    @Environment(StoreViewModel.self) private var store
     @Environment(AppState.self) private var appState
     @Environment(\.dismiss) private var dismiss
     @State private var selectedCareer: CareerPath?

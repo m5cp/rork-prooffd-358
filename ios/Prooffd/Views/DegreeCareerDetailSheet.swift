@@ -3,9 +3,7 @@ import SwiftUI
 struct DegreeCareerDetailSheet: View {
     let record: DegreeCareerRecord
     @Environment(\.dismiss) private var dismiss
-    @Environment(StoreViewModel.self) private var store
     @Environment(AppState.self) private var appState
-    @State private var showPaywall: Bool = false
     @State private var showPlanAdded: Bool = false
     @State private var showShareCard: Bool = false
     @State private var showSetPathConfirm: Bool = false
@@ -47,21 +45,16 @@ struct DegreeCareerDetailSheet: View {
                     favBar
                     overviewCard
 
-                    if store.isPremium {
-                        if let detail {
-                            educationPathCard(detail)
-                            prerequisitesCard(detail)
-                            licensingCard(detail)
-                            aiResistantCard(detail)
-                            salaryCard(detail)
-                            bestFitCard(detail)
-                        } else {
-                            aiReasonsCard
-                            bestFitTraitsCard
-                        }
+                    if let detail {
+                        educationPathCard(detail)
+                        prerequisitesCard(detail)
+                        licensingCard(detail)
+                        aiResistantCard(detail)
+                        salaryCard(detail)
+                        bestFitCard(detail)
                     } else {
-                        freeAIReasonsCard
-                        proUpgradeCard
+                        aiReasonsCard
+                        bestFitTraitsCard
                     }
 
                     Color.clear.frame(height: 20)
@@ -81,9 +74,6 @@ struct DegreeCareerDetailSheet: View {
                 }
             }
             .toolbarBackground(Theme.background, for: .navigationBar)
-            .sheet(isPresented: $showPaywall) {
-                PaywallView()
-            }
             .sheet(isPresented: $showShareCard) {
                 ShareCardPresenterSheet(content: .degreeCareer(from: record))
             }
@@ -353,27 +343,6 @@ struct DegreeCareerDetailSheet: View {
         .cardShadow()
     }
 
-    private var freeAIReasonsCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            sectionHeader("Why It's AI-Resistant", icon: "shield.checkered")
-            ForEach(Array(record.aiProofReasons.prefix(2).enumerated()), id: \.offset) { _, reason in
-                HStack(alignment: .top, spacing: 10) {
-                    Circle()
-                        .fill(tierColor)
-                        .frame(width: 5, height: 5)
-                        .padding(.top, 6)
-                    Text(reason)
-                        .font(.subheadline)
-                        .foregroundStyle(Theme.textSecondary)
-                }
-            }
-        }
-        .padding(16)
-        .background(Theme.cardBackground)
-        .clipShape(.rect(cornerRadius: 14))
-        .cardShadow()
-    }
-
     private var aiReasonsCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             sectionHeader("Why It's AI-Resistant", icon: "shield.checkered")
@@ -614,21 +583,6 @@ struct DegreeCareerDetailSheet: View {
         .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 14))
         .cardShadow()
-    }
-
-    private var proUpgradeCard: some View {
-        ProUpgradePromptView(
-            title: "Unlock Full Degree Career Details",
-            subtitle: "Get the complete roadmap for this career path.",
-            features: [
-                "Full education path and timeline",
-                "Prerequisites and licensing requirements",
-                "Complete AI-resistance analysis",
-                "Detailed salary breakdown",
-                "Best fit personality summary"
-            ],
-            onUpgrade: { showPaywall = true }
-        )
     }
 
     private func sectionHeader(_ title: String, icon: String) -> some View {

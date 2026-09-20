@@ -8,9 +8,7 @@ import SwiftUI
 struct CareerPathDetailSheet: View {
     let career: CareerPath
     @Environment(\.dismiss) private var dismiss
-    @Environment(StoreViewModel.self) private var store
     @Environment(AppState.self) private var appState
-    @State private var showPaywall: Bool = false
     @State private var showPlanAdded: Bool = false
     @State private var showShareCard: Bool = false
     @State private var showSetPathConfirm: Bool = false
@@ -31,15 +29,11 @@ struct CareerPathDetailSheet: View {
                     overviewCard
                     firstStepsCard
 
-                    if store.isPremium {
-                        aiSafeCard
-                        stepsCard
-                        findProgramsCard
-                        fundingCard
-                        proStepsCard
-                    } else {
-                        careerProUpgradePrompt
-                    }
+                    aiSafeCard
+                    stepsCard
+                    findProgramsCard
+                    fundingCard
+                    proStepsCard
 
                     Color.clear.frame(height: 20)
                 }
@@ -58,9 +52,6 @@ struct CareerPathDetailSheet: View {
                 }
             }
             .toolbarBackground(Theme.background, for: .navigationBar)
-            .sheet(isPresented: $showPaywall) {
-                PaywallView()
-            }
             .sheet(isPresented: $showShareCard) {
                 ShareCardPresenterSheet(content: .educationPath(from: career))
             }
@@ -535,21 +526,6 @@ struct CareerPathDetailSheet: View {
         .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 14))
         .cardShadow()
-    }
-
-    private var careerProUpgradePrompt: some View {
-        ProUpgradePromptView(
-            title: "Unlock Full Career Details",
-            subtitle: "Get the complete roadmap for this career path.",
-            features: [
-                "Why this career is AI-resistant",
-                "Step-by-step certification path",
-                "How to find accredited programs",
-                "Funding options & financial aid",
-                "Advanced career steps"
-            ],
-            onUpgrade: { showPaywall = true }
-        )
     }
 
     private func sectionHeader(_ title: String, icon: String) -> some View {

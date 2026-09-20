@@ -2,7 +2,6 @@ import SwiftUI
 
 struct DiscoverView: View {
     @Environment(AppState.self) private var appState
-    @Environment(StoreViewModel.self) private var store
     @State private var selectedResult: MatchResult?
     @State private var shareResult: MatchResult?
     @State private var showRandomPicks: Bool = false

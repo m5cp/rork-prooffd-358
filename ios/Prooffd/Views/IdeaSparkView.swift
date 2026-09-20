@@ -123,7 +123,7 @@ struct IdeaSparkView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(16)
-                    .background(Color(.secondarySystemGroupedBackground))
+                    .background(Theme.cardBackground)
                     .clipShape(.rect(cornerRadius: 16))
 
                     ForEach(ideas) { idea in
@@ -136,7 +136,7 @@ struct IdeaSparkView: View {
                 .padding(.top, 8)
             }
             .scrollIndicators(.hidden)
-            .background(Color(.systemGroupedBackground))
+            .background(Theme.background)
             .navigationTitle("Idea Generator")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -200,7 +200,7 @@ struct IdeaSparkView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 18))
     }
 

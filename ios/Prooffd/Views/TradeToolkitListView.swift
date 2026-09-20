@@ -32,7 +32,7 @@ struct TradeToolkitListView: View {
                             }
                             .padding(14)
                             .frame(maxWidth: .infinity)
-                            .background(Color(.secondarySystemGroupedBackground))
+                            .background(Theme.cardBackground)
                             .clipShape(.rect(cornerRadius: 14))
                         }
                         .buttonStyle(.plain)
@@ -42,7 +42,7 @@ struct TradeToolkitListView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 12)
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Theme.background)
             .navigationTitle("Trade Toolkits")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
@@ -132,7 +132,7 @@ struct TradeToolkitDetailView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 12)
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Theme.background)
             .navigationTitle(toolkit.tradeName)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -145,12 +145,11 @@ struct TradeToolkitDetailView: View {
 
     private var headerCard: some View {
         HStack(spacing: 14) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(Theme.accentBlue.opacity(0.15))
-                    .frame(width: 56, height: 56)
-                Image(systemName: toolkit.tradeIcon).font(.title2).foregroundStyle(Theme.accentBlue)
-            }
+            RenderedIcon(
+                name: IconArtwork.trade(toolkit.tradeIcon),
+                size: 56,
+                glow: Theme.accent
+            )
             VStack(alignment: .leading, spacing: 4) {
                 Text(toolkit.tradeName).font(.title3.weight(.bold)).foregroundStyle(.primary)
                 HStack(spacing: 6) {
@@ -162,7 +161,7 @@ struct TradeToolkitDetailView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 16))
     }
 
@@ -176,7 +175,7 @@ struct TradeToolkitDetailView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 16))
     }
 

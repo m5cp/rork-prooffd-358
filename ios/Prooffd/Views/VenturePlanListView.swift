@@ -67,7 +67,7 @@ struct VenturePlanListView: View {
                         }
                         .padding(16)
                         .frame(maxWidth: .infinity)
-                        .background(Color(.secondarySystemGroupedBackground))
+                        .background(Theme.cardBackground)
                         .clipShape(.rect(cornerRadius: 18))
                     }
                     .buttonStyle(.plain)
@@ -86,7 +86,7 @@ struct VenturePlanListView: View {
                 .padding(.top, 8)
             }
             .scrollIndicators(.hidden)
-            .background(Color(.systemGroupedBackground))
+            .background(Theme.background)
             .navigationTitle("Business Plan")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
@@ -126,7 +126,7 @@ struct VenturePlanListView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 16))
     }
 
@@ -144,7 +144,7 @@ struct VenturePlanListView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(24)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 18))
     }
 
@@ -182,7 +182,7 @@ struct VenturePlanListView: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity)
-            .background(Color(.secondarySystemGroupedBackground))
+            .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 18))
         }
         .buttonStyle(.plain)

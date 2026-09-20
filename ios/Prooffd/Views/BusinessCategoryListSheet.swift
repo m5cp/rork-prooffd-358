@@ -3,13 +3,11 @@ import SwiftUI
 struct BusinessCategoryListSheet: View {
     let category: BusinessCategory
     @Environment(AppState.self) private var appState
-    @Environment(StoreViewModel.self) private var store
     @Environment(\.dismiss) private var dismiss
     @State private var selectedResult: MatchResult?
     @State private var selectedZone: AIZone?
     @State private var selectedCostFilter: CostFilter?
     @State private var showFilters: Bool = false
-    @State private var showPaywall: Bool = false
     @State private var showShareEditor: Bool = false
     @State private var shareContextImage: UIImage?
 
@@ -63,7 +61,7 @@ struct BusinessCategoryListSheet: View {
                 .padding(.bottom, 40)
             }
             .scrollIndicators(.hidden)
-            .background(Color(.systemGroupedBackground))
+            .background(Theme.background)
             .navigationTitle(category.rawValue)
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
@@ -88,9 +86,6 @@ struct BusinessCategoryListSheet: View {
             .sheet(item: $selectedResult) { result in
                 PathDetailView(result: result)
             }
-            .sheet(isPresented: $showPaywall) {
-                PaywallView()
-            }
             .fullScreenCover(isPresented: $showShareEditor) {
                 if let image = shareContextImage {
                     ShareEditorSheet(capturedImage: image)
@@ -99,7 +94,7 @@ struct BusinessCategoryListSheet: View {
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
-        .presentationBackground(Color(.systemGroupedBackground))
+        .presentationBackground(Theme.background)
     }
 
     private var filterBar: some View {
@@ -153,7 +148,7 @@ struct BusinessCategoryListSheet: View {
         }
         .padding(.vertical, 10)
         .padding(.horizontal, 4)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 12))
     }
 
@@ -224,7 +219,7 @@ struct BusinessCategoryListSheet: View {
                 }
             }
             .padding(14)
-            .background(Color(.secondarySystemGroupedBackground))
+            .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 14))
         }
         .buttonStyle(.plain)

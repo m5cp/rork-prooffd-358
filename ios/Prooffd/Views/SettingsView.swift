@@ -4,7 +4,6 @@ struct SettingsView: View {
     @Environment(AppState.self) private var appState
     @Environment(StoreViewModel.self) private var store
     @Environment(\.dismiss) private var dismiss
-    @State private var showPaywall: Bool = false
     @State private var showRetakeConfirm: Bool = false
     @State private var showDeleteConfirm: Bool = false
 
@@ -15,10 +14,7 @@ struct SettingsView: View {
                     HStack(spacing: 14) {
                         ZStack {
                             Circle()
-                                .fill(store.isPremium
-                                    ? LinearGradient(colors: [Theme.accent, Theme.accentBlue], startPoint: .topLeading, endPoint: .bottomTrailing)
-                                    : LinearGradient(colors: [Theme.cardBackgroundLight, Theme.cardBackgroundLight], startPoint: .top, endPoint: .bottom)
-                                )
+                                .fill(LinearGradient(colors: [Theme.accent, Theme.accentBlue], startPoint: .topLeading, endPoint: .bottomTrailing))
                                 .frame(width: 50, height: 50)
                             Text(appState.userProfile.firstName.prefix(1).uppercased())
                                 .font(.title2.weight(.semibold))
@@ -29,20 +25,12 @@ struct SettingsView: View {
                             Text(appState.userProfile.firstName.isEmpty ? "User" : appState.userProfile.firstName)
                                 .font(.headline)
                                 .foregroundStyle(Theme.textPrimary)
-                            Text(store.isPremium ? "Pro Member" : "Free Plan")
+                            Text("Everything unlocked")
                                 .font(.caption)
-                                .foregroundStyle(store.isPremium ? Theme.accent : Theme.textTertiary)
+                                .foregroundStyle(Theme.accent)
                         }
                     }
                     .listRowBackground(Theme.cardBackground)
-                }
-
-                Section {
-                    ProVsFreeComparisonView(isPremium: store.isPremium) {
-                        showPaywall = true
-                    }
-                    .listRowInsets(EdgeInsets())
-                    .listRowBackground(Color.clear)
                 }
 
                 Section("Your Profile") {
@@ -101,40 +89,7 @@ struct SettingsView: View {
                         .listRowBackground(Theme.cardBackground)
                 }
 
-                Section("Subscription") {
-                    if store.isPremium {
-                        Button {
-                            if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
-                                UIApplication.shared.open(url)
-                            }
-                        } label: {
-                            HStack {
-                                Image(systemName: "creditcard.fill")
-                                    .foregroundStyle(Theme.accent)
-                                Text("Manage Subscription")
-                                    .foregroundStyle(Theme.textPrimary)
-                                Spacer()
-                                Image(systemName: "arrow.up.right")
-                                    .font(.caption)
-                                    .foregroundStyle(Theme.textTertiary)
-                            }
-                        }
-                        .listRowBackground(Theme.cardBackground)
-                    } else {
-                        Button {
-                            showPaywall = true
-                        } label: {
-                            HStack {
-                                Image(systemName: "crown.fill")
-                                    .foregroundStyle(Theme.accent)
-                                Text("Upgrade to Pro")
-                                    .foregroundStyle(Theme.accent)
-                                Spacer()
-                            }
-                        }
-                        .listRowBackground(Theme.cardBackground)
-                    }
-
+                Section("Purchases") {
                     Button {
                         Task { await store.restore() }
                     } label: {
@@ -262,9 +217,6 @@ struct SettingsView: View {
                 }
             }
             .toolbarBackground(Theme.background, for: .navigationBar)
-            .sheet(isPresented: $showPaywall) {
-                PaywallView()
-            }
             .alert("Retake Quiz?", isPresented: $showRetakeConfirm) {
                 Button("Cancel", role: .cancel) {}
                 Button("Retake", role: .destructive) {

@@ -1,64 +1,31 @@
 import SwiftUI
 import RevenueCat
 
+/// Prooffd is free. Every feature is unlocked for everyone.
+///
+/// `isPremium` is a stored constant rather than an entitlement lookup so that
+/// the dozens of `if store.isPremium` checks scattered across the views keep
+/// compiling and simply always take the unlocked branch. Removing the property
+/// outright would have meant rewriting every call site — this way the gates are
+/// dead code that can be cleaned up incrementally without risking a regression.
+///
+/// `restore()` is intentionally kept: users who subscribed while the app was
+/// paid can still restore, and the App Store requires a restore path to exist
+/// for as long as the products do.
 @Observable
 class StoreViewModel {
+    /// Always unlocked. Do not wire this back to an entitlement without also
+    /// restoring the paywall UI that was removed.
+    let isPremium = true
+
     var offerings: Offerings?
-    var isPremium = false
     var isLoading = false
     var isPurchasing = false
     var error: String?
 
-    init() {
-        Task { await listenForUpdates() }
-        Task { await fetchOfferings() }
-    }
-
-    private func listenForUpdates() async {
-        for await info in Purchases.shared.customerInfoStream {
-            self.isPremium = info.entitlements["premium"]?.isActive == true
-        }
-    }
-
-    func fetchOfferings() async {
-        isLoading = true
-        do {
-            offerings = try await Purchases.shared.offerings()
-        } catch {
-            self.error = error.localizedDescription
-        }
-        isLoading = false
-    }
-
-    func purchase(package: Package) async {
-        isPurchasing = true
-        do {
-            let result = try await Purchases.shared.purchase(package: package)
-            if !result.userCancelled {
-                isPremium = result.customerInfo.entitlements["premium"]?.isActive == true
-            }
-        } catch ErrorCode.purchaseCancelledError {
-        } catch ErrorCode.paymentPendingError {
-        } catch {
-            self.error = error.localizedDescription
-        }
-        isPurchasing = false
-    }
-
     func restore() async {
         do {
-            let info = try await Purchases.shared.restorePurchases()
-            isPremium = info.entitlements["premium"]?.isActive == true
-        } catch {
-            self.error = error.localizedDescription
-        }
-    }
-
-    func checkStatus() async {
-
-        do {
-            let info = try await Purchases.shared.customerInfo()
-            isPremium = info.entitlements["premium"]?.isActive == true
+            _ = try await Purchases.shared.restorePurchases()
         } catch {
             self.error = error.localizedDescription
         }

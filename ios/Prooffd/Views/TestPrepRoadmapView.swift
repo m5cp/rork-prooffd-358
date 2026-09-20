@@ -3,7 +3,6 @@ import SwiftUI
 struct TestPrepRoadmapView: View {
     let roadmap: TestPrepRoadmap
 
-    @Environment(StoreViewModel.self) private var store
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var sizeClass
 
@@ -28,7 +27,6 @@ struct TestPrepRoadmapView: View {
     }
 
     @State private var expanded: PrepCard? = .overview
-    @State private var showPaywall = false
 
     var body: some View {
         NavigationStack {
@@ -53,7 +51,6 @@ struct TestPrepRoadmapView: View {
                         .frame(minWidth: 44, minHeight: 44)
                 }
             }
-            .sheet(isPresented: $showPaywall) { PaywallView() }
         }
     }
 
@@ -116,67 +113,34 @@ struct TestPrepRoadmapView: View {
 
     private var studyPlanContent: some View {
         VStack(alignment: .leading, spacing: 12) {
-            ForEach(Array(roadmap.studyPhases.enumerated()), id: \.element.id) { index, phase in
-                if index == 0 || store.isPremium {
-                    phaseBlock(phase, locked: false)
-                } else if index == 1 && !store.isPremium {
-                    paywallBanner
-                    phaseBlock(phase, locked: true)
-                } else {
-                    phaseBlock(phase, locked: true)
-                }
+            ForEach(roadmap.studyPhases) { phase in
+                phaseBlock(phase)
             }
         }
     }
 
-    private func phaseBlock(_ phase: StudyPhase, locked: Bool) -> some View {
+    private func phaseBlock(_ phase: StudyPhase) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Text(phase.weekRange.uppercased())
                     .font(.caption.weight(.bold))
                     .foregroundStyle(Theme.accent)
                 Spacer()
-                if locked {
-                    Image(systemName: "lock.fill").font(.caption).foregroundStyle(Theme.textTertiary)
-                } else {
-                    Text("\(phase.hoursPerWeek) hrs/wk")
-                        .font(.caption)
-                        .foregroundStyle(Theme.textTertiary)
-                }
+                Text("\(phase.hoursPerWeek) hrs/wk")
+                    .font(.caption)
+                    .foregroundStyle(Theme.textTertiary)
             }
             Text(phase.title)
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(locked ? Theme.textTertiary : Theme.textPrimary)
-            Text(locked ? "Unlock Pro to see this phase." : phase.description)
+                .foregroundStyle(Theme.textPrimary)
+            Text(phase.description)
                 .font(.footnote)
                 .foregroundStyle(Theme.textSecondary)
-                .lineLimit(locked ? 1 : nil)
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.cardBackgroundLight)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-
-    private var paywallBanner: some View {
-        Button { showPaywall = true } label: {
-            HStack(spacing: 10) {
-                Image(systemName: "lock.fill").foregroundStyle(.white)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Unlock full study plan").font(.subheadline.weight(.semibold)).foregroundStyle(.white)
-                    Text("All phases, timelines, and drills").font(.caption).foregroundStyle(.white.opacity(0.85))
-                }
-                Spacer()
-                Image(systemName: "chevron.right").foregroundStyle(.white.opacity(0.9))
-            }
-            .padding(14)
-            .background(
-                LinearGradient(colors: [Theme.accent, Theme.accent.opacity(0.85)],
-                               startPoint: .topLeading, endPoint: .bottomTrailing)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-        }
-        .buttonStyle(.plain)
     }
 
     private var freeContent: some View {
@@ -187,20 +151,10 @@ struct TestPrepRoadmapView: View {
         }
     }
 
-    @ViewBuilder
     private var paidContent: some View {
-        if store.isPremium {
-            VStack(alignment: .leading, spacing: 10) {
-                ForEach(roadmap.paidResources, id: \.self) { item in
-                    bulletRow(item)
-                }
-            }
-        } else {
-            VStack(alignment: .leading, spacing: 12) {
-                paywallBanner
-                Text("Vetted paid prep courses and books. Unlock Pro to see recommendations.")
-                    .font(.footnote)
-                    .foregroundStyle(Theme.textSecondary)
+        VStack(alignment: .leading, spacing: 10) {
+            ForEach(roadmap.paidResources, id: \.self) { item in
+                bulletRow(item)
             }
         }
     }

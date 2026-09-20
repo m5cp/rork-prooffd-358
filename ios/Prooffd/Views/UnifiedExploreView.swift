@@ -2,9 +2,7 @@ import SwiftUI
 
 struct UnifiedExploreView: View {
     @Environment(AppState.self) private var appState
-    @Environment(StoreViewModel.self) private var store
     @State private var selectedResult: MatchResult?
-    @State private var showPaywall: Bool = false
     @State private var searchText: String = ""
     @State private var showJobShare: MatchResult?
     @State private var showRedoQuizAlert: Bool = false
@@ -65,31 +63,9 @@ struct UnifiedExploreView: View {
                 .padding(.top, 8)
             }
             .scrollIndicators(.hidden)
-            .background(Color(.systemGroupedBackground))
+            .background(Theme.background)
             .navigationTitle("Explore")
             .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                if !store.isPremium {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button {
-                            showPaywall = true
-                        } label: {
-                            HStack(spacing: 4) {
-                                Image(systemName: "crown.fill")
-                                    .font(.caption.weight(.bold))
-                                Text("PRO")
-                                    .font(.caption.weight(.bold))
-                            }
-                            .foregroundStyle(.black)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(Theme.accent)
-                            .clipShape(.capsule)
-                        }
-                        .accessibilityLabel("Unlock Pro")
-                    }
-                }
-            }
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "Search careers & businesses")
             .overlay {
                 if !searchText.isEmpty {
@@ -120,9 +96,6 @@ struct UnifiedExploreView: View {
             }
             .sheet(item: $showJobShare) { result in
                 ShareCardPresenterSheet(content: .topMatch(from: result))
-            }
-            .sheet(isPresented: $showPaywall) {
-                PaywallView()
             }
             .sheet(isPresented: $showLongQuiz) {
                 LongQuizView(isPresented: $showLongQuiz, onComplete: { showLongQuiz = false })
@@ -268,7 +241,7 @@ struct UnifiedExploreView: View {
                     .foregroundStyle(.tertiary)
             }
             .padding(16)
-            .background(Color(.secondarySystemGroupedBackground))
+            .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 16))
         }
         .buttonStyle(ArtworkPressStyle())
@@ -390,7 +363,7 @@ struct UnifiedExploreView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 14)
-                .background(Color(.secondarySystemGroupedBackground))
+                .background(Theme.cardBackground)
             }
             .clipShape(.rect(cornerRadius: 20))
             .overlay(
@@ -422,7 +395,7 @@ struct UnifiedExploreView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 14)
-                .background(Color(.secondarySystemGroupedBackground))
+                .background(Theme.cardBackground)
             }
             .clipShape(.rect(cornerRadius: 20))
             .overlay(
@@ -454,7 +427,7 @@ struct UnifiedExploreView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 14)
-                .background(Color(.secondarySystemGroupedBackground))
+                .background(Theme.cardBackground)
             }
             .clipShape(.rect(cornerRadius: 20))
             .overlay(
@@ -522,7 +495,7 @@ struct UnifiedExploreView: View {
             }
             .padding(20)
             .frame(minHeight: 102)
-            .background(Color(.secondarySystemGroupedBackground))
+            .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 20))
         }
         .buttonStyle(.plain)
@@ -573,7 +546,7 @@ struct UnifiedExploreView: View {
                     .foregroundStyle(Theme.accent)
             }
             .padding(16)
-            .background(Color(.secondarySystemGroupedBackground))
+            .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 16))
         }
         .buttonStyle(.plain)
@@ -620,7 +593,7 @@ struct UnifiedExploreView: View {
             .padding(.horizontal, 16)
             .padding(.top, 8)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Theme.background)
     }
 
     private func searchRow(_ result: MatchResult) -> some View {
@@ -678,46 +651,10 @@ struct UnifiedExploreView: View {
                     .foregroundStyle(.tertiary)
             }
             .padding(16)
-            .background(Color(.secondarySystemGroupedBackground))
+            .background(Theme.cardBackground)
             .clipShape(.rect(cornerRadius: 16))
         }
         .buttonStyle(.plain)
     }
 
-    // MARK: - Upgrade
-
-    private var upgradeCard: some View {
-        Button {
-            showPaywall = true
-        } label: {
-            HStack(spacing: 14) {
-                Image(systemName: "crown.fill")
-                    .font(.title3)
-                    .foregroundStyle(.yellow)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Unlock Full Plans")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.primary)
-                    Text("Business plans, scripts, templates & PDF export")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-
-                Text("PRO")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(Theme.accent)
-                    .clipShape(.capsule)
-            }
-            .padding(16)
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(.rect(cornerRadius: 16))
-        }
-        .buttonStyle(.plain)
-    }
 }

@@ -3,9 +3,7 @@ import SwiftUI
 struct PathDetailView: View {
     let result: MatchResult
     @Environment(AppState.self) private var appState
-    @Environment(StoreViewModel.self) private var store
     @Environment(\.dismiss) private var dismiss
-    @State private var showPaywall: Bool = false
     @State private var showShareSheet: Bool = false
     @State private var showBuildAdded: Bool = false
     @State private var showSetPathConfirm: Bool = false
@@ -68,9 +66,6 @@ struct PathDetailView: View {
                 }
             }
             .toolbarBackground(Theme.background, for: .navigationBar)
-            .sheet(isPresented: $showPaywall) {
-                PaywallView()
-            }
             .sheet(isPresented: $showShareSheet) {
                 ShareCardPresenterSheet(content: .topMatch(from: result))
             }
@@ -717,92 +712,6 @@ struct PathDetailView: View {
         return [text]
     }
 
-    private var lockedProContentSection: some View {
-        VStack(spacing: 0) {
-            VStack(spacing: 2) {
-                Image(systemName: "crown.fill")
-                    .font(.title2)
-                    .foregroundStyle(Theme.accent)
-                HStack(spacing: 4) {
-                    Text("Pro Templates & Scripts")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Theme.textPrimary)
-                }
-                Text("Unlock ready-to-use business materials")
-                    .font(.caption)
-                    .foregroundStyle(Theme.textTertiary)
-            }
-            .padding(.top, 16)
-            .padding(.bottom, 12)
-
-            VStack(spacing: 0) {
-                lockedRow(title: "Draft Email", icon: "envelope.fill", description: "Pre-written outreach email")
-                lockedDivider
-                lockedRow(title: "Draft Text Message", icon: "message.fill", description: "Ready-to-send text template")
-                lockedDivider
-                lockedRow(title: "Sales Intro Script", icon: "person.wave.2.fill", description: "Word-for-word intro script")
-                lockedDivider
-                lockedRow(title: "Social Media Post", icon: "square.and.arrow.up.fill", description: "Ready-to-post content")
-                lockedDivider
-                lockedRow(title: "Offer & Pricing Sheet", icon: "dollarsign.square.fill", description: "Suggested pricing structure")
-                lockedDivider
-                lockedRow(title: "One-Page Business Plan", icon: "doc.text.fill", description: "Investor-ready business plan")
-            }
-
-            Button {
-                showPaywall = true
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "lock.open.fill")
-                    Text("Unlock All with Pro")
-                }
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(Theme.background)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Theme.accent)
-                .clipShape(.capsule)
-            }
-            .padding(16)
-        }
-        .background(Theme.cardBackground)
-        .clipShape(.rect(cornerRadius: 14))
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(Theme.accent.opacity(0.2), lineWidth: 1)
-        )
-    }
-
-    private func lockedRow(title: String, icon: String, description: String) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.caption)
-                .foregroundStyle(Theme.accent.opacity(0.5))
-                .frame(width: 24)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(Theme.textPrimary)
-                Text(description)
-                    .font(.caption2)
-                    .foregroundStyle(Theme.textTertiary)
-            }
-            Spacer()
-            Image(systemName: "lock.fill")
-                .font(.caption2)
-                .foregroundStyle(Theme.textTertiary)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-    }
-
-    private var lockedDivider: some View {
-        Rectangle()
-            .fill(Theme.cardBackgroundLight)
-            .frame(height: 0.5)
-            .padding(.leading, 52)
-    }
-
     private var startBuildSection: some View {
         VStack(spacing: 12) {
             if alreadyBuilding {
@@ -924,20 +833,18 @@ struct PathDetailView: View {
             .accessibilityLabel("Share match card for \(path.name)")
             .accessibilityHint("Creates a shareable image card")
 
-            if store.isPremium {
-                Button {
-                    exportPDF()
-                } label: {
-                    Label("Export as PDF", systemImage: "doc.fill")
-                        .font(.headline)
-                        .foregroundStyle(Theme.accent)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Theme.accent.opacity(0.12))
-                        .clipShape(.capsule)
-                }
-                .accessibilityLabel("Export \(path.name) details as PDF")
+            Button {
+                exportPDF()
+            } label: {
+                Label("Export as PDF", systemImage: "doc.fill")
+                    .font(.headline)
+                    .foregroundStyle(Theme.accent)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Theme.accent.opacity(0.12))
+                    .clipShape(.capsule)
             }
+            .accessibilityLabel("Export \(path.name) details as PDF")
         }
     }
 
@@ -1003,48 +910,27 @@ struct PathDetailView: View {
     private var businessTrackContent: some View {
         actionPlanSection
 
-        if store.isPremium {
-            whatYouNeedToStartSection
-            startupCostBreakdownSection
-            typicalPricingSection
+        whatYouNeedToStartSection
+        startupCostBreakdownSection
+        typicalPricingSection
 
-            let content = startupContent
-            if !content.licensesAndPermits.isEmpty {
-                licensesPermitsSection(content.licensesAndPermits)
-            }
-            if !content.toolsAndEquipment.isEmpty {
-                toolsEquipmentSection(content.toolsAndEquipment)
-            }
-
-            launchRoadmapDisplaySection
-            marketingAcquisitionSection
-            bookkeepingTaxSection
-            emailSection
-            textMessageSection
-            scriptSection(title: "Sales Intro Script", icon: "person.wave.2.fill", content: path.salesIntroScript)
-            socialMediaSection
-            pricingSheetSection
-            businessPlanSection
-        } else {
-            businessProUpgradePrompt
+        let content = startupContent
+        if !content.licensesAndPermits.isEmpty {
+            licensesPermitsSection(content.licensesAndPermits)
         }
-    }
+        if !content.toolsAndEquipment.isEmpty {
+            toolsEquipmentSection(content.toolsAndEquipment)
+        }
 
-    private var businessProUpgradePrompt: some View {
-        ProUpgradePromptView(
-            title: "Unlock Your Full Business Plan",
-            subtitle: "Get everything you need to launch and grow this business.",
-            features: [
-                "Startup cost breakdown & checklist",
-                "Pricing tiers & revenue projections",
-                "Licenses, permits & tools needed",
-                "30-60-90 day launch roadmap",
-                "Marketing & customer acquisition plan",
-                "Email, text & sales scripts",
-                "One-page business plan & PDF export"
-            ],
-            onUpgrade: { showPaywall = true }
-        )
+        launchRoadmapDisplaySection
+        marketingAcquisitionSection
+        bookkeepingTaxSection
+        emailSection
+        textMessageSection
+        scriptSection(title: "Sales Intro Script", icon: "person.wave.2.fill", content: path.salesIntroScript)
+        socialMediaSection
+        pricingSheetSection
+        businessPlanSection
     }
 
     // MARK: - Business Track Sections
@@ -1485,59 +1371,38 @@ struct PathDetailView: View {
 
         tradeTimeToEntrySection
 
-        if store.isPremium {
-            tradeTuitionCostSection
+        tradeTuitionCostSection
 
-            if let edu = linkedEducation {
-                tradeCertRequirements(edu)
-            }
-
-            tradeToolsExamLicensingSection
-            tradePaySection
-            tradeAIResistantSection
-            tradeFirstJobStrategySection
-
-            if let edu = linkedEducation {
-                tradeFundingSection(edu)
-                tradeFindProgramsSection(edu)
-            }
-
-            actionPlanSection
-
-            tradeFutureBusinessSection
-
-            let setupSteps = SmartCareerBrain.businessSetupSteps(for: path)
-            if !setupSteps.isEmpty {
-                businessSetupSection(setupSteps)
-            }
-
-            whatOthersChargeSection
-            pricingSection
-            emailSection
-            textMessageSection
-            scriptSection(title: "Sales Intro Script", icon: "person.wave.2.fill", content: path.salesIntroScript)
-            socialMediaSection
-            pricingSheetSection
-        } else {
-            tradeProUpgradePrompt
+        if let edu = linkedEducation {
+            tradeCertRequirements(edu)
         }
-    }
 
-    private var tradeProUpgradePrompt: some View {
-        ProUpgradePromptView(
-            title: "Unlock Full Trade Career Details",
-            subtitle: "Get the complete roadmap for this career path.",
-            features: [
-                "Tuition & training cost breakdown",
-                "Certification & licensing requirements",
-                "Pay ranges: entry to self-employment",
-                "Why this career is AI-resistant",
-                "First job strategy & action plan",
-                "Funding options & program finder",
-                "Future business opportunity"
-            ],
-            onUpgrade: { showPaywall = true }
-        )
+        tradeToolsExamLicensingSection
+        tradePaySection
+        tradeAIResistantSection
+        tradeFirstJobStrategySection
+
+        if let edu = linkedEducation {
+            tradeFundingSection(edu)
+            tradeFindProgramsSection(edu)
+        }
+
+        actionPlanSection
+
+        tradeFutureBusinessSection
+
+        let setupSteps = SmartCareerBrain.businessSetupSteps(for: path)
+        if !setupSteps.isEmpty {
+            businessSetupSection(setupSteps)
+        }
+
+        whatOthersChargeSection
+        pricingSection
+        emailSection
+        textMessageSection
+        scriptSection(title: "Sales Intro Script", icon: "person.wave.2.fill", content: path.salesIntroScript)
+        socialMediaSection
+        pricingSheetSection
     }
 
     // MARK: - Trade Detail Sections (Phase 3)
@@ -1874,42 +1739,21 @@ struct PathDetailView: View {
             degreeDegreeRequiredSection
             degreeTimelineSection
 
-            if store.isPremium {
-                degreePrerequisitesSection
-                degreeLicensingExamSection
-                degreeSalaryRangeSection
-                degreeAIResistantSection
-                degreeClinicalSection
-                degreeDemandStabilitySection
-                degreeBestFitSection
+            degreePrerequisitesSection
+            degreeLicensingExamSection
+            degreeSalaryRangeSection
+            degreeAIResistantSection
+            degreeClinicalSection
+            degreeDemandStabilitySection
+            degreeBestFitSection
 
-                if let edu = linkedEducation {
-                    degreeFundingSection(edu)
-                    degreeFindProgramsSection(edu)
-                }
-            } else {
-                degreeProUpgradePrompt
+            if let edu = linkedEducation {
+                degreeFundingSection(edu)
+                degreeFindProgramsSection(edu)
             }
         } else {
             degreeFallbackSection
         }
-    }
-
-    private var degreeProUpgradePrompt: some View {
-        ProUpgradePromptView(
-            title: "Unlock Full Career Pathway",
-            subtitle: "Get the complete education and career roadmap.",
-            features: [
-                "Prerequisites & admissions prep",
-                "Licensing & exam path details",
-                "Salary range: early to established",
-                "Why this career is AI-resistant",
-                "Clinical / residency requirements",
-                "Demand & long-term stability",
-                "Best fit summary & funding options"
-            ],
-            onUpgrade: { showPaywall = true }
-        )
     }
 
     // MARK: - Trade Track Sections

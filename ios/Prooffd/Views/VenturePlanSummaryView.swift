@@ -58,7 +58,7 @@ struct VenturePlanSummaryView: View {
                 .padding(20)
             }
             .scrollIndicators(.hidden)
-            .background(Color(.systemGroupedBackground))
+            .background(Theme.background)
             .navigationTitle("Your Plan")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -89,7 +89,7 @@ struct VenturePlanSummaryView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(20)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Theme.cardBackground)
         .clipShape(.rect(cornerRadius: 18))
     }
 
