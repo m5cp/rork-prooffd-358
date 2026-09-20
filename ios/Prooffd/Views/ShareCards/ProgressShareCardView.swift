@@ -103,18 +103,14 @@ struct ProgressShareCardView: View {
         }
     }
 
+    /// The share card is the app's most public surface, so it leads with the
+    /// same bundled 3D render the rest of the app uses rather than an SF Symbol.
     private var iconBadge: some View {
-        ZStack {
-            Circle()
-                .fill(progressColor.opacity(0.12))
-                .frame(width: isSquare ? 72 : 100, height: isSquare ? 72 : 100)
-            Circle()
-                .fill(progressColor.opacity(0.06))
-                .frame(width: isSquare ? 96 : 130, height: isSquare ? 96 : 130)
-            Image(systemName: content.buildIcon)
-                .font(.system(size: isSquare ? 30 : 42, weight: .semibold))
-                .foregroundStyle(progressColor)
-        }
+        RenderedIcon(
+            name: content.artwork,
+            size: isSquare ? 104 : 140,
+            glow: progressColor
+        )
     }
 
     private var progressRing: some View {

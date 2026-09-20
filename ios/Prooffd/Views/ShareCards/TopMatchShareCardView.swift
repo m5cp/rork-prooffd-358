@@ -102,19 +102,14 @@ struct TopMatchShareCardView: View {
         }
     }
 
+    /// The share card is the app's most public surface, so it leads with the
+    /// same bundled 3D render the rest of the app uses rather than an SF Symbol.
     private var iconBadge: some View {
-        ZStack {
-            Circle()
-                .fill(accentColor.opacity(0.12))
-                .frame(width: isSquare ? 72 : 100, height: isSquare ? 72 : 100)
-            Circle()
-                .fill(accentColor.opacity(0.06))
-                .frame(width: isSquare ? 96 : 130, height: isSquare ? 96 : 130)
-            Image(systemName: content.jobIcon)
-                .font(.system(size: isSquare ? 30 : 42, weight: .semibold))
-                .foregroundStyle(accentColor)
-                .symbolEffect(.pulse)
-        }
+        RenderedIcon(
+            name: content.artwork,
+            size: isSquare ? 104 : 140,
+            glow: accentColor
+        )
     }
 
     private var matchRing: some View {

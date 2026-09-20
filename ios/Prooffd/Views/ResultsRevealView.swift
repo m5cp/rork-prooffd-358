@@ -6,6 +6,8 @@ private struct RevealMatch: Identifiable {
     let category: String
     let icon: String
     let scorePercentage: Int
+    /// Bundled 3D render for this match, used by the share card.
+    let artwork: String
 }
 
 struct ResultsRevealView: View {
@@ -33,7 +35,8 @@ struct ResultsRevealView: View {
                     name: path.title,
                     category: path.category.rawValue,
                     icon: path.icon,
-                    scorePercentage: appState.educationScore(for: path.id)
+                    scorePercentage: appState.educationScore(for: path.id),
+                    artwork: PathArtwork.educationImage(for: path.category)
                 )
             }.sorted { $0.scorePercentage > $1.scorePercentage }
         case .degree:
@@ -43,7 +46,8 @@ struct ResultsRevealView: View {
                     name: record.title,
                     category: record.category.rawValue,
                     icon: record.icon,
-                    scorePercentage: appState.degreeScore(for: record.id)
+                    scorePercentage: appState.degreeScore(for: record.id),
+                    artwork: PathArtwork.collegeDegree
                 )
             }.sorted { $0.scorePercentage > $1.scorePercentage }
         default:
@@ -55,7 +59,8 @@ struct ResultsRevealView: View {
                         name: match.businessPath.name,
                         category: match.businessPath.category.rawValue,
                         icon: match.businessPath.icon,
-                        scorePercentage: match.scorePercentage
+                        scorePercentage: match.scorePercentage,
+                        artwork: PathArtwork.businessImage(for: match.businessPath.category)
                     )
                 }
         }
@@ -81,7 +86,13 @@ struct ResultsRevealView: View {
         let top3 = Array(allRevealMatches.prefix(3))
         return ShareCardContent(
             type: .quizResults,
-            topMatches: top3.map { (name: $0.name, percent: $0.scorePercentage, icon: $0.icon, zone: AIZone.from(score: $0.scorePercentage)) }
+            topMatches: top3.map {
+                (name: $0.name,
+                 percent: $0.scorePercentage,
+                 icon: $0.icon,
+                 artwork: $0.artwork,
+                 zone: AIZone.from(score: $0.scorePercentage))
+            }
         )
     }
 

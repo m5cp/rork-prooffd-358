@@ -81,7 +81,7 @@ struct QuizResultsShareCardView: View {
 
                 VStack(spacing: isSquare ? 12 : 20) {
                     ForEach(Array(content.topMatches.enumerated()), id: \.offset) { index, match in
-                        matchRow(rank: index + 1, name: match.name, percent: match.percent, icon: match.icon)
+                        matchRow(rank: index + 1, name: match.name, percent: match.percent, artwork: match.artwork)
                     }
                 }
 
@@ -94,7 +94,7 @@ struct QuizResultsShareCardView: View {
         }
     }
 
-    private func matchRow(rank: Int, name: String, percent: Int, icon: String) -> some View {
+    private func matchRow(rank: Int, name: String, percent: Int, artwork: String) -> some View {
         let isTop = rank == 1
         let rowColor = isTop ? accentColor : (rank == 2 ? secondaryAccent : Color.white.opacity(0.5))
         let iconSize: CGFloat = isSquare ? (isTop ? 44 : 36) : (isTop ? 60 : 48)
@@ -102,14 +102,9 @@ struct QuizResultsShareCardView: View {
         let percentSize: CGFloat = isSquare ? (isTop ? 28 : 20) : (isTop ? 38 : 26)
 
         return VStack(spacing: isSquare ? 6 : 10) {
-            ZStack {
-                Circle()
-                    .fill(rowColor.opacity(isTop ? 0.15 : 0.08))
-                    .frame(width: iconSize, height: iconSize)
-                Image(systemName: icon)
-                    .font(.system(size: iconSize * 0.4, weight: .semibold))
-                    .foregroundStyle(rowColor)
-            }
+            // Real render, matching the rest of the app. The rank still reads
+            // through size and color rather than a flat symbol.
+            RenderedIcon(name: artwork, size: iconSize * 1.5, glow: rowColor)
 
             Text(name)
                 .font(.system(size: nameSize, weight: isTop ? .heavy : .bold))

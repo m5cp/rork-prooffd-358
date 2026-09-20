@@ -54,7 +54,7 @@ nonisolated enum ShareCardFormat: String, CaseIterable, Identifiable, Sendable {
 
 struct ShareCardContent {
     let type: ShareCardType
-    var topMatches: [(name: String, percent: Int, icon: String, zone: AIZone)] = []
+    var topMatches: [(name: String, percent: Int, icon: String, artwork: String, zone: AIZone)] = []
     var jobTitle: String = ""
     var matchPercent: Int = 0
     var jobIcon: String = "star.fill"
@@ -64,11 +64,22 @@ struct ShareCardContent {
     var buildIcon: String = "hammer.fill"
     var buildCategory: BusinessCategory = .homeProperty
 
+    /// Bundled 3D render shown as the card's hero. Share cards go out to social
+    /// feeds as the app's most public surface, so they lead with real artwork
+    /// rather than an SF Symbol in a tinted circle.
+    var artwork: String = PathArtwork.resultsReveal
+
     static func quizResults(from results: [MatchResult]) -> ShareCardContent {
         let top3 = Array(results.prefix(3))
         return ShareCardContent(
             type: .quizResults,
-            topMatches: top3.map { ($0.businessPath.name, $0.scorePercentage, $0.businessPath.icon, $0.businessPath.zone) }
+            topMatches: top3.map {
+                ($0.businessPath.name,
+                 $0.scorePercentage,
+                 $0.businessPath.icon,
+                 PathArtwork.businessImage(for: $0.businessPath.category),
+                 $0.businessPath.zone)
+            }
         )
     }
 
@@ -79,7 +90,8 @@ struct ShareCardContent {
             jobTitle: path.name,
             matchPercent: result.scorePercentage,
             jobIcon: path.icon,
-            category: path.category
+            category: path.category,
+            artwork: PathArtwork.businessImage(for: path.category)
         )
     }
 
@@ -89,7 +101,8 @@ struct ShareCardContent {
             buildName: build.businessName.isEmpty ? build.pathName : build.businessName,
             progressPercent: build.progressPercentage,
             buildIcon: build.pathIcon,
-            buildCategory: build.category
+            buildCategory: build.category,
+            artwork: PathArtwork.businessImage(for: build.category)
         )
     }
 
@@ -103,7 +116,8 @@ struct ShareCardContent {
             type: .topMatch,
             jobTitle: record.title,
             matchPercent: score,
-            jobIcon: record.icon
+            jobIcon: record.icon,
+            artwork: PathArtwork.collegeDegree
         )
     }
 
@@ -112,7 +126,8 @@ struct ShareCardContent {
             type: .topMatch,
             jobTitle: path.title,
             matchPercent: path.aiSafeScore,
-            jobIcon: path.icon
+            jobIcon: path.icon,
+            artwork: PathArtwork.educationImage(for: path.category)
         )
     }
 }
