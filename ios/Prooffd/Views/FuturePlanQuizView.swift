@@ -89,10 +89,21 @@ struct FuturePlanQuizView: View {
 
                     questionContent
                         .padding(.horizontal, 20)
+
+                    Spacer(minLength: 24)
                 }
-                .padding(.bottom, 24)
+                .frame(maxWidth: .infinity)
             }
             .scrollIndicators(.hidden)
+            .scrollBounceBehavior(.basedOnSize)
+            // One identity for the whole question. Previously `header` and
+            // `questionContent` each carried their own `.id` + a slide
+            // transition, so on question change they animated INDEPENDENTLY:
+            // the outgoing title slid up through the progress bar while the
+            // incoming options were still off-screen, leaving the cards clipped
+            // with dead space beneath. Animating one block fixes the overlap.
+            .id(vm.currentQuestionIndex)
+            .transition(.opacity)
         }
         // The button must be a safe-area inset, not a Spacer-pushed VStack after
         // the ScrollView. The old `VStack { Spacer(); bottomButton }` was a
@@ -129,8 +140,6 @@ struct FuturePlanQuizView: View {
                 .foregroundStyle(Theme.textSecondary)
                 .multilineTextAlignment(.center)
         }
-        .id(vm.currentQuestionIndex)
-        .transition(.opacity.combined(with: .move(edge: .trailing)))
     }
 
     @ViewBuilder
@@ -150,7 +159,6 @@ struct FuturePlanQuizView: View {
             case .incomeTarget:     incomeTargetStep
             }
         }
-        .id(vm.currentQuestionIndex)
     }
 
     private var bottomButton: some View {
